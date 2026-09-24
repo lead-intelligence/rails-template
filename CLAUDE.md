@@ -105,7 +105,7 @@ verified against a library's source, and not knowing it is how they break.
 - **Background jobs** — Solid Queue runs INSIDE Puma in development too, so `Procfile.dev` has no jobs line. No automatic retries: a failed job sits in the failed-executions table. → `background-jobs.md`
 - **Analytics** — capability only, zero events tracked. Two wiring details (`Ahoy.user_method`, the callback reorder) fail SILENTLY if touched. → `analytics.md`
 - **Health checks** — `/up` stays shallow (Kamal gates deploys on it), `/health` is the deep one. The supervisor reports `Supervisor(fork)`, never `Supervisor`: match with `LIKE`. → `health-checks.md`
-- **Error tracking** — Solid Errors subscribes to `Rails.error` and deduplicates into the primary DB; dashboard at `/errors`. → `error-tracking.md`
+- **Error tracking** — Solid Errors subscribes to `Rails.error` and deduplicates into the primary DB; dashboard at `/errors`. `/error_feed` hands new errors to an outside watcher behind a bearer token, `404` until one is set. → `error-tracking.md`
 - **User feedback** — always persists locally; the GitHub issue is optional and never blocks. Nothing retries it. → `user-feedback.md`
 - **Support chat** — **BINDING RULE: nothing technical may ever reach the person.** The column is `ticket_context`, NOT `context` (it would shadow `acts_as_chat`'s). Photos: `detach`, never `purge`. → `support-chat.md`
 - **Ticket lifecycle** — `Feedback#resolve!` is idempotent and closes the conversation it came from; panel at `/admin/feedbacks`, no notifications. → `ticket-lifecycle.md`

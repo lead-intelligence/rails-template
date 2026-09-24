@@ -97,6 +97,7 @@ Each item below is documented in depth in its own section — this is the order 
 **After you deploy**
 
 11. Point an uptime monitor at `https://your-app/health` — see [Health checks](#health-checks). The endpoint exists and reports on the database and the job supervisor, but nothing watches it until you wire a monitor up. This is the one piece that cannot live in the template.
+12. Set `ERROR_FEED_TOKEN` and hand the same token to the watcher — see [Error feed](#error-feed). Until it is set, nothing outside the app can read its errors.
 
 ## Configuration
 
@@ -453,6 +454,10 @@ The dashboard is behind the shared superadmin basic auth (see [Superadmin access
 
 Email notification is off unless `email_to` resolves to a value; when it does, Solid Errors emails that address (via the app's already-configured Action Mailer) every time a new error occurs.
 
+### Error feed
+
+`GET /error_feed` hands new errors to a watcher outside the app: occurrences above a `since` id, 100 per page, with `next_cursor` and `more`. It is off until a token is set (`error_feed_token` in credentials, or `ERROR_FEED_TOKEN`), answering `404`; the watcher sends it as `Authorization: Bearer <token>`. It returns only what the error says about itself and its route pattern, never params, cookies, headers, URLs or user data. See `docs/architecture/error-tracking.md`.
+
 ### Browser errors
 
 Server-side exceptions are only half the picture: a Stimulus controller that throws, a failed fetch, a rejected promise — none of that reaches the server on its own. `app/javascript/error_reporting.js` listens for `error` and `unhandledrejection` on `window` and posts to `POST /javascript_errors`, which wraps the report in a `JavascriptError` (`app/errors/`) carrying the browser's stack as its backtrace and hands it to `Rails.error.report(handled: true)`. Solid Errors picks it up like any other exception, so browser and server failures land in the same `/errors` dashboard, deduplicated the same way. The occurrence context records the page URL, the user agent, and the signed-in user's id.
@@ -676,7 +681,7 @@ Deploys use [Kamal](https://kamal-deploy.org). Before your first deploy, edit `c
 
 `RAILS_MASTER_KEY` and `OPENAI_API_KEY` are injected as secrets via `.kamal/secrets` (which reads `config/master.key` and the `OPENAI_API_KEY` environment variable — never commit real secrets into that file). A persistent storage volume (`storage/` mounted at `/rails/storage`) is mandatory: it holds the SQLite database files and any locally-stored Active Storage uploads, so losing it means losing data.
 
-The `env:` block also declares `APP_HOST` (clear) plus `SUPERADMIN_USER`, `SUPERADMIN_PASSWORD`, `SMTP_USER_NAME`, and `SMTP_PASSWORD` (secret) — a first deploy must set the real domain in `config/deploy.yml` and uncomment those four in `.kamal/secrets`, or mailer links point at `example.com`, no email sends, and every developer panel answers `401`.
+The `env:` block also declares `APP_HOST` (clear) plus `SUPERADMIN_USER`, `SUPERADMIN_PASSWORD`, `ERROR_FEED_TOKEN`, `SMTP_USER_NAME`, and `SMTP_PASSWORD` (secret) — a first deploy must set the real domain in `config/deploy.yml` and uncomment those five in `.kamal/secrets`, or mailer links point at `example.com`, no email sends, every developer panel answers `401`, and no watcher can read the app's errors.
 
 ```bash
 kamal setup
