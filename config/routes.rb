@@ -62,6 +62,7 @@ Rails.application.routes.draw do
   get "/robots.txt" => "sitemaps#robots", as: :robots, defaults: { format: "text" }
 
   resource :javascript_errors, only: [ :create ]
+  resource :error_feed, only: [ :show ]
 
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
