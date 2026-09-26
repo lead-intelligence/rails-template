@@ -1,5 +1,10 @@
 # Audit all gems listed in the Gemfile for known security problems by running bin/bundler-audit.
 # CVEs that are not relevant to the application can be enumerated on the ignore list below.
+#
+# CVE-2026-67991 (ruby_llm, GHSA-42r3-x6vx-x49x): a ReDoS in `RubyLLM::Utils.underscore`, on Ruby
+# 3.1, fed by class, agent or tool names. ruby_llm 1.16.0 has no `Utils.underscore` at all (checked
+# 2026-09-24), the names it would read are the app's own class names, and Ruby 4.0 is not 3.1. The
+# only patched release is 2.0; drop this line when the template moves to ruby_llm 2.0.
 
 ignore:
-  - CVE-THAT-DOES-NOT-APPLY
+  - CVE-2026-67991
