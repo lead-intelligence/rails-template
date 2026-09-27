@@ -487,7 +487,7 @@ GEM
       ruby_llm-schema (~> 0)
       zeitwerk (~> 2)
     ruby_llm-schema (0.4.0)
-    rubyzip (3.5.0)
+    rubyzip (3.6.0)
     safely_block (1.0.0)
     schematist (1.1.0)
     securerandom (0.4.1)
@@ -624,7 +624,7 @@ DEPENDENCIES
   rubocop-rails-omakase
   ruby-vips (~> 2.3)
   ruby_llm (~> 1.16)
-  rubyzip (~> 3.0)
+  rubyzip (~> 3.6)
   schematist (~> 1.1)
   simplecov (~> 1.1)
   simplecov-console (~> 0.9)
@@ -805,7 +805,7 @@ CHECKSUMS
   ruby-vips (2.3.0) sha256=e685ec02c13969912debbd98019e50492e12989282da5f37d05f5471442f5374
   ruby_llm (1.16.0) sha256=26bd5310cf2ce55f74a60f8aae0b0d0327b586ff4532c84828103c3b2b905a18
   ruby_llm-schema (0.4.0) sha256=e930f5a5316f9301bff3fb7fe572e44727d05bb8e50621001bbb49a47d63b8da
-  rubyzip (3.5.0) sha256=f77c49d737a849b662f6ca4de473f31b4ecd8288f1c9f901a5c820641f0f8d7c
+  rubyzip (3.6.0) sha256=268994d44d62282d1cfd99bf10eae48d7267199158ad7ea3e1fee2da9458b695
   safely_block (1.0.0) sha256=bea80e084e620adeada62fd98cf461bbb9888d40dc0f06d337df9d01e1a658e5
   schematist (1.1.0) sha256=905d8f0286830926e77e0d631bee325ee741c4b99640bc99735593b40ba73e7b
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
