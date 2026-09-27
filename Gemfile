@@ -130,3 +130,5 @@ gem "redcarpet", "~> 3.6"
 gem "ahoy_matey", "~> 5.4"
 
 gem "action_push_native", "~> 0.3"
+
+gem "reactionview", "~> 0.6.0"

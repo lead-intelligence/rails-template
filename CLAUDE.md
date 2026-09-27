@@ -6,6 +6,7 @@ Rails starter template. This repo is both a working app and the template new app
 - Ruby 4.0.6, Rails 8.1.3.1, SQLite everywhere (Solid Queue/Cache/Cable on SQLite)
 - Propshaft + Importmap (no Node), Tailwind v4 + DaisyUI 5 (vendored `app/assets/tailwind/daisyui.mjs`, `app/assets/tailwind/daisyui-theme.mjs`)
 - Hotwire (Turbo + Stimulus), Lexxy for Action Text rich text
+- ReActionView + `Herb::Engine` render every `.html.erb` (HTML-aware, fails on malformed markup); the experimental reactive templates (`slots`) are not adopted
 - Lucide icons via `lucide-rails` (`lucide_icon` helper, inline SVG, no icon font/CDN)
 - RubyLLM (OpenAI only: `OPENAI_CHAT_MODEL`/`OPENAI_EMBEDDING_MODEL` ENV), Schematist for structured output, Neighbor + sqlite-vec for vector search
 - Native Rails authentication (+ registration, profile, email confirmation, active sessions), Active Storage avatars
@@ -120,3 +121,4 @@ verified against a library's source, and not knowing it is how they break.
 - **Backups** — the restic accessory is ACTIVE: it refuses to boot until the repository and secrets are set. Deliberate. → `backups.md`
 - **Security headers / CSP** — nonce-based CSP active in every environment: scripts strict, styles inline. → `security-headers.md`
 - **Mobile apps** — `charco_mobile` signals in the layout and form pages; a mistyped signal is SILENTLY ignored, so `charco_mobile check` runs in CI. Push tokens land on `User#push_devices`; `config/push.yml` needs real credentials before anything is delivered. → `mobile.md`
+- **Templates** — `Herb::Engine` intercepts every `.html.erb`; malformed HTML is a compile-time error, not a silent render. Reactive templates (`slots`) are NOT adopted, and the linter needs Node, which this stack doesn't have. → `templates.md`
