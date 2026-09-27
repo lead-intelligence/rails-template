@@ -599,6 +599,7 @@ DEPENDENCIES
   cuprite
   debug
   dotenv-rails (~> 3.2)
+  herb (~> 0.11)
   i18n-tasks (~> 1.0)
   image_processing (~> 2.0)
   importmap-rails

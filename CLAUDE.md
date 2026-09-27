@@ -121,4 +121,4 @@ verified against a library's source, and not knowing it is how they break.
 - **Backups** — the restic accessory is ACTIVE: it refuses to boot until the repository and secrets are set. Deliberate. → `backups.md`
 - **Security headers / CSP** — nonce-based CSP active in every environment: scripts strict, styles inline. → `security-headers.md`
 - **Mobile apps** — `charco_mobile` signals in the layout and form pages; a mistyped signal is SILENTLY ignored, so `charco_mobile check` runs in CI. Push tokens land on `User#push_devices`; `config/push.yml` needs real credentials before anything is delivered. → `mobile.md`
-- **Templates** — `Herb::Engine` intercepts every `.html.erb`; malformed HTML is a compile-time error, not a silent render. Reactive templates (`slots`) are NOT adopted, and the linter needs Node, which this stack doesn't have. → `templates.md`
+- **Templates** — `Herb::Engine` intercepts every `.html.erb`; malformed HTML is a compile-time error, not a silent render. Reactive templates (`slots`) are NOT adopted. `herb analyze` (Ruby-native, no Node) gates `bin/ci`; `herb lint`/`format` need Node, which this stack doesn't have. → `templates.md`
