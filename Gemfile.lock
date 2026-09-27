@@ -267,7 +267,7 @@ GEM
       letter_opener (~> 1.9)
       railties (>= 6.1)
       rexml
-    lexxy (0.9.30)
+    lexxy (0.9.31)
       rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -604,7 +604,7 @@ DEPENDENCIES
   importmap-rails
   kamal
   letter_opener_web (~> 3.0)
-  lexxy (~> 0.9.30)
+  lexxy (~> 0.9.31)
   lucide-rails (~> 0.7.4)
   madmin (~> 2.0)
   meta-tags (~> 2.23)
@@ -728,7 +728,7 @@ CHECKSUMS
   launchy (3.1.1) sha256=72b847b5cc961589dde2c395af0108c86ff0119f42d4648d25b5440ebb10059e
   letter_opener (1.10.0) sha256=2ff33f2e3b5c3c26d1959be54b395c086ca6d44826e8bf41a14ff96fdf1bdbb2
   letter_opener_web (3.0.0) sha256=3f391efe0e8b9b24becfab5537dfb17a5cf5eb532038f947daab58cb4b749860
-  lexxy (0.9.30) sha256=6594fc83c3af21975ac66e4a2646a8ed5ae1508cf088f6b30bdd584c21730f91
+  lexxy (0.9.31) sha256=6207e187c341fc419bbaa0480e092e75a45d840d4da18afe104963f3a64b6f91
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   loofah (2.25.2) sha256=2007f746959ac65552456e04b433e83deb22759ab38c838b4445c70e43425918

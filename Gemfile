@@ -88,7 +88,7 @@ gem "webmock", "~> 3.26", group: :test
 
 gem "schematist", "~> 1.1"
 
-gem "lexxy", "~> 0.9.30"
+gem "lexxy", "~> 0.9.31"
 
 gem "neighbor", "~> 1.2"
 
