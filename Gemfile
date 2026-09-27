@@ -76,7 +76,7 @@ group :test do
   gem "axe-core-api"
 end
 
-gem "meta-tags", "~> 2.23"
+gem "meta-tags", "~> 2.24"
 
 gem "active_storage_validations", "~> 4.1"
 
