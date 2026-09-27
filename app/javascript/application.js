@@ -20,3 +20,4 @@ function controllersLoaded() {
   const paths = Object.keys(importmap.imports).filter(path => path.match(/^controllers\/.*_controller$/))
   return Promise.allSettled(paths.map(path => import(path)))
 }
+import "reactionview"
