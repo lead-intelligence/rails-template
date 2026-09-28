@@ -172,7 +172,7 @@ class Template::SpawnerTest < ActiveSupport::TestCase
         File.write(File.join(Dir.pwd, "renamed-#{name}"), "")
       RUBY
       FileUtils.chmod("+x", root.join("bin", "rename"))
-      system("git", "-C", root.to_s, "-c", "gc.auto=0", "-c", "maintenance.auto=false", "init", "--quiet", exception: true)
+      system("git", "-C", root.to_s, "init", "--quiet", exception: true)
       system("git", "-C", root.to_s, "add", "-A", exception: true)
       system("git", "-C", root.to_s, "commit", "--quiet", "-m", "Initial commit", exception: true)
       yield root

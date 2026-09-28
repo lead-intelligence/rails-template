@@ -132,3 +132,6 @@ gem "ahoy_matey", "~> 5.4"
 gem "action_push_native", "~> 0.3"
 
 gem "reactionview", "~> 0.6.0"
+
+# HTML-aware ERB parser and engine; `bin/herb analyze` checks every template in bin/ci [https://herb-tools.dev]
+gem "herb", "~> 0.11"
