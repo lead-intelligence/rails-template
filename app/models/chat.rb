@@ -1,12 +1,14 @@
 class Chat < ApplicationRecord
   INACTIVITY_WINDOW = 12.hours
+  MAX_PENDING_PHOTOS = 5
 
   acts_as_chat
   belongs_to :user
   has_many :feedbacks, dependent: :nullify
 
   has_many_attached :pending_photos
-  validates :pending_photos, content_type: %w[image/png image/jpeg image/webp], size: { less_than: 5.megabytes }
+  validates :pending_photos, content_type: %w[image/png image/jpeg image/webp], size: { less_than: 5.megabytes },
+    limit: { max: MAX_PENDING_PHOTOS }
 
   scope :support, -> { where(support: true) }
   scope :open, -> { where(closed_at: nil) }
@@ -37,9 +39,18 @@ class Chat < ApplicationRecord
     return if closed?
 
     update!(closed_at: Time.current)
+    discard_pending_photos
   end
 
   private
+
+  def discard_pending_photos
+    return unless pending_photos.attached?
+
+    blob_ids = pending_photos.blobs.ids
+    pending_photos.detach
+    ActiveStorage::Blob.unattached.where(id: blob_ids).find_each(&:purge_later)
+  end
 
   def preload_history
     ActiveRecord::Associations::Preloader.new(

@@ -388,6 +388,7 @@ en:
       title: Notifications
   support_chat_photos:
     create:
+      too_many: You can attach up to %{count} photos to a conversation.
       upload_error: That photo couldn't be attached. Please use a JPG, PNG, or WEBP
         image under 5MB.
   support_chats:

@@ -63,6 +63,29 @@ class ChatClosingTest < ActiveSupport::TestCase
     assert_equal closed_at, chat.reload.closed_at
   end
 
+  test "closing a conversation deletes the photos it never filed" do
+    chat = support_chat_last_active(1.minute.ago)
+    chat.pending_photos.attach(photo)
+    blob = chat.pending_photos.first.blob
+
+    perform_enqueued_jobs(only: ActiveStorage::PurgeJob) { chat.close! }
+
+    assert_not chat.reload.pending_photos.attached?
+    assert_not ActiveStorage::Blob.exists?(blob.id)
+  end
+
+  test "closing a conversation keeps a photo a ticket still shows" do
+    chat = support_chat_last_active(1.minute.ago)
+    chat.pending_photos.attach(photo)
+    feedback = users(:one).feedbacks.create!(message: "No puedo entrar", chat: chat)
+    feedback.photos.attach(chat.pending_photos.first.blob)
+
+    perform_enqueued_jobs(only: ActiveStorage::PurgeJob) { chat.close! }
+
+    assert_not chat.reload.pending_photos.attached?
+    assert feedback.reload.photos.attached?
+  end
+
   test "resolving the ticket closes the conversation it came from" do
     chat = support_chat_last_active(1.minute.ago)
     feedback = users(:one).feedbacks.create!(message: "No puedo entrar", chat: chat)
@@ -81,6 +104,10 @@ class ChatClosingTest < ActiveSupport::TestCase
   end
 
   private
+
+  def photo
+    { io: File.open(file_fixture("avatar.png")), filename: "avatar.png", content_type: "image/png" }
+  end
 
   def support_chat_last_active(moment)
     users(:one).chats.create!(support: true, created_at: moment).tap do |chat|

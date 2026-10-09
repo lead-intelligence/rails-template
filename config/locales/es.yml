@@ -393,6 +393,7 @@ es:
       title: Notificaciones
   support_chat_photos:
     create:
+      too_many: Puedes adjuntar hasta %{count} fotos a una conversación.
       upload_error: No se pudo adjuntar esa foto. Usa una imagen JPG, PNG o WEBP de
         menos de 5MB.
   support_chats:
