@@ -10,7 +10,8 @@
           <div class="alert alert-error mb-4"><%= @feedback.errors.full_messages.to_sentence %></div>
         <% end %>
         <%= form.label :message, t(".message_label"), class: "label" %>
-        <%= form.text_area :message, class: "textarea textarea-bordered w-full", rows: 6, required: true %>
+        <%= form.text_area :message, class: "textarea textarea-bordered w-full", rows: 6, required: true, maxlength: Feedback::MESSAGE_MAX_LENGTH, aria: { describedby: "feedback_message_hint" } %>
+        <p id="feedback_message_hint" class="label"><%= t(".message_hint", count: number_with_delimiter(Feedback::MESSAGE_MAX_LENGTH)) %></p>
         <%= form.label :photos, t(".photos_label"), class: "label mt-4" %>
         <%= form.file_field :photos, multiple: true, accept: "image/*", class: "file-input file-input-bordered w-full" %>
         <%= form.submit t(".submit"), class: "btn btn-primary w-full mt-4" %>

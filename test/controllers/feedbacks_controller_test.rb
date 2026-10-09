@@ -12,6 +12,8 @@ class FeedbacksControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
     get new_feedback_url
     assert_response :success
+    assert_select "textarea[maxlength=?][aria-describedby=feedback_message_hint]", Feedback::MESSAGE_MAX_LENGTH.to_s
+    assert_select "#feedback_message_hint", I18n.t("feedbacks.new.message_hint", count: ActiveSupport::NumberHelper.number_to_delimited(Feedback::MESSAGE_MAX_LENGTH))
   end
 
   test "creates feedback scoped to the current user and redirects with a success flash" do

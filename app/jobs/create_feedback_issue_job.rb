@@ -32,9 +32,14 @@ class CreateFeedbackIssueJob < ApplicationJob
     end
 
     lines << "---"
-    lines << feedback.message
+    lines.concat(fenced(feedback.message))
 
     lines.join("\n")
+  end
+
+  def fenced(text)
+    fence = "`" * [ 3, text.scan(/`+/).map(&:length).max.to_i + 1 ].max
+    [ fence, text, fence ]
   end
 
   def photo_url(photo)

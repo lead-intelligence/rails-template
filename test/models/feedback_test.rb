@@ -7,6 +7,14 @@ class FeedbackTest < ActiveSupport::TestCase
     assert_includes feedback.errors[:message], I18n.t("errors.messages.blank")
   end
 
+  test "rejects a message longer than the limit" do
+    assert users(:one).feedbacks.build(message: "a" * Feedback::MESSAGE_MAX_LENGTH).valid?
+
+    feedback = users(:one).feedbacks.build(message: "a" * (Feedback::MESSAGE_MAX_LENGTH + 1))
+    assert_not feedback.valid?
+    assert_includes feedback.errors[:message], I18n.t("errors.messages.too_long", count: Feedback::MESSAGE_MAX_LENGTH)
+  end
+
   test "is valid with a user and a message" do
     feedback = users(:one).feedbacks.build(message: "The chat page is slow")
     assert feedback.valid?

@@ -193,6 +193,7 @@ en:
       notice: Thanks for the feedback!
     new:
       heading: Send feedback
+      message_hint: Up to %{count} characters.
       message_label: What's on your mind?
       photos_label: Attach screenshots (optional)
       submit: Send feedback

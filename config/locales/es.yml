@@ -197,6 +197,7 @@ es:
       notice: "¡Gracias por tu comentario!"
     new:
       heading: Enviar comentarios
+      message_hint: Hasta %{count} caracteres.
       message_label: "¿Qué tienes en mente?"
       photos_label: Adjuntar capturas de pantalla (opcional)
       submit: Enviar comentarios

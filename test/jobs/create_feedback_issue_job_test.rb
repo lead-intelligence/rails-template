@@ -41,7 +41,9 @@ class CreateFeedbackIssueJobTest < ActiveJob::TestCase
       "Photos:",
       photo_url,
       "---",
-      "Broken layout"
+      "```",
+      "Broken layout",
+      "```"
     ].join("\n")
 
     request = stub_request(:post, "https://api.github.com/repos/acme/app/issues")
@@ -51,6 +53,21 @@ class CreateFeedbackIssueJobTest < ActiveJob::TestCase
           payload["labels"] == [ "feedback" ] &&
           payload["body"] == expected_body
       }
+      .to_return(status: 201, headers: { "Content-Type" => "application/json" }, body: { number: 1 }.to_json)
+
+    CreateFeedbackIssueJob.perform_now(feedback)
+
+    assert_requested request
+  end
+
+  test "fences the person's words so mentions and markdown in them stay inert" do
+    ENV["GITHUB_ISSUES_TOKEN"] = "fine-grained-token"
+    ENV["GITHUB_ISSUES_REPO"] = "acme/app"
+    message = "Ping @octocat\n```\n# Not a heading\n````"
+    feedback = users(:one).feedbacks.create!(message: message)
+
+    request = stub_request(:post, "https://api.github.com/repos/acme/app/issues")
+      .with { |req| JSON.parse(req.body)["body"].end_with?("---\n`````\n#{message}\n`````") }
       .to_return(status: 201, headers: { "Content-Type" => "application/json" }, body: { number: 1 }.to_json)
 
     CreateFeedbackIssueJob.perform_now(feedback)
