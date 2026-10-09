@@ -24,7 +24,8 @@ module Template
     def new_title = @new_snake.titleize
 
     def text_files
-      Dir.glob(@root.join("**", "*"), File::FNM_DOTMATCH)
+      Dir.glob("**/*", File::FNM_DOTMATCH, base: @root)
+        .map { |relative| @root.join(relative).to_s }
         .select { |path| File.file?(path) && !skip?(path) && text?(path) }
     end
 

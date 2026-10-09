@@ -22,6 +22,19 @@ class Template::RenamerTest < ActiveSupport::TestCase
     end
   end
 
+  test "renames a tree whose path holds glob characters" do
+    Dir.mktmpdir do |tmp|
+      root = File.join(tmp, "apps [old]")
+      FileUtils.mkdir_p(root)
+      path = File.join(root, "application.rb")
+      File.write(path, "module CharcoTemplate\nend\n")
+
+      Template::Renamer.new(root: root, new_name: @target).run
+
+      assert_includes File.read(path), "module #{@target.camelize}"
+    end
+  end
+
   test "leaves docs directory untouched to preserve historical spec content" do
     Dir.mktmpdir do |dir|
       FileUtils.mkdir(File.join(dir, "docs"))
