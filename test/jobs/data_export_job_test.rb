@@ -12,5 +12,8 @@ class DataExportJobTest < ActiveJob::TestCase
 
     assert user.reload.data_export.attached?
     assert_equal "application/zip", user.data_export.content_type
+    Zip::File.open_buffer(StringIO.new(user.data_export.download)) do |zip|
+      assert_equal user.email_address, JSON.parse(zip.read("data.json"))["user"]["email_address"]
+    end
   end
 end

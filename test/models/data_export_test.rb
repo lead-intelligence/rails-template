@@ -12,7 +12,7 @@ class DataExportTest < ActiveSupport::TestCase
     feedback = user.feedbacks.create!(message: "Nice app")
     feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "shot.png", content_type: "image/png")
 
-    entries = zip_entries(DataExport.new(user).to_zip)
+    entries = zip_entries(export(user))
 
     data = JSON.parse(entries["data.json"])
     assert_equal user.email_address, data["user"]["email_address"]
@@ -58,7 +58,44 @@ class DataExportTest < ActiveSupport::TestCase
     assert fresh_user.reload.data_export.attached?
   end
 
+  test "the query count does not grow with the number of exported records" do
+    user = users(:one)
+    user.documents.create!(title: "First", content: "Notes")
+    user.feedbacks.create!(message: "First")
+    baseline = queries_during { export(User.find(user.id)) }
+
+    5.times do |index|
+      user.documents.create!(title: "Doc #{index}", content: "Notes")
+      user.sessions.create!(ip_address: "127.0.0.1", user_agent: "Test")
+      user.feedbacks.create!(message: "Feedback #{index}")
+    end
+
+    assert_equal baseline, queries_during { export(User.find(user.id)) }
+  end
+
+  test "stores attached files as they are instead of compressing them again" do
+    user = users(:one)
+    feedback = user.feedbacks.create!(message: "Nice app")
+    feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "shot.png", content_type: "image/png")
+
+    Zip::File.open_buffer(StringIO.new(export(user))) do |zip|
+      assert_equal Zip::Entry::STORED, zip.find_entry("files/feedbacks/#{feedback.id}/photos/shot.png").compression_method
+      assert_equal Zip::Entry::DEFLATED, zip.find_entry("data.json").compression_method
+    end
+  end
+
   private
+
+  def export(user)
+    StringIO.new.tap { |io| DataExport.new(user).write(io) }.string
+  end
+
+  def queries_during(&block)
+    count = 0
+    counter = ->(*, payload) { count += 1 unless payload[:name] == "SCHEMA" }
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &block)
+    count
+  end
 
   def zip_entries(bytes)
     {}.tap do |entries|

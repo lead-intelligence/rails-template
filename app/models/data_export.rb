@@ -20,15 +20,15 @@ class DataExport
     @user = user
   end
 
-  def to_zip
-    Zip::OutputStream.write_buffer do |zip|
+  def write(io)
+    Zip::OutputStream.write_buffer(io) do |zip|
       zip.put_next_entry("data.json")
       zip.write(JSON.pretty_generate(data))
-      files.each do |path, bytes|
-        zip.put_next_entry(path)
-        zip.write(bytes)
+      each_attachment do |path, attachment|
+        zip.put_next_entry(path, nil, nil, Zip::Entry::STORED)
+        attachment.blob.download { |chunk| zip.write(chunk) }
       end
-    end.tap(&:rewind).read
+    end
   end
 
   private
@@ -72,19 +72,18 @@ class DataExport
     klass.reflect_on_all_associations.select { |reflection| reflection.options[:class_name] == "ActionText::RichText" }
   end
 
-  def files
-    entries = attachments_for("user", user)
+  def each_attachment
+    attachments(User, user.id).each { |attachment| yield "files/user/#{attachment.name}/#{attachment.blob.filename}", attachment }
     exported_associations.each do |reflection|
-      user.public_send(reflection.name).each do |record|
-        entries.concat(attachments_for("#{reflection.name}/#{record.id}", record))
+      next if reflection.klass.reflect_on_all_attachments.empty?
+
+      attachments(reflection.klass, user.public_send(reflection.name).select(:id)).each do |attachment|
+        yield "files/#{reflection.name}/#{attachment.record_id}/#{attachment.name}/#{attachment.blob.filename}", attachment
       end
     end
-    entries
   end
 
-  def attachments_for(prefix, record)
-    ActiveStorage::Attachment.where(record: record).where.not(name: EXCLUDED_ATTACHMENTS).includes(:blob).map do |attachment|
-      [ "files/#{prefix}/#{attachment.name}/#{attachment.blob.filename}", attachment.blob.download ]
-    end
+  def attachments(klass, ids)
+    ActiveStorage::Attachment.where(record_type: klass.polymorphic_name, record_id: ids).where.not(name: EXCLUDED_ATTACHMENTS).includes(:blob)
   end
 end
