@@ -41,7 +41,7 @@ class DocumentsController < ApplicationController
   private
 
   def search(query)
-    Document.where(user: Current.user).semantic_search(query)
+    Document.where(user: Current.user).select(:id, :title).semantic_search(query)
   rescue RubyLLM::Error => error
     Rails.error.report(error)
     flash.now[:alert] = t("documents.index.search_unavailable")
@@ -49,7 +49,7 @@ class DocumentsController < ApplicationController
   end
 
   def listed_documents
-    Current.user.documents.order(updated_at: :desc)
+    Current.user.documents.select(:id, :title).order(updated_at: :desc)
   end
 
   def document_params

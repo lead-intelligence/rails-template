@@ -30,6 +30,7 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")
     get documents_url
     assert_response :success
+    assert_not_embedding_loaded
   end
 
   test "searches own documents semantically" do
@@ -43,6 +44,7 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes @response.body, "Kamal notes"
+    assert_not_embedding_loaded
   end
 
   test "falls back to the plain list when the search provider fails" do
@@ -112,5 +114,13 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
       delete document_url(document)
     end
     assert_redirected_to documents_url
+  end
+
+  private
+
+  def assert_not_embedding_loaded
+    documents = controller.instance_variable_get(:@documents).to_a
+    assert_not_empty documents
+    documents.each { |document| assert_not document.has_attribute?(:embedding) }
   end
 end
