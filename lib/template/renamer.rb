@@ -1,3 +1,5 @@
+require "open3"
+
 module Template
   class Renamer
     SKIP_DIRS = %w[.git docs log node_modules storage tmp vendor].freeze
@@ -24,9 +26,18 @@ module Template
     def new_title = @new_snake.titleize
 
     def text_files
-      Dir.glob("**/*", File::FNM_DOTMATCH, base: @root)
+      candidate_files
         .map { |relative| @root.join(relative).to_s }
         .select { |path| File.file?(path) && !skip?(path) && text?(path) }
+    end
+
+    def candidate_files
+      return Dir.glob("**/*", File::FNM_DOTMATCH, base: @root) unless @root.join(".git").exist?
+
+      stdout, stderr, status = Open3.capture3("git", "-C", @root.to_s, "ls-files", "-z")
+      raise "git ls-files failed: #{stderr}" unless status.success?
+
+      stdout.split("\0")
     end
 
     def skip?(path)

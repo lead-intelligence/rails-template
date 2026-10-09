@@ -2,9 +2,14 @@ require "test_helper"
 require "tmpdir"
 
 class Template::RenamerTest < ActiveSupport::TestCase
+  include GitIdentityHelper
+
   setup do
+    stub_git_identity
     @target = "#{Rails.application.class.module_parent_name.underscore}_renamed"
   end
+
+  teardown { restore_git_identity }
 
   test "rewrites module, snake, dashed and title-case names in text files" do
     Dir.mktmpdir do |dir|
@@ -32,6 +37,31 @@ class Template::RenamerTest < ActiveSupport::TestCase
       Template::Renamer.new(root: root, new_name: @target).run
 
       assert_includes File.read(path), "module #{@target.camelize}"
+    end
+  end
+
+  test "in a git checkout, rewrites only the files git tracks" do
+    Dir.mktmpdir do |root|
+      tracked = File.join(root, "application.rb")
+      untracked = File.join(root, ".claude", "worktrees", "x", "file.rb")
+      File.write(tracked, "module CharcoTemplate\nend\n")
+      FileUtils.mkdir_p(File.dirname(untracked))
+      File.write(untracked, "module CharcoTemplate\nend\n")
+      system("git", "-C", root, "init", "--quiet", exception: true)
+      system("git", "-C", root, "add", "application.rb", exception: true)
+
+      Template::Renamer.new(root: root, new_name: @target).run
+
+      assert_includes File.read(tracked), "module #{@target.camelize}"
+      assert_equal "module CharcoTemplate\nend\n", File.read(untracked)
+    end
+  end
+
+  test "refuses to guess which files to rename when git cannot list them" do
+    Dir.mktmpdir do |root|
+      File.write(File.join(root, ".git"), "not a gitdir")
+
+      assert_raises(RuntimeError) { Template::Renamer.new(root: root, new_name: @target).run }
     end
   end
 
