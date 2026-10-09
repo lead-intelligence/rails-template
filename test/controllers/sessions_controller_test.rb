@@ -25,6 +25,19 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a cookie whose session is gone is looked up once and cleared" do
+    sign_in_as users(:one)
+    Session.delete_all
+
+    queries = []
+    callback = ->(*, payload) { queries << payload[:sql] if payload[:sql].include?(%("sessions")) }
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") { get root_url }
+
+    assert_response :success
+    assert_equal 1, queries.size
+    assert cookies[:session_id].blank?
+  end
+
   test "signs out" do
     sign_in_as users(:one)
     delete session_url
