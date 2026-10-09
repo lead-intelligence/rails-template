@@ -95,6 +95,18 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_nil users(:one).reload.unconfirmed_email
   end
 
+  test "refuses an email change to an address another account owns and mails nobody" do
+    sign_in_as users(:one)
+
+    assert_no_enqueued_emails do
+      patch profile_url, params: { user: { unconfirmed_email: users(:two).email_address, password_challenge: "password" } }
+    end
+
+    assert_response :unprocessable_entity
+    assert_nil users(:one).reload.unconfirmed_email
+    assert_select ".alert-error", /#{Regexp.escape(users(:one).errors.generate_message(:unconfirmed_email, :taken))}/
+  end
+
   test "re-submitting the same pending address sends the confirmation email again" do
     sign_in_as users(:one)
     users(:one).update!(unconfirmed_email: "ada-new@example.com")

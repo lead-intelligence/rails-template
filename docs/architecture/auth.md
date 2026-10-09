@@ -18,6 +18,8 @@ Rate limits guard every unauthenticated credential endpoint, using Rails' own `r
 
 Changing an email address or a password from `/profile` requires the current password. `User` validates `password_challenge` on the `:profile` validation context whenever credentials are changing, and `ProfilesController#update` saves with `save(context: :profile)`; `profile_params` drops blank password fields so a plain name-or-avatar edit does not demand one. A new address is parked in `users.unconfirmed_email` and only becomes the real address when the person clicks the link mailed by `EmailConfirmationsMailer.change`, which `EmailChangesController#show` resolves through `User.confirm_email_change`.
 
+A pending address that another account already owns fails the `:profile` context with the standard `:taken` error, so `ProfilesController#update` re-renders the form and mails nothing. The check runs whenever a pending address is present, not only when it changes, so re-submitting an address someone else has claimed since does not mail that person either. `users.email_address` is unique, so such a change could never be confirmed anyway; without the check the only effect would be a confirmation mail in a stranger's inbox.
+
 The pending address is cancellable by submitting a blank one and resendable by submitting the same one again, because the mail is gated on the submitted parameter rather than on the dirty flag — a plain re-submit of the identical address still mails a fresh confirmation.
 
 One consequence of the `:profile` context: a future validation declared `on: :update` will not run on this path, since `save(context: :profile)` only runs validations scoped to `:profile` (plus the context-less ones).

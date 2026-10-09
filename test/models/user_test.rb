@@ -119,6 +119,23 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:password_challenge].any?
   end
 
+  test "the profile context refuses a new email another account already owns" do
+    user = users(:one)
+    user.unconfirmed_email = users(:two).email_address.upcase
+    user.password_challenge = "password"
+
+    assert_not user.valid?(:profile)
+    assert user.errors.added?(:unconfirmed_email, :taken)
+  end
+
+  test "the profile context accepts a new email nobody owns" do
+    user = users(:one)
+    user.unconfirmed_email = "ada-new@example.com"
+    user.password_challenge = "password"
+
+    assert user.valid?(:profile)
+  end
+
   test "an untouched profile needs no challenge" do
     user = users(:one)
     user.name = "Ada King"

@@ -37,6 +37,7 @@ class User < ApplicationRecord
   validates :unconfirmed_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_nil: true
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :password_challenge, presence: true, on: :profile, if: :changing_credentials?
+  validate :unconfirmed_email_not_taken, on: :profile, if: :unconfirmed_email?
   validates :avatar, content_type: %w[image/png image/jpeg image/webp], size: { less_than: 5.megabytes }
 
   def initials
@@ -64,6 +65,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def unconfirmed_email_not_taken
+    errors.add(:unconfirmed_email, :taken) if User.where.not(id: id).exists?(email_address: unconfirmed_email)
+  end
 
   def changing_credentials?
     password.present? || unconfirmed_email_changed?
