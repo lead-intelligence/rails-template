@@ -27,6 +27,33 @@ class DataExportTest < ActiveSupport::TestCase
     assert_includes entries.keys, "files/feedbacks/#{feedback.id}/photos/#{feedback.photos.first.id}/shot.png"
   end
 
+  test "follows the deletion cascade into nested records and their files" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    message = chat.messages.create!(role: :user, content: "My private question")
+    message.attachments.attach(io: File.open(file_fixture("avatar.png")), filename: "photo.png", content_type: "image/png")
+    tool_call = chat.messages.create!(role: :assistant, content: "").tool_calls.create!(tool_call_id: "call_1", name: "lookup", arguments: {})
+
+    entries = zip_entries(export(users(:one)))
+
+    data = JSON.parse(entries["data.json"])
+    assert_includes data["chats/messages"].map { |record| record["content"] }, "My private question"
+    assert_includes data["chats/messages/tool_calls"].map { |record| record["id"] }, tool_call.id
+    assert_includes entries.keys, "files/chats/messages/#{message.id}/attachments/#{message.attachments.first.id}/photo.png"
+  end
+
+  test "leaves out the technical messages a support chat hides from the person" do
+    chat = users(:one).chats.create!(support: true)
+    reply = chat.messages.create!(role: :assistant, content: "Thanks, I've filed this for the team.")
+    chat.messages.create!(role: :system, content: "Never mention code.")
+    chat.messages.create!(role: :tool, content: "Ticket filed.")
+    chat.messages.create!(role: :assistant, content: "").tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: {})
+
+    data = JSON.parse(zip_entries(export(users(:one)))["data.json"])
+
+    assert_equal [ reply.id ], data["chats/messages"].map { |record| record["id"] }
+    assert_empty data["chats/messages/tool_calls"]
+  end
+
   test "keeps every attachment when two on one record share a filename" do
     feedback = users(:one).feedbacks.create!(message: "Nice app")
     2.times { feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "shot.png", content_type: "image/png") }

@@ -3,10 +3,13 @@ require "zip"
 class DataExport
   EXCLUDED_COLUMNS = {
     "User" => %w[password_digest],
-    "Document" => %w[embedding]
+    "Document" => %w[embedding],
+    "Message" => %w[content_raw thinking_signature]
   }.freeze
 
   EXCLUDED_ATTACHMENTS = %w[data_export].freeze
+
+  RECORD_SCOPES = { "Message" => :visible_to_person }.freeze
 
   RETENTION = 48.hours
 
@@ -36,22 +39,37 @@ class DataExport
   attr_reader :user
 
   def data
-    { "user" => serialize(user) }.merge(associations_data)
+    { "user" => serialize(user) }.merge(
+      exported_relations.transform_values do |relation|
+        relation.includes(rich_text_reflections(relation.klass).map(&:name)).map { |record| serialize(record) }
+      end
+    )
   end
 
-  def associations_data
-    exported_associations.to_h do |reflection|
-      [ reflection.name.to_s, records_for(reflection).map { |record| serialize(record) } ]
+  def exported_relations
+    @exported_relations ||= relations_under(User.where(id: user.id))
+  end
+
+  def relations_under(parent, prefix = nil)
+    destroyed_associations(parent.klass).each_with_object({}) do |reflection, relations|
+      path = [ prefix, reflection.name ].compact.join("/")
+      relations[path] = scoped(child_relation(parent, reflection))
+      relations.merge!(relations_under(relations[path], path))
     end
   end
 
-  def records_for(reflection)
-    names = rich_text_reflections(reflection.klass).map(&:name)
-    names.any? ? user.public_send(reflection.name).includes(names) : user.public_send(reflection.name)
+  def child_relation(parent, reflection)
+    klass = reflection.klass
+    klass.where(klass.primary_key => parent.joins(reflection.name).select(klass.arel_table[klass.primary_key]))
   end
 
-  def exported_associations
-    User.reflect_on_all_associations.select do |reflection|
+  def scoped(relation)
+    scope = RECORD_SCOPES[relation.klass.name]
+    scope ? relation.public_send(scope) : relation
+  end
+
+  def destroyed_associations(klass)
+    klass.reflect_on_all_associations.select do |reflection|
       reflection.options[:dependent] == :destroy && domain_association?(reflection)
     end
   end
@@ -74,11 +92,11 @@ class DataExport
 
   def each_attachment
     attachments(User, user.id).each { |attachment| yield path_for("user", attachment), attachment }
-    exported_associations.each do |reflection|
-      next if reflection.klass.reflect_on_all_attachments.empty?
+    exported_relations.each do |path, relation|
+      next if relation.klass.reflect_on_all_attachments.empty?
 
-      attachments(reflection.klass, user.public_send(reflection.name).select(:id)).each do |attachment|
-        yield path_for("#{reflection.name}/#{attachment.record_id}", attachment), attachment
+      attachments(relation.klass, relation.select(:id)).each do |attachment|
+        yield path_for("#{path}/#{attachment.record_id}", attachment), attachment
       end
     end
   end

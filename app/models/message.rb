@@ -2,6 +2,11 @@ class Message < ApplicationRecord
   acts_as_message
   has_many_attached :attachments
 
+  scope :visible_to_person, -> {
+    where(chat: Chat.where(support: false))
+      .or(where.not(role: %w[system tool]).where.not(id: ToolCall.select(:message_id)))
+  }
+
   after_create_commit :broadcast_new_message
   after_update_commit :broadcast_updated_message
   after_destroy_commit :broadcast_removed_message
