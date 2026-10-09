@@ -14,10 +14,11 @@ class SeedsTest < ActiveSupport::TestCase
     assert_raises(RubyLLM::ModelNotFoundError) { Document.semantic_search("deploy") }
   end
 
-  test "seeding loads the bundled registry into the table and resolves the embedding model" do
+  test "seeding loads the bundled registry into the table once, and resolves the embedding model" do
     Rails.application.load_seed
 
     assert Model.exists?(model_id: "text-embedding-3-small", provider: "openai")
+    assert_no_difference("Model.count") { Rails.application.load_seed }
 
     vector = Array.new(Document::EMBEDDING_DIMENSIONS, 0.0).tap { |v| v[0] = 1.0 }
     document = users(:one).documents.create!(title: "Kamal", content: "Deploy fast")
@@ -25,11 +26,5 @@ class SeedsTest < ActiveSupport::TestCase
     stub_openai_embedding(vector: vector)
 
     assert_equal [ document ], Document.semantic_search("deploy")
-  end
-
-  test "seeding twice leaves the registry table unchanged" do
-    Rails.application.load_seed
-
-    assert_no_difference("Model.count") { Rails.application.load_seed }
   end
 end
