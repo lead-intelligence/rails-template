@@ -129,6 +129,26 @@ class Template::CleanupTest < ActiveSupport::TestCase
     end
   end
 
+  test "cuts the git link to the template from a path that holds a space or shell syntax" do
+    in_fixture_tree("my app; $(touch pwned) ") do |dir|
+      system("git", "-C", dir, "init", "--quiet", exception: true)
+      system("git", "-C", dir, "remote", "add", "template", "git@github.com:bruno-costanzo/rails-template.git", exception: true)
+
+      Template::Cleanup.new(root: dir, app_name: "Demo").run
+
+      assert_empty IO.popen([ "git", "-C", dir, "remote" ], &:read).split
+      assert_not File.exist?("pwned")
+    end
+  end
+
+  test "stops when git cannot read the remotes of a tree that claims a repository" do
+    in_fixture_tree do |dir|
+      FileUtils.mkdir(File.join(dir, ".git"))
+
+      assert_raises(RuntimeError) { Template::Cleanup.new(root: dir, app_name: "Demo").run }
+    end
+  end
+
   test "a tree with no git repository is left alone" do
     in_fixture_tree do |dir|
       assert_nothing_raised { Template::Cleanup.new(root: dir, app_name: "Demo").run }
@@ -137,8 +157,10 @@ class Template::CleanupTest < ActiveSupport::TestCase
 
   private
 
-  def in_fixture_tree
-    Dir.mktmpdir do |dir|
+  def in_fixture_tree(name = "app")
+    Dir.mktmpdir do |tmp|
+      dir = File.join(tmp, name)
+      FileUtils.mkdir(dir)
       %w[bin lib/template test/lib/template docs/superpowers config].each { |path| FileUtils.mkdir_p(File.join(dir, path)) }
       FileUtils.touch(File.join(dir, "bin", "rename"))
       FileUtils.touch(File.join(dir, "bin", "smoke-rename"))

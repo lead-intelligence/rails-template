@@ -1,3 +1,5 @@
+require "open3"
+
 module Template
   class Cleanup
     REMOVED_PATHS = %w[bin/rename bin/smoke-rename bin/spawn bin/children children.yml lib/template test/lib/template docs/superpowers].freeze
@@ -40,9 +42,11 @@ module Template
     end
 
     def template_remotes
-      `git -C #{@root} remote -v`.lines.filter_map { |line| line.split.first if line.include?(TEMPLATE_SLUG) }.uniq
-    end
+      stdout, stderr, status = Open3.capture3("git", "-C", @root.to_s, "remote", "-v")
+      raise "git remote -v failed: #{stderr}" unless status.success?
 
+      stdout.lines.filter_map { |line| line.split.first if line.include?(TEMPLATE_SLUG) }.uniq
+    end
 
     def rewrite(relative_path)
       path = @root.join(relative_path)
