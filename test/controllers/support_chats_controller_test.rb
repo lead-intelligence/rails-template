@@ -32,6 +32,26 @@ class SupportChatsControllerTest < ActionDispatch::IntegrationTest
     assert_operator @response.body.index("La factura sale mal"), :<, @response.body.index("No puedo entrar")
   end
 
+  test "the list names each conversation by its first question" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(support: true)
+    chat.messages.create!(role: :user, content: "No puedo entrar", created_at: 3.minutes.ago)
+    chat.messages.create!(role: :assistant, content: "Contame mas", created_at: 2.minutes.ago)
+    chat.messages.create!(role: :user, content: "Me da error", created_at: 1.minute.ago)
+
+    get support_chats_url
+
+    assert_match "No puedo entrar", @response.body
+    assert_no_match "Me da error", @response.body
+  end
+
+  test "the list loads no conversation's whole history" do
+    sign_in_as users(:one)
+    seed_messages(users(:one).chats.create!(support: true), 3)
+
+    assert_no_queries_match(/\ASELECT "messages"/) { get support_chats_url }
+  end
+
   test "the list leaves out other people's conversations" do
     sign_in_as users(:one)
     intruder = users(:two).chats.create!(support: true)

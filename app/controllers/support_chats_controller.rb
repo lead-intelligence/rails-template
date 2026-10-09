@@ -5,7 +5,7 @@ class SupportChatsController < ApplicationController
 
   def index
     @context = context_params
-    @chats = conversations.includes(:messages).order(created_at: :desc).limit(RECENT_CONVERSATIONS)
+    @chats = conversations.with_first_question.order(created_at: :desc).limit(RECENT_CONVERSATIONS)
   end
 
   def show

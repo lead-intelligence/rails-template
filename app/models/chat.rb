@@ -10,6 +10,10 @@ class Chat < ApplicationRecord
 
   scope :support, -> { where(support: true) }
   scope :open, -> { where(closed_at: nil) }
+  scope :with_first_question, -> {
+    first_question = Message.where(role: "user").where("messages.chat_id = chats.id").order(:created_at).limit(1).select(:content)
+    select(arel_table[Arel.star], first_question.arel.as("first_question"))
+  }
 
   def self.close_inactive_support_conversations
     support.open.find_each { |chat| chat.close! if chat.inactive? }

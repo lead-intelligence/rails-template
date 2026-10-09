@@ -21,7 +21,7 @@
               <%= link_to support_chat_path(chat), class: "flex items-center gap-2" do %>
                 <span class="flex-1 min-w-0 flex flex-col items-start">
                   <span class="truncate w-full font-medium">
-                    <%= chat.messages.detect { |message| message.role.to_s == "user" }&.content&.truncate(60).presence || t(".untitled") %>
+                    <%= chat.first_question&.truncate(60).presence || t(".untitled") %>
                   </span>
                   <span class="text-xs opacity-70"><%= l(chat.created_at.to_date, format: :long) %></span>
                 </span>
