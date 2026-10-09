@@ -13,6 +13,23 @@ class DataExportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_profile_url
   end
 
+  test "create rate limits repeated export requests per person" do
+    sign_in_as users(:one)
+    DataExport::REQUEST_LIMIT.times { post data_export_url }
+
+    assert_no_enqueued_jobs only: DataExportJob do
+      post data_export_url
+    end
+
+    assert_redirected_to edit_profile_url
+    assert_equal I18n.t("data_exports.rate_limit", count: DataExport::REQUEST_LIMIT), flash[:alert]
+
+    delete session_url
+    sign_in_as users(:two)
+
+    assert_enqueued_with(job: DataExportJob) { post data_export_url }
+  end
+
   test "create requires authentication" do
     assert_no_enqueued_jobs only: DataExportJob do
       post data_export_url

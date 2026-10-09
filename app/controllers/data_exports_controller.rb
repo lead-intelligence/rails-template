@@ -1,4 +1,7 @@
 class DataExportsController < ApplicationController
+  rate_limit to: DataExport::REQUEST_LIMIT, within: DataExport::REQUEST_WINDOW, only: :create, by: -> { Current.user.id },
+    with: -> { redirect_to edit_profile_path, alert: t("data_exports.rate_limit", count: DataExport::REQUEST_LIMIT) }
+
   def create
     DataExportJob.perform_later(Current.user)
     redirect_to edit_profile_path, notice: t(".notice")

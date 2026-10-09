@@ -110,6 +110,8 @@ es:
     create:
       notice: Estamos preparando tu exportación de datos. Te enviaremos un enlace
         de descarga cuando esté lista.
+    rate_limit: Ya pediste %{count} exportaciones hace poco. Inténtalo de nuevo más
+      tarde.
     show:
       expired: Esa exportación caducó por tu seguridad. Solicita una nueva.
       pending: Tu exportación todavía no está lista. Te avisaremos por correo cuando

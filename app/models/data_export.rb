@@ -13,6 +13,9 @@ class DataExport
 
   RETENTION = 48.hours
 
+  REQUEST_LIMIT = 3
+  REQUEST_WINDOW = 1.hour
+
   def self.purge_expired
     ActiveStorage::Attachment
       .where(name: "data_export", created_at: ..RETENTION.ago)
