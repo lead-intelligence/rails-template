@@ -5,6 +5,7 @@ class Document < ApplicationRecord
   validates :title, presence: true
 
   EMBEDDING_DIMENSIONS = 1536
+  EMBEDDING_SOURCE_BYTES = 8_191
 
   has_neighbors :embedding, dimensions: EMBEDDING_DIMENSIONS
   after_save_commit :refresh_embedding_later, if: :embedding_source_changed?
@@ -15,7 +16,7 @@ class Document < ApplicationRecord
   end
 
   def embedding_source_text
-    [ title, content.to_plain_text ].join("\n").strip
+    [ title, content.to_plain_text ].join("\n").strip.truncate_bytes(EMBEDDING_SOURCE_BYTES, omission: "")
   end
 
   private

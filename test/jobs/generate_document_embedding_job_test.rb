@@ -12,6 +12,17 @@ class GenerateDocumentEmbeddingJobTest < ActiveJob::TestCase
     assert_no_enqueued_jobs only: GenerateDocumentEmbeddingJob
   end
 
+  test "sends no more of a long document than the embedding model accepts" do
+    doc = users(:one).documents.create!(title: "Long", content: "ñandú 日本 " * 5_000)
+    request = stub_openai_embedding(vector: Array.new(Document::EMBEDDING_DIMENSIONS, 0.5))
+      .with { |req| JSON.parse(req.body)["input"].bytesize.between?(1, Document::EMBEDDING_SOURCE_BYTES) }
+
+    GenerateDocumentEmbeddingJob.perform_now(doc)
+
+    assert_requested request
+    assert_equal Document::EMBEDDING_DIMENSIONS, doc.reload.embedding.size
+  end
+
   test "writing an embedding identical to the stored one does not re-enqueue" do
     doc = users(:one).documents.create!(title: "Kamal", content: "Deploy")
     stored_vector = Array.new(Document::EMBEDDING_DIMENSIONS, 0.5)
