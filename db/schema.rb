@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_100727) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_224450) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -180,9 +180,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_100727) do
     t.integer "thinking_tokens"
     t.integer "tool_call_id"
     t.datetime "updated_at", null: false
+    t.index ["chat_id", "role", "created_at"], name: "index_messages_on_chat_id_and_role_and_created_at"
     t.index ["chat_id"], name: "index_messages_on_chat_id"
     t.index ["model_id"], name: "index_messages_on_model_id"
-    t.index ["role"], name: "index_messages_on_role"
     t.index ["tool_call_id"], name: "index_messages_on_tool_call_id"
   end
 

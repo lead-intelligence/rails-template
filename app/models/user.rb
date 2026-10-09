@@ -45,7 +45,11 @@ class User < ApplicationRecord
   end
 
   def messages_remaining_today
-    [ DAILY_MESSAGE_LIMIT - messages.where(role: "user", created_at: Time.current.all_day).count, 0 ].max
+    [ DAILY_MESSAGE_LIMIT - messages_sent_today.count, 0 ].max
+  end
+
+  def messages_sent_today
+    messages.where(role: "user", created_at: Time.current.all_day)
   end
 
   def confirmed?

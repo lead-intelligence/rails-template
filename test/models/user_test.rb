@@ -70,6 +70,13 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.messages_remaining_today
   end
 
+  test "the daily quota reads its own index instead of every person's messages" do
+    sql = users(:one).messages_sent_today.select("COUNT(*)").to_sql
+    plan = ActiveRecord::Base.connection.select_rows("EXPLAIN QUERY PLAN #{sql}").map(&:last)
+
+    assert plan.any? { |step| step.include?("index_messages_on_chat_id_and_role_and_created_at") }, plan.inspect
+  end
+
   test "changing the password in the profile context requires the current password" do
     user = users(:one)
     user.password = "newpassword123"
