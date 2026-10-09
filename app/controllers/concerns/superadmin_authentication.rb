@@ -14,8 +14,8 @@ module SuperadminAuthentication
     return request_http_basic_authentication("Superadmin") if username.blank? || password.blank?
 
     authenticate_or_request_with_http_basic("Superadmin") do |given_username, given_password|
-      ActiveSupport::SecurityUtils.secure_compare(given_username, username) &
-        ActiveSupport::SecurityUtils.secure_compare(given_password, password)
+      ActiveSupport::SecurityUtils.secure_compare(given_username.to_s, username) &
+        ActiveSupport::SecurityUtils.secure_compare(given_password.to_s, password)
     end
   end
 end

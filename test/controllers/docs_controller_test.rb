@@ -29,6 +29,12 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "refuses credentials without a colon" do
+    get docs_url, headers: { "Authorization" => "Basic #{Base64.strict_encode64("superadmin")}" }
+
+    assert_response :unauthorized
+  end
+
   test "denies access when no credentials are configured" do
     ENV["SUPERADMIN_USER"] = nil
     ENV["SUPERADMIN_PASSWORD"] = nil
