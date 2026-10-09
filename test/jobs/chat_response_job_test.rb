@@ -127,6 +127,12 @@ class ChatResponseJobTest < ActiveJob::TestCase
     assert_includes feedback.message, "Pages take a long time to load for this person."
   end
 
+  test "answers one turn of a chat at a time" do
+    assert_equal 1, ChatResponseJob.concurrency_limit
+    assert_equal ChatResponseJob.new(42).concurrency_key, ChatResponseJob.new(42).concurrency_key
+    assert_not_equal ChatResponseJob.new(42).concurrency_key, ChatResponseJob.new(43).concurrency_key
+  end
+
   test "the queries to answer do not grow with the history of a chat" do
     assert_equal queries_to_answer(history: 4), queries_to_answer(history: 8)
   end
