@@ -13,4 +13,8 @@ module DocsHelper
   def doc_icon(doc)
     doc.section == :guide ? "book-open" : "layers"
   end
+
+  def docs_search_index
+    json_escape(Doc.search_index).html_safe
+  end
 end
