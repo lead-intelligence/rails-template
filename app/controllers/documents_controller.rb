@@ -1,10 +1,6 @@
 class DocumentsController < ApplicationController
   def index
-    @documents = if params[:q].present?
-      Document.where(user: Current.user).semantic_search(params[:q])
-    else
-      Current.user.documents.order(updated_at: :desc)
-    end
+    @documents = params[:q].present? ? search(params[:q]) : listed_documents
   end
 
   def show
@@ -43,6 +39,18 @@ class DocumentsController < ApplicationController
   end
 
   private
+
+  def search(query)
+    Document.where(user: Current.user).semantic_search(query)
+  rescue RubyLLM::Error => error
+    Rails.error.report(error)
+    flash.now[:alert] = t("documents.index.search_unavailable")
+    listed_documents
+  end
+
+  def listed_documents
+    Current.user.documents.order(updated_at: :desc)
+  end
 
   def document_params
     params.expect(document: [ :title, :content ])

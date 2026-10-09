@@ -149,6 +149,7 @@ en:
       scan: Scan
       search: Search
       search_placeholder: Semantic search…
+      search_unavailable: Search isn't available right now. Here are all your documents.
       title: Documents
     new:
       title: New document

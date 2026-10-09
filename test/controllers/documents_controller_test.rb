@@ -45,6 +45,22 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "Kamal notes"
   end
 
+  test "falls back to the plain list when the search provider fails" do
+    sign_in_as users(:one)
+    users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")
+    stub_request(:post, "https://api.openai.com/v1/embeddings").to_return(
+      status: 503, headers: { "Content-Type" => "application/json" }, body: { error: { message: "Service unavailable" } }.to_json
+    )
+
+    assert_error_reported(RubyLLM::Error) do
+      get documents_url, params: { q: "How do I deploy?" }
+    end
+
+    assert_response :success
+    assert_equal I18n.t("documents.index.search_unavailable"), flash[:alert]
+    assert_includes @response.body, "Kamal notes"
+  end
+
   test "shows own document" do
     sign_in_as users(:one)
     document = users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")
