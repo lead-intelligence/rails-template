@@ -11,6 +11,8 @@ class DataExport
 
   RECORD_SCOPES = { "Message" => :visible_to_person }.freeze
 
+  SERIALIZED_ASSOCIATIONS = { "Chat" => %i[model] }.freeze
+
   RETENTION = 48.hours
 
   REQUEST_LIMIT = 3
@@ -47,9 +49,13 @@ class DataExport
   def data
     { "user" => serialize(user) }.merge(
       exported_relations.transform_values do |relation|
-        relation.includes(rich_text_reflections(relation.klass).map(&:name)).map { |record| serialize(record) }
+        relation.includes(preloads_for(relation.klass)).map { |record| serialize(record) }
       end
     )
+  end
+
+  def preloads_for(klass)
+    rich_text_reflections(klass).map(&:name) + SERIALIZED_ASSOCIATIONS.fetch(klass.name, [])
   end
 
   def exported_relations

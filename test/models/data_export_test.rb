@@ -115,9 +115,11 @@ class DataExportTest < ActiveSupport::TestCase
     user = users(:one)
     user.documents.create!(title: "First", content: "Notes")
     user.feedbacks.create!(message: "First")
+    user.chats.create!(model: "gpt-4o-mini").messages.create!(role: :user, content: "Hi")
     baseline = queries_during { export(User.find(user.id)) }
 
     5.times do |index|
+      user.chats.create!(model: "gpt-4o-mini").messages.create!(role: :user, content: "Hi #{index}")
       user.documents.create!(title: "Doc #{index}", content: "Notes")
       user.sessions.create!(ip_address: "127.0.0.1", user_agent: "Test")
       user.feedbacks.create!(message: "Feedback #{index}")
