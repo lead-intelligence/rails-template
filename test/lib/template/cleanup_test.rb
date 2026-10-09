@@ -2,6 +2,11 @@ require "test_helper"
 require "tmpdir"
 
 class Template::CleanupTest < ActiveSupport::TestCase
+  include GitIdentityHelper
+
+  setup { stub_git_identity }
+  teardown { restore_git_identity }
+
   test "removes the tooling that only serves the template" do
     in_fixture_tree do |dir|
       Template::Cleanup.new(root: dir, app_name: "Demo").run
@@ -112,7 +117,7 @@ class Template::CleanupTest < ActiveSupport::TestCase
 
   test "cuts the git link to the template so a stray push cannot reach it" do
     in_fixture_tree do |dir|
-      system("git", "-C", dir, "-c", "gc.auto=0", "-c", "maintenance.auto=false", "init", "--quiet")
+      system("git", "-C", dir, "init", "--quiet")
       system("git", "-C", dir, "remote", "add", "template", "git@github.com:bruno-costanzo/rails-template.git")
       system("git", "-C", dir, "remote", "add", "origin", "git@github.com:someone/demo.git")
 

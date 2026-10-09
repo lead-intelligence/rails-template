@@ -7,6 +7,13 @@ class Template::ChildrenTest < ActiveSupport::TestCase
   setup { stub_git_identity }
   teardown { restore_git_identity }
 
+  test "every git command a test spawns runs with background maintenance off" do
+    in_git_root do |root|
+      assert_equal "0", `git -C #{root} config gc.auto`.strip
+      assert_equal "false", `git -C #{root} config maintenance.auto`.strip
+    end
+  end
+
   test "register writes an entry with born_from equal to synced_to" do
     in_tmp_root do |root|
       Template::Children.new(root: root).register("demo", path: "../demo", sha: "abc123")
@@ -137,7 +144,7 @@ class Template::ChildrenTest < ActiveSupport::TestCase
 
   def in_git_root
     in_tmp_root do |root|
-      system("git", "-C", root.to_s, "-c", "gc.auto=0", "-c", "maintenance.auto=false", "init", "--quiet", exception: true)
+      system("git", "-C", root.to_s, "init", "--quiet", exception: true)
       File.write(root.join("first.txt"), "first")
       system("git", "-C", root.to_s, "add", "-A", exception: true)
       system("git", "-C", root.to_s, "commit", "--quiet", "-m", "First commit", exception: true)
