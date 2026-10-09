@@ -42,14 +42,24 @@ class DocumentationTest < ActiveSupport::TestCase
     assert_empty offenders, "lines over #{MAX_LINE_LENGTH} characters (the detail belongs in docs/architecture/)"
   end
 
-  test "every file path the documentation cites exists" do
+  test "every file path the documentation cites exists and is tracked" do
     offenders = documented_files.flat_map do |doc|
       cited_paths(doc).reject { |path| exists?(path) }.map do |path|
         "#{doc.relative_path_from(Rails.root)} cites #{path}"
       end
     end
 
-    assert_empty offenders, "documented paths that no longer exist in the tree"
+    assert_empty offenders, "documented paths that no longer exist in the tree, or that git does not track (a spawned app is a clone)"
+  end
+
+  test "a cited file on disk that git does not track counts as missing, except in an export with no repository" do
+    probe = Rails.root.join("db/untracked_documentation_probe.txt")
+    probe.write("probe")
+
+    assert_equal !Rails.root.join(".git").exist?, exists?("db/untracked_documentation_probe.txt"),
+      "with a repository only tracked files count; a git archive export carries only tracked files, so the disk decides there"
+  ensure
+    probe&.delete
   end
 
   private
@@ -85,8 +95,26 @@ class DocumentationTest < ActiveSupport::TestCase
   end
 
   def exists?(path)
+    on_disk?(path) && tracked?(path)
+  end
+
+  def on_disk?(path)
     return Dir.glob(Rails.root.join(path)).any? if path.include?("*")
 
     Rails.root.join(path).exist?
+  end
+
+  def tracked?(path)
+    return true unless Rails.root.join(".git").exist?
+
+    pattern = path.chomp("/")
+    return tracked_paths.include?(pattern) unless pattern.include?("*")
+
+    tracked_paths.any? { |tracked| File.fnmatch?(pattern, tracked, File::FNM_PATHNAME) }
+  end
+
+  def tracked_paths
+    @tracked_paths ||= IO.popen([ "git", "-C", Rails.root.to_s, "ls-files", "-z" ], &:read)
+      .split("\0").flat_map { |file| Pathname.new(file).ascend.map(&:to_s) }.to_set
   end
 end
