@@ -25,7 +25,7 @@ class SupportChatsController < ApplicationController
   end
 
   def context_params
-    params.fetch(:context, {}).permit(*CONTEXT_KEYS).to_h.transform_values { |value| sanitize_context_value(value) }
+    params.permit(context: CONTEXT_KEYS).to_h.fetch(:context, {}).transform_values { |value| sanitize_context_value(value) }
   end
 
   def sanitize_context_value(value)

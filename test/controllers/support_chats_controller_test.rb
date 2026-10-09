@@ -143,6 +143,16 @@ class SupportChatsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "1512x982", chat.ticket_context["viewport"]
   end
 
+  test "ignores a context that is not a set of keys" do
+    sign_in_as users(:one)
+
+    get support_chats_url, params: { context: "x" }
+    assert_response :success
+
+    post support_chats_url, params: { context: "x" }
+    assert_nil users(:one).chats.support.sole.ticket_context
+  end
+
   test "truncates context values to 2 kilobytes" do
     sign_in_as users(:one)
 
