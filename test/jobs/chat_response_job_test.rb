@@ -127,6 +127,14 @@ class ChatResponseJobTest < ActiveJob::TestCase
     assert_includes feedback.message, "Pages take a long time to load for this person."
   end
 
+  test "discards the answer for a chat deleted before it ran" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    ChatResponseJob.perform_later(chat.id)
+    chat.destroy!
+
+    assert_nothing_raised { perform_enqueued_jobs(only: ChatResponseJob) }
+  end
+
   test "answers one turn of a chat at a time" do
     assert_equal 1, ChatResponseJob.concurrency_limit
     assert_equal ChatResponseJob.new(42).concurrency_key, ChatResponseJob.new(42).concurrency_key

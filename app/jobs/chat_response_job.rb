@@ -1,5 +1,6 @@
 class ChatResponseJob < ApplicationJob
   limits_concurrency to: 1, key: ->(chat_id) { chat_id }, duration: 15.minutes
+  discard_on ActiveRecord::RecordNotFound
 
   def perform(chat_id)
     support = Chat.where(id: chat_id).pick(:support)
