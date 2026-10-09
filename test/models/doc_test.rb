@@ -126,4 +126,41 @@ class DocTest < ActiveSupport::TestCase
 
     assert_not_includes html, "<script>"
   end
+
+  test "the search index is built once and follows an edited or an added page" do
+    Dir.mktmpdir do |dir|
+      root = Pathname(dir)
+      root.join(Doc::ARCHITECTURE).mkpath
+      Doc::GUIDES.each { |guide| root.join(guide).write("# Guide\n") }
+      page = root.join(Doc::ARCHITECTURE, "alpha.md")
+      page.write("# Alpha\n\nFirst text.\n")
+
+      with_doc_root(root) do
+        first = Doc.search_index
+
+        assert_includes first, "First text."
+        assert_same first, Doc.search_index
+
+        page.write("# Alpha\n\nEdited text.\n")
+        File.utime(Time.now + 1, Time.now + 1, page)
+        root.join(Doc::ARCHITECTURE, "beta.md").write("# Beta\n")
+        File.utime(Time.now + 1, Time.now + 1, root.join(Doc::ARCHITECTURE))
+
+        rebuilt = Doc.search_index
+
+        assert_includes rebuilt, "Edited text."
+        assert_includes rebuilt, "Beta"
+        assert_equal %w[README CLAUDE architecture/alpha architecture/beta], Doc.all.map(&:slug)
+      end
+    end
+  end
+
+  private
+    def with_doc_root(root)
+      original_root = Doc.method(:root)
+      Doc.define_singleton_method(:root) { root }
+      yield
+    ensure
+      Doc.define_singleton_method(:root, original_root)
+    end
 end

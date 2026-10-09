@@ -44,8 +44,19 @@ class Doc
   end
 
   class << self
+    def root
+      Rails.root
+    end
+
     def all
-      (GUIDES + architecture_pages).map { |page| new(page) }
+      paths.map { |page| new(page) }
+    end
+
+    def search_index
+      docs = all
+      key = [ root, I18n.locale, docs.map(&:stamp) ]
+      @search_index = [ key, docs.flat_map(&:search_entries).to_json ] unless @search_index&.first == key
+      @search_index.last
     end
 
     def find(slug)
@@ -72,17 +83,19 @@ class Doc
       path.delete_prefix("docs/").delete_suffix(".md")
     end
 
+    def url_helpers
+      Rails.application.routes.url_helpers
+    end
+
     private
       def paths
-        GUIDES + architecture_pages
+        key = [ root, File.mtime(root.join(ARCHITECTURE)) ]
+        @paths = [ key, GUIDES + architecture_pages ] unless @paths&.first == key
+        @paths.last
       end
 
       def architecture_pages
-        Dir.glob(Rails.root.join(ARCHITECTURE, "*.md")).sort.map { |page| "#{ARCHITECTURE}/#{File.basename(page)}" }
-      end
-
-      def url_helpers
-        Rails.application.routes.url_helpers
+        Dir.glob(root.join(ARCHITECTURE, "*.md")).sort.map { |page| "#{ARCHITECTURE}/#{File.basename(page)}" }
       end
   end
 
@@ -119,8 +132,19 @@ class Doc
     end
   end
 
+  def stamp
+    [ path, File.mtime(self.class.root.join(path)) ]
+  end
+
+  def search_entries
+    page = self.class.url_helpers.doc_path(slug)
+
+    [ { title: title, heading: nil, summary: summary, body: body_text, path: page } ] +
+      headings.map { |heading| { title: title, heading: heading[:text], summary: "", body: "", path: "#{page}#{heading[:anchor]}" } }
+  end
+
   private
     def content
-      @content ||= Rails.root.join(path).read
+      @content ||= self.class.root.join(path).read
     end
 end

@@ -82,6 +82,22 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#conventions']"
   end
 
+  test "a page lists the documentation directory at most once" do
+    globs = 0
+    original_glob = Dir.method(:glob)
+    Dir.define_singleton_method(:glob) do |pattern, *args, **options, &block|
+      globs += 1 if pattern.to_s.include?(Doc::ARCHITECTURE)
+      original_glob.call(pattern, *args, **options, &block)
+    end
+
+    get doc_url("architecture/auth"), headers: superadmin_headers
+
+    assert_response :success
+    assert_operator globs, :<=, 1
+  ensure
+    Dir.define_singleton_method(:glob, original_glob)
+  end
+
   test "a page without subheadings has no table of contents" do
     get doc_url("architecture/superadmin-panels"), headers: superadmin_headers
 
