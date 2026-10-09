@@ -3,7 +3,8 @@ class ChatsController < ApplicationController
   before_action :ensure_within_quota, only: :create
 
   def index
-    @chats = Current.user.chats.where(support: false).order(created_at: :desc)
+    @chats = Current.user.chats.where(support: false).includes(:model).left_joins(:messages).group(:id)
+      .select("chats.*, COUNT(messages.id) AS messages_count").order(created_at: :desc)
   end
 
   def new

@@ -2,6 +2,7 @@ require "test_helper"
 
 class ChatResponseJobTest < ActiveJob::TestCase
   include ActionCable::TestHelper
+  include QueryCountHelper
 
   test "enqueues chat titling after the response is persisted" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
@@ -146,9 +147,6 @@ class ChatResponseJobTest < ActiveJob::TestCase
     chat.messages.create!(role: :user, content: "And now?")
     stub_openai_chat(content: "Sure.")
 
-    count = 0
-    counter = ->(*, payload) { count += 1 unless payload[:name] == "SCHEMA" || payload[:cached] }
-    ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { ChatResponseJob.perform_now(chat.id) }
-    count
+    queries_to { ChatResponseJob.perform_now(chat.id) }
   end
 end

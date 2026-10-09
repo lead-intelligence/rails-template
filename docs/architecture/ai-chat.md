@@ -4,6 +4,8 @@ The chat models are RubyLLM's generated `acts_as_chat` set — `Chat`, `Message`
 
 `Message#to_partial_path` and `#hidden_from_person?` build a full `to_llm` representation of each message, touching its tool calls, parent tool call, model and attachments. Both `ChatsController#show` and `SupportChatsController#show` therefore load `@messages` with `.includes(:tool_calls, :parent_tool_call, :model, attachments_attachments: :blob)`; without it the strict Bullet gate fails the moment a chat has more than one message.
 
+`ChatsController#index` lists chats with `includes(:model)` and a grouped `COUNT(messages.id) AS messages_count`, which `app/views/chats/_chat.html.erb` reads. Calling `messages.count` in the row instead runs one query per chat; `test/controllers/chats_controller_test.rb` asserts the query count does not grow with the number of chats.
+
 The gem's `to_llm` rebuilds the whole history the same way and loads `messages` with no preloading, so `Chat#to_llm` preloads those four associations first, unless the messages are already loaded. Without it `ChatResponseJob` runs two queries per message of history on every turn; `test/jobs/chat_response_job_test.rb` asserts the query count does not grow with the history.
 
 Broadcasting is a set of hand-rolled synchronous callbacks on `Message` rather than the declarative `broadcasts_to`. The declarative helper's default renders the partial inside another job, and that render can land after the streamed chunks it is supposed to precede. The callbacks broadcast in the request or job that made the change, in order.

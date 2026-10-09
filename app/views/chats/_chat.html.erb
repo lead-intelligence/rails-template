@@ -1,6 +1,6 @@
 <div id="<%= dom_id chat %>" class="list-col-grow min-w-0">
   <div class="font-medium truncate"><%= chat.model&.label || default_model_display_name %></div>
   <div class="text-xs opacity-60 truncate">
-    <%= t(".messages") %> <%= chat.messages.count %> · <%= t(".created") %> <%= l(chat.created_at, format: :short) %>
+    <%= t(".messages") %> <%= chat.messages_count %> · <%= t(".created") %> <%= l(chat.created_at, format: :short) %>
   </div>
 </div>

@@ -3,6 +3,7 @@ require "test_helper"
 class ChatsControllerTest < ActionDispatch::IntegrationTest
   include SessionTestHelper
   include MessageQuotaHelper
+  include QueryCountHelper
 
   test "requires authentication" do
     get chats_url
@@ -21,6 +22,26 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     users(:one).chats.create!(model: "gpt-4o-mini")
     get chats_url
     assert_response :success
+  end
+
+  test "lists each chat with its message count" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    seed_messages(chat, 3)
+
+    get chats_url
+
+    assert_select "#chat_#{chat.id}", text: /#{I18n.t("chats.chat.messages")} 3/
+  end
+
+  test "the queries to list chats do not grow with the number of chats" do
+    sign_in_as users(:one)
+    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), 2)
+    one_chat = queries_to { get chats_url }
+
+    4.times { seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), 2) }
+
+    assert_equal one_chat, queries_to { get chats_url }
   end
 
   test "excludes support chats from the index" do
