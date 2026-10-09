@@ -69,6 +69,20 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_notice I18n.t("passwords.update.alert")
   end
 
+  test "update with a blank password changes nothing and keeps the sessions" do
+    token = @user.password_reset_token
+    @user.sessions.create!
+
+    assert_no_changes -> { [ @user.reload.password_digest, @user.sessions.count ] } do
+      put password_path(token), params: { password: "", password_confirmation: "" }
+      assert_redirected_to edit_password_path(token)
+    end
+    assert_equal I18n.t("passwords.update.alert"), flash[:alert]
+
+    get edit_password_path(token)
+    assert_response :success
+  end
+
   private
     def assert_notice(text)
       assert_select "div", /#{Regexp.escape(text)}/
