@@ -11,4 +11,5 @@ search:
 
 ignore_unused:
   - 'activerecord.attributes.*'
+  - 'activerecord.errors.models.*'
   - 'charco_mobile.*'

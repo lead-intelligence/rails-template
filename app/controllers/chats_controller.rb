@@ -22,6 +22,12 @@ class ChatsController < ApplicationController
 
       redirect_to @chat, notice: t("chats.create.notice")
     end
+  rescue RubyLLM::ModelNotFoundError
+    @chat = Chat.new
+    @chat.errors.add(:model, :unknown)
+    @selected_model = params.dig(:chat, :model)
+    @chat_models = available_chat_models
+    render :new, status: :unprocessable_entity
   end
 
   def show

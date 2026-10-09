@@ -14,9 +14,17 @@ es:
       notice: Cerraste las demás sesiones.
   activerecord:
     attributes:
+      chat:
+        model: Modelo
       user:
         password_challenge: Contraseña actual
         unconfirmed_email: Nuevo correo electrónico
+    errors:
+      models:
+        chat:
+          attributes:
+            model:
+              unknown: no está disponible. Elige otro.
   admin:
     feedbacks:
       index:

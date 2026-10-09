@@ -89,6 +89,19 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to chat
   end
 
+  test "re-renders the form when the chosen model is unknown" do
+    sign_in_as users(:one)
+
+    assert_no_difference("Chat.count") do
+      assert_no_enqueued_jobs(only: ChatResponseJob) do
+        post chats_url, params: { chat: { model: "no-such-model", prompt: "Hola" } }
+      end
+    end
+
+    assert_response :unprocessable_entity
+    assert_select "#error_explanation", text: /#{I18n.t("activerecord.errors.models.chat.attributes.model.unknown")}/
+  end
+
   test "does not create a chat when the prompt is blank" do
     sign_in_as users(:one)
     assert_no_difference("users(:one).chats.count") do

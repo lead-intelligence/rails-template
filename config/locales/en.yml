@@ -14,9 +14,17 @@ en:
       notice: The other sessions were signed out.
   activerecord:
     attributes:
+      chat:
+        model: Model
       user:
         password_challenge: Current password
         unconfirmed_email: New email address
+    errors:
+      models:
+        chat:
+          attributes:
+            model:
+              unknown: is not available. Choose another one.
   admin:
     feedbacks:
       index:
