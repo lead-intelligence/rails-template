@@ -22,9 +22,11 @@ class ApplicationController < ActionController::Base
   end
 
   def locale_from_accept_language
-    request.env["HTTP_ACCEPT_LANGUAGE"].to_s.scan(/[a-z]{2}/).map(&:to_sym).find do |locale|
-      I18n.available_locales.include?(locale)
-    end
+    Rack::Request.new(request.env).accept_language
+      .select { |_range, quality| quality.positive? }
+      .sort_by.with_index { |(_range, quality), position| [ -quality, position ] }
+      .map { |range, _quality| range.split("-", 2).first.downcase.to_sym }
+      .find { |locale| I18n.available_locales.include?(locale) }
   end
 
   def pundit_user
