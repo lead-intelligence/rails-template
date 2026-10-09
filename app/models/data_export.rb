@@ -73,14 +73,18 @@ class DataExport
   end
 
   def each_attachment
-    attachments(User, user.id).each { |attachment| yield "files/user/#{attachment.name}/#{attachment.blob.filename}", attachment }
+    attachments(User, user.id).each { |attachment| yield path_for("user", attachment), attachment }
     exported_associations.each do |reflection|
       next if reflection.klass.reflect_on_all_attachments.empty?
 
       attachments(reflection.klass, user.public_send(reflection.name).select(:id)).each do |attachment|
-        yield "files/#{reflection.name}/#{attachment.record_id}/#{attachment.name}/#{attachment.blob.filename}", attachment
+        yield path_for("#{reflection.name}/#{attachment.record_id}", attachment), attachment
       end
     end
+  end
+
+  def path_for(prefix, attachment)
+    "files/#{prefix}/#{attachment.name}/#{attachment.id}/#{attachment.blob.filename}"
   end
 
   def attachments(klass, ids)

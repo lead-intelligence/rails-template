@@ -23,8 +23,19 @@ class DataExportTest < ActiveSupport::TestCase
     assert_equal "Confidential rich text", exported_document["content"]
     assert_includes data["feedbacks"].map { |record| record["id"] }, feedback.id
 
-    assert_includes entries.keys, "files/user/avatar/avatar.png"
-    assert_includes entries.keys, "files/feedbacks/#{feedback.id}/photos/shot.png"
+    assert_includes entries.keys, "files/user/avatar/#{user.avatar.attachment.id}/avatar.png"
+    assert_includes entries.keys, "files/feedbacks/#{feedback.id}/photos/#{feedback.photos.first.id}/shot.png"
+  end
+
+  test "keeps every attachment when two on one record share a filename" do
+    feedback = users(:one).feedbacks.create!(message: "Nice app")
+    2.times { feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "shot.png", content_type: "image/png") }
+
+    entries = zip_entries(export(users(:one)))
+
+    feedback.photos.each do |photo|
+      assert_includes entries.keys, "files/feedbacks/#{feedback.id}/photos/#{photo.id}/shot.png"
+    end
   end
 
   test "encrypted columns are decrypted by the serialization the export uses, and are excludable" do
@@ -79,7 +90,7 @@ class DataExportTest < ActiveSupport::TestCase
     feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "shot.png", content_type: "image/png")
 
     Zip::File.open_buffer(StringIO.new(export(user))) do |zip|
-      assert_equal Zip::Entry::STORED, zip.find_entry("files/feedbacks/#{feedback.id}/photos/shot.png").compression_method
+      assert_equal Zip::Entry::STORED, zip.find_entry("files/feedbacks/#{feedback.id}/photos/#{feedback.photos.first.id}/shot.png").compression_method
       assert_equal Zip::Entry::DEFLATED, zip.find_entry("data.json").compression_method
     end
   end
