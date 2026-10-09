@@ -8,6 +8,7 @@ module Template
     DEPLOY_KEY_PATH = "CHARCO_MOBILE_DEPLOY_KEY_PATH".freeze
 
     def initialize(root:, name:, github: false)
+      Renamer.validate_name!(name)
       @root = Pathname.new(root)
       @name = name
       @github = github
@@ -17,16 +18,23 @@ module Template
     def run
       raise AlreadyExists, "#{@dest} already exists" if @dest.exist?
 
+      give_birth
+      @github ? create_github_repo : print_github_command
+    end
+
+    private
+
+    def give_birth
       clone
       detach_from_template
       bundle
       rename
       commit
       register
-      @github ? create_github_repo : print_github_command
+    rescue StandardError
+      FileUtils.rm_rf(@dest)
+      raise
     end
-
-    private
 
     def clone
       system("git", "clone", "--quiet", @root.to_s, @dest.to_s, exception: true)

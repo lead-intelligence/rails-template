@@ -2,12 +2,22 @@
 require "bundler/setup"
 require "pathname"
 require "yaml"
+require "fileutils"
+require "active_support"
+require "active_support/core_ext/string/inflections"
 require_relative "../lib/template/children"
+require_relative "../lib/template/renamer"
 require_relative "../lib/template/spawner"
 
 name = ARGV.find { |arg| !arg.start_with?("--") } or abort("Usage: bin/spawn <name> [--github]")
 root = File.expand_path("..", __dir__)
 
-Template::Spawner.new(root: root, name: name, github: ARGV.include?("--github")).run
+begin
+  spawner = Template::Spawner.new(root: root, name: name, github: ARGV.include?("--github"))
+rescue Template::Renamer::InvalidName => error
+  abort(error.message)
+end
+
+spawner.run
 
 puts "Spawned #{name} at ../#{name} and registered it in children.yml"

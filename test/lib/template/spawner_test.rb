@@ -15,6 +15,12 @@ class Template::SpawnerTest < ActiveSupport::TestCase
     end
   end
 
+  class FailingSpawner < Template::Spawner
+    private
+
+    def rename = raise("rename failed")
+  end
+
   include GitIdentityHelper
 
   setup { stub_git_identity }
@@ -56,6 +62,29 @@ class Template::SpawnerTest < ActiveSupport::TestCase
       assert_raises(Template::Spawner::AlreadyExists) do
         Template::Spawner.new(root: root, name: "demo").run
       end
+    end
+  end
+
+  test "refuses a name that leaves the template's parent or cannot become a module, before cloning" do
+    in_template do |root|
+      [ "../../escape", "/abs", "2fast", "my app" ].each do |name|
+        assert_raises(Template::Renamer::InvalidName, name) { Template::Spawner.new(root: root, name: name) }
+      end
+
+      assert_equal [ "template" ], root.parent.children.map { |child| child.basename.to_s }
+    end
+  end
+
+  test "a failure after the clone removes the half-born app, so a retry starts clean" do
+    in_template do |root|
+      error = assert_raises(RuntimeError) { FailingSpawner.new(root: root, name: "demo").run }
+
+      assert_equal "rename failed", error.message
+      assert_not root.parent.join("demo").exist?
+      assert_not root.join("children.yml").exist?
+
+      Template::Spawner.new(root: root, name: "demo").run
+      assert root.parent.join("demo", "renamed-demo").exist?
     end
   end
 

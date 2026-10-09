@@ -38,6 +38,7 @@ Rails starter template. This repo is both a working app and the template new app
   **Gotcha:** it exports tracked changes only, so a brand-new file must be `git add`ed before the smoke can see it.
   **Gotcha:** the local Bundler override lives in the gitignored `.bundle/config`, so the export resolves `charco_mobile` from git instead — a revision your own tree never materializes. After bumping the gem, `bundle install` in a throwaway export or smoke alone fails.
 - `bin/spawn <name> [--github]` — clone into `../<name>`, bundle it, rename, detach, commit, register in `children.yml`. `--github` also creates and pushes a private repo, and sets its `CHARCO_MOBILE_DEPLOY_KEY` secret from `CHARCO_MOBILE_DEPLOY_KEY_PATH`, or prints the command when that is unset.
+  It refuses any name `bin/rename` refuses. A failure before the app is registered removes `../<name>`, so a retry starts clean.
 - `bin/children [synced <name> [sha]]` — report each child's pending template commits with a ready cherry-pick command, or record a child as synced.
 
 All Ruby/Rails commands run under `mise exec ruby@4.0.6 -- <command>` in non-mise-shimmed shells (e.g. `mise exec ruby@4.0.6 -- bin/rails test`).
