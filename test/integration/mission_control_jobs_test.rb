@@ -32,6 +32,18 @@ class MissionControlJobsTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
   end
 
+  test "a first visit to the English-only dashboard after a reload keeps the Spanish translations" do
+    I18n.backend.reload!
+    Rails.application.reloader.prepare!
+
+    get "/jobs", headers: superadmin_headers
+
+    assert_not_equal I18n.t("messages.failure.body", locale: :en), I18n.t("messages.failure.body", locale: :es)
+  ensure
+    I18n.backend.reload!
+    I18n.eager_load!
+  end
+
   test "jobs dashboard is reachable with superadmin credentials" do
     get "/jobs", headers: superadmin_headers
 
