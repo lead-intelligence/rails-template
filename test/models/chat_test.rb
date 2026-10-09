@@ -38,4 +38,13 @@ class ChatTest < ActiveSupport::TestCase
     chat.pending_photos.attach(io: StringIO.new("x" * 6.megabytes), filename: "big.png", content_type: "image/png")
     assert_not chat.valid?
   end
+
+  test "destroying a conversation keeps the ticket it filed" do
+    chat = users(:one).chats.create!(support: true)
+    feedback = users(:one).feedbacks.create!(message: "No puedo entrar", chat: chat)
+
+    chat.destroy!
+
+    assert_nil feedback.reload.chat
+  end
 end

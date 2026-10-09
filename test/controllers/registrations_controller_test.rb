@@ -43,6 +43,19 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_not cookies[:session_id].present?
   end
 
+  test "destroy deletes an account whose support conversation filed a ticket" do
+    user = users(:one)
+    chat = user.chats.create!(support: true)
+    user.feedbacks.create!(message: "No puedo entrar", chat: chat)
+    sign_in_as user
+
+    assert_difference("User.count", -1) do
+      delete registration_url, params: { confirmation: I18n.t("registrations.destroy.confirmation_phrase"), password: "password" }
+    end
+
+    assert_redirected_to new_session_url
+  end
+
   test "destroy is rejected with the wrong confirmation phrase" do
     sign_in_as users(:one)
 

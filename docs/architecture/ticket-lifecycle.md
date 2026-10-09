@@ -7,3 +7,5 @@
 Nothing is notified on resolution. This panel is ticket control for the developer, not a customer-facing workflow; the person learns their conversation is over because it renders closed.
 
 The controller includes `SuperadminAuthentication` and keeps `allow_unauthenticated_access`, so the app's session auth is skipped and the shared superadmin gate is the only one that applies. See superadmin-panels.md.
+
+A ticket outlives the conversation it came from. `Chat` declares `has_many :feedbacks, dependent: :nullify`, because the `feedbacks.chat_id` foreign key has no `on_delete` and `User` destroys its chats before its feedbacks; without the nullify, deleting a conversation that filed a ticket, or the account that owns it, fails on the foreign key.
