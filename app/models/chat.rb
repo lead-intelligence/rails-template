@@ -14,9 +14,14 @@ class Chat < ApplicationRecord
     first_question = Message.where(role: "user").where("messages.chat_id = chats.id").order(:created_at).limit(1).select(:content)
     select(arel_table[Arel.star], first_question.arel.as("first_question"))
   }
+  scope :inactive, -> {
+    last_message_at = Message.where("messages.chat_id = chats.id").select(Message.arel_table[:created_at].maximum)
+    last_activity_at = Arel::Nodes::NamedFunction.new("COALESCE", [ last_message_at.arel, arel_table[:created_at] ])
+    where(last_activity_at.lteq(INACTIVITY_WINDOW.ago))
+  }
 
   def self.close_inactive_support_conversations
-    support.open.find_each { |chat| chat.close! if chat.inactive? }
+    support.open.inactive.find_each(&:close!)
   end
 
   def to_llm
@@ -26,10 +31,6 @@ class Chat < ApplicationRecord
 
   def closed?
     closed_at.present?
-  end
-
-  def inactive?
-    last_activity_at <= INACTIVITY_WINDOW.ago
   end
 
   def close!
@@ -45,9 +46,5 @@ class Chat < ApplicationRecord
       records: [ self ],
       associations: { messages: [ :tool_calls, :parent_tool_call, :model, { attachments_attachments: :blob } ] }
     ).call
-  end
-
-  def last_activity_at
-    messages.maximum(:created_at) || created_at
   end
 end

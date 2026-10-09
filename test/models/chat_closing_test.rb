@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ChatClosingTest < ActiveSupport::TestCase
+  include QueryCountHelper
+
   test "a support conversation with no activity for the inactivity window is closed" do
     chat = support_chat_last_active((Chat::INACTIVITY_WINDOW + 1.hour).ago)
 
@@ -27,6 +29,24 @@ class ChatClosingTest < ActiveSupport::TestCase
 
   test "ordinary chats are never closed by inactivity" do
     chat = users(:one).chats.create!(support: false, created_at: 3.days.ago)
+
+    Chat.close_inactive_support_conversations
+
+    assert_not chat.reload.closed?
+  end
+
+  test "finding the inactive conversations takes the same queries however many are open" do
+    support_chat_last_active(1.hour.ago)
+    one_open = queries_to { Chat.close_inactive_support_conversations }
+
+    3.times { support_chat_last_active(1.hour.ago) }
+
+    assert_equal one_open, queries_to { Chat.close_inactive_support_conversations }
+  end
+
+  test "a conversation with an old message but a recent one stays open" do
+    chat = support_chat_last_active(2.days.ago)
+    chat.messages.create!(role: :user, content: "Sigo aca")
 
     Chat.close_inactive_support_conversations
 
