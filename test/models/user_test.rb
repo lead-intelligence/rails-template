@@ -3,6 +3,10 @@ require "test_helper"
 class UserTest < ActiveSupport::TestCase
   include MessageQuotaHelper
 
+  test "fixture password digests use the cheapest bcrypt cost" do
+    assert_equal(BCrypt::Engine::MIN_COST, BCrypt::Password.new(users(:one).password_digest).cost)
+  end
+
   test "requires a name" do
     user = User.new(name: "", email_address: "new@example.com", password: "password")
     assert_not user.valid?
