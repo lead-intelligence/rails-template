@@ -54,6 +54,21 @@ class DataExportTest < ActiveSupport::TestCase
     assert_empty data["chats/messages/tool_calls"]
   end
 
+  test "skips a file missing from storage and lists it instead of failing the export" do
+    feedback = users(:one).feedbacks.create!(message: "Nice app")
+    feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "lost.png", content_type: "image/png")
+    feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "kept.png", content_type: "image/png")
+    lost, kept = feedback.photos.sort_by(&:id)
+    lost.blob.service.delete(lost.blob.key)
+    lost_path = "files/feedbacks/#{feedback.id}/photos/#{lost.id}/lost.png"
+
+    entries = zip_entries(export(users(:one)))
+
+    assert_not_includes entries.keys, lost_path
+    assert_includes entries.keys, "files/feedbacks/#{feedback.id}/photos/#{kept.id}/kept.png"
+    assert_equal [ lost_path ], JSON.parse(entries["data.json"])["missing_files"]
+  end
+
   test "keeps every attachment when two on one record share a filename" do
     feedback = users(:one).feedbacks.create!(message: "Nice app")
     2.times { feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "shot.png", content_type: "image/png") }

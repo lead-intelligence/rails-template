@@ -24,13 +24,16 @@ class DataExport
   end
 
   def write(io)
+    missing_files = []
     Zip::OutputStream.write_buffer(io) do |zip|
-      zip.put_next_entry("data.json")
-      zip.write(JSON.pretty_generate(data))
       each_attachment do |path, attachment|
+        next missing_files << path unless attachment.blob.service.exist?(attachment.blob.key)
+
         zip.put_next_entry(path, nil, nil, Zip::Entry::STORED)
         attachment.blob.download { |chunk| zip.write(chunk) }
       end
+      zip.put_next_entry("data.json")
+      zip.write(JSON.pretty_generate(data.merge("missing_files" => missing_files)))
     end
   end
 

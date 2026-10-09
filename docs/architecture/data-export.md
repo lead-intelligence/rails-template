@@ -12,6 +12,8 @@ Each record is serialized with `as_json`, minus the columns in `DataExport::EXCL
 
 The ZIP never sits in memory. `DataExport#write` streams into any seekable IO, and `DataExportJob` hands it a `Tempfile` and attaches that file. Each blob is downloaded in chunks straight into its entry, and attachment entries are STORED rather than deflated, because photos are already compressed and deflating them again costs time for no gain. Attachments are looked up with one query per association, and an association whose model declares no attachments is skipped, so the query count stays flat however many records a person has. `test/models/data_export_test.rb` pins that count.
 
+A blob whose file is gone from storage is skipped, not fatal. `DataExport#write` asks the service whether each file exists before it opens the entry, leaves the missing ones out and lists their would-be paths under `missing_files` in `data.json`, which is written last for that reason. Without the check one lost file would raise `ActiveStorage::FileNotFoundError` on every attempt, and nothing retries the job, so the person could never export again.
+
 Active Record Encryption decrypts transparently on read and `as_json` reads through it, so an `encrypts`'d column is exported in PLAINTEXT — correct for portability, since the person gets readable data back.
 
 One consequence: a genuinely secret encrypted field (an API token, a TOTP secret) has to be added to `EXCLUDED_COLUMNS` exactly like `password_digest`, or it leaves the app in the clear inside someone's downloaded ZIP.
