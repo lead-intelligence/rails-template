@@ -1,6 +1,13 @@
 class JavascriptErrorsController < ApplicationController
   MAX_MESSAGE_LENGTH = 1000
   MAX_BACKTRACE_LINES = 20
+  MAX_BODY_SIZE = 64.kilobytes
+
+  TOO_LARGE = ->(_env) { [ 413, {}, [] ] }
+
+  def self.within_body_limit?(request)
+    request.content_length.to_i <= MAX_BODY_SIZE
+  end
 
   allow_unauthenticated_access
   rate_limit to: 30, within: 1.minute, with: -> { head :too_many_requests }
@@ -22,7 +29,7 @@ class JavascriptErrorsController < ApplicationController
   end
 
   def backtrace_from_stack
-    params[:stack].to_s.lines.filter_map { |line| line.strip.presence }.first(MAX_BACKTRACE_LINES)
+    params[:stack].to_s.each_line.lazy.filter_map { |line| line.strip.presence }.first(MAX_BACKTRACE_LINES)
   end
 
   def error_context

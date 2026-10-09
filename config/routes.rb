@@ -61,7 +61,8 @@ Rails.application.routes.draw do
   get "/sitemap.xml" => "sitemaps#show", as: :sitemap, defaults: { format: "xml" }
   get "/robots.txt" => "sitemaps#robots", as: :robots, defaults: { format: "text" }
 
-  resource :javascript_errors, only: [ :create ]
+  resource :javascript_errors, only: [ :create ], constraints: ->(request) { JavascriptErrorsController.within_body_limit?(request) }
+  post "javascript_errors", to: JavascriptErrorsController::TOO_LARGE
   resource :error_feed, only: [ :show ]
 
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

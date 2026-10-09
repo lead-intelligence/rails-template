@@ -29,6 +29,19 @@ class JavascriptErrorsControllerTest < ActionDispatch::IntegrationTest
     assert_operator SolidErrors::Error.last.message.length, :<=, JavascriptErrorsController::MAX_MESSAGE_LENGTH
   end
 
+  test "a body over the size limit is refused before anything is reported" do
+    reports = []
+    callback = Object.new.tap { |subscriber| subscriber.define_singleton_method(:report) { |error, **| reports << error } }
+    Rails.error.subscribe(callback)
+
+    post javascript_errors_url, params: { message: "boom", stack: "x" * JavascriptErrorsController::MAX_BODY_SIZE }
+
+    assert_response :content_too_large
+    assert_empty reports
+  ensure
+    Rails.error.unsubscribe(callback)
+  end
+
   test "a report from a signed in person carries their id in the error context" do
     user = users(:one)
     sign_in_as(user)

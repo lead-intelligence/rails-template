@@ -4,6 +4,8 @@
 
 Both ends are fenced. The client caps reports at `MAX_REPORTS_PER_PAGE = 5` per page load, truncates the message and stack, and swallows failures of its own fetch so a broken endpoint cannot start a reporting loop. The server `rate_limit`s at 30 requests per minute, rejects a blank message with `400`, and truncates the message to `MAX_MESSAGE_LENGTH = 1000` characters and the backtrace to `MAX_BACKTRACE_LINES = 20` lines before reporting.
 
+A body over `MAX_BODY_SIZE` (64 KB) is answered `413` by the router, never by the controller. The route carries a constraint, `JavascriptErrorsController.within_body_limit?`, that reads only the `Content-Length`, and a second route for the same path answers with the bare `TOO_LARGE` Rack app. The check cannot live in a `before_action`: Rails instruments every action with the filtered parameters, so the JSON body is already parsed before the first callback runs. The client's own caps keep a real report far under the limit. The stack is split lazily and stops at `MAX_BACKTRACE_LINES`.
+
 The CSRF token is attached when present and never required. `csrf_meta_tags` renders nothing when forgery protection is off, which is the case in test, so requiring the token would silently drop every report there and make the wiring untestable. The server is the enforcement point.
 
 An error thrown from injected script is masked by the browser to a generic message with a null error object, which is why the system test dispatches a synthetic error event instead of throwing one.
