@@ -125,4 +125,30 @@ class ChatResponseJobTest < ActiveJob::TestCase
     assert_includes feedback.message, "Chat page is slow"
     assert_includes feedback.message, "Pages take a long time to load for this person."
   end
+
+  test "the queries to answer do not grow with the history of a chat" do
+    assert_equal queries_to_answer(history: 4), queries_to_answer(history: 8)
+  end
+
+  test "the queries to answer do not grow with the history of a support chat" do
+    assert_equal queries_to_answer(history: 4, support: true), queries_to_answer(history: 8, support: true)
+  end
+
+  private
+
+  def queries_to_answer(history:, support: false)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini", support: support)
+    now = Time.current
+    Message.insert_all(Array.new(history) do |index|
+      { chat_id: chat.id, role: index.even? ? "user" : "assistant", model_id: index.even? ? nil : chat.model.id,
+        content: "Seeded", created_at: now - (history - index).minutes, updated_at: now }
+    end)
+    chat.messages.create!(role: :user, content: "And now?")
+    stub_openai_chat(content: "Sure.")
+
+    count = 0
+    counter = ->(*, payload) { count += 1 unless payload[:name] == "SCHEMA" || payload[:cached] }
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { ChatResponseJob.perform_now(chat.id) }
+    count
+  end
 end

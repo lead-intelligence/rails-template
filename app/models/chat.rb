@@ -15,6 +15,11 @@ class Chat < ApplicationRecord
     support.open.find_each { |chat| chat.close! if chat.inactive? }
   end
 
+  def to_llm
+    preload_history unless messages.loaded?
+    super
+  end
+
   def closed?
     closed_at.present?
   end
@@ -30,6 +35,13 @@ class Chat < ApplicationRecord
   end
 
   private
+
+  def preload_history
+    ActiveRecord::Associations::Preloader.new(
+      records: [ self ],
+      associations: { messages: [ :tool_calls, :parent_tool_call, :model, { attachments_attachments: :blob } ] }
+    ).call
+  end
 
   def last_activity_at
     messages.maximum(:created_at) || created_at
