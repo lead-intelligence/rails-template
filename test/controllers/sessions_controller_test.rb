@@ -17,6 +17,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".toast .alert.alert-error", /#{Regexp.escape(I18n.t("sessions.create.alert"))}/
   end
 
+  test "rejects a sign-in with a missing password or email" do
+    [ { email_address: "ada@example.com" }, { password: "password" }, {} ].each do |params|
+      post session_url, params: params
+      assert_redirected_to new_session_url
+      assert_equal I18n.t("sessions.create.alert"), flash[:alert]
+    end
+  end
+
   test "signs out" do
     sign_in_as users(:one)
     delete session_url
