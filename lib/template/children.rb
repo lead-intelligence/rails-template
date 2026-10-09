@@ -29,6 +29,7 @@ module Template
     def report_line(name, entry)
       child_path = @root.join(entry["path"])
       return "#{name} (#{entry["path"]}): missing" unless child_path.directory?
+      return "#{name} (#{entry["path"]}): present, unknown sync point #{entry["synced_to"]}" unless commit?(entry["synced_to"])
 
       pending = pending_commits(entry["synced_to"])
       return "#{name} (#{entry["path"]}): present, up to date" if pending.empty?
@@ -50,6 +51,10 @@ module Template
       run_git("rev-list", "--reverse", "#{synced_to}..HEAD").lines.map(&:strip)
     end
 
+    def commit?(sha)
+      system("git", "-C", @root.to_s, "cat-file", "-e", "#{sha}^{commit}", out: File::NULL, err: File::NULL)
+    end
+
     def head
       run_git("rev-parse", "HEAD").strip
     end
@@ -64,7 +69,7 @@ module Template
     def load
       return {} unless @path.exist?
 
-      YAML.load(@path.read)
+      YAML.load(@path.read) || {}
     end
 
     def save(data)

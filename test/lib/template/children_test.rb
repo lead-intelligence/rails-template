@@ -78,13 +78,27 @@ class Template::ChildrenTest < ActiveSupport::TestCase
     end
   end
 
-  test "report raises when synced_to references a commit that does not exist" do
+  test "report flags a child whose sync point the template no longer has, and still reports the rest" do
     in_git_root do |root|
       children = Template::Children.new(root: root)
       FileUtils.mkdir_p(root.parent.join("demo"))
+      FileUtils.mkdir_p(root.parent.join("other"))
       children.register("demo", path: "../demo", sha: "0" * 40)
+      children.register("other", path: "../other", sha: `git -C #{root} rev-parse HEAD`.strip)
 
-      assert_raises(RuntimeError) { children.report }
+      report = children.report
+      assert_includes report, "demo (../demo): present, unknown sync point #{"0" * 40}"
+      assert_includes report, "other (../other): present, up to date"
+    end
+  end
+
+  test "register into an empty children.yml" do
+    in_tmp_root do |root|
+      root.join("children.yml").write("")
+
+      Template::Children.new(root: root).register("demo", path: "../demo", sha: "abc123")
+
+      assert_equal "abc123", YAML.load(root.join("children.yml").read)["demo"]["synced_to"]
     end
   end
 
@@ -123,6 +137,15 @@ class Template::ChildrenTest < ActiveSupport::TestCase
       head = `git -C #{root} rev-parse HEAD`.strip
       data = YAML.load(root.join("children.yml").read)
       assert_equal head, data["demo"]["synced_to"]
+    end
+  end
+
+  test "mark_synced without a sha raises outside a git repository" do
+    in_tmp_root do |root|
+      children = Template::Children.new(root: root)
+      children.register("demo", path: "../demo", sha: "abc123")
+
+      assert_raises(RuntimeError) { children.mark_synced("demo") }
     end
   end
 
