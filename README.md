@@ -42,6 +42,8 @@ bin/setup
 
 `bin/rename` does two things: it rewrites the app's name throughout the files git tracks (every file, when the tree has no `.git`), and then **removes the tooling that only serves the template** — itself, `bin/smoke-rename`, `bin/spawn`, `bin/children`, `children.yml`, `lib/template/`, their tests, the smoke step in `config/ci.rb`, this repo's own planning documents under `docs/superpowers/`, and the template-specific parts of this README and of `CLAUDE.md`. An app has no use for a tool that renames it again, and carrying the renamer's unit tests is worse than useless: renaming rewrites their fixtures into nonsense and the app is born with a red `bin/ci`.
 
+The name has to become a Ruby module: letters, digits and single underscores, starting with a letter (`my_app`, `my-app` and `MyApp` all work). `bin/rename` refuses any other name before it touches a file.
+
 New apps need their own credentials — `config/master.key` is gitignored on purpose and never travels with the repo, and console1984 depends on Active Record encryption keys that live inside `config/credentials.yml.enc`. Before running the app for real, regenerate both:
 
 ```bash

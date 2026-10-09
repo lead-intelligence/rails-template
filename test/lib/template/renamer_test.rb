@@ -65,6 +65,24 @@ class Template::RenamerTest < ActiveSupport::TestCase
     end
   end
 
+  test "refuses a name that cannot become a Ruby module before touching any file" do
+    [ "2fast", "my app", "my.app", "mi_app_ñ", "my__app", "my_app_", "../escape", "/abs", "" ].each do |name|
+      Dir.mktmpdir do |root|
+        path = File.join(root, "application.rb")
+        File.write(path, "module CharcoTemplate\nend\n")
+
+        assert_raises(Template::Renamer::InvalidName, name.inspect) { Template::Renamer.new(root: root, new_name: name).run }
+        assert_equal "module CharcoTemplate\nend\n", File.read(path)
+      end
+    end
+  end
+
+  test "accepts a name in snake, dashed or module case" do
+    %w[my_app my-app MyApp meal4two api_v2].each do |name|
+      assert_nil Template::Renamer.validate_name!(name), name
+    end
+  end
+
   test "leaves docs directory untouched to preserve historical spec content" do
     Dir.mktmpdir do |dir|
       FileUtils.mkdir(File.join(dir, "docs"))

@@ -10,6 +10,12 @@ require_relative "../lib/template/cleanup"
 new_name = ARGV[0] or abort("Usage: bin/rename <new_app_name>")
 root = File.expand_path("..", __dir__)
 
+begin
+  Template::Renamer.validate_name!(new_name)
+rescue Template::Renamer::InvalidName => error
+  abort(error.message)
+end
+
 Template::Renamer.new(root: root, new_name: new_name).run
 Template::Cleanup.new(root: root, app_name: new_name.underscore.camelize).run
 

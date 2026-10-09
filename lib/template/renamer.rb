@@ -8,7 +8,19 @@ module Template
     OLD_DASHED = "charco-template".freeze
     OLD_TITLE = "Charco Template".freeze
 
+    class InvalidName < StandardError; end
+
+    VALID_SNAKE = /\A[a-z][a-z0-9_]*\z/
+
+    def self.validate_name!(name)
+      snake = name.underscore
+      return if snake.match?(VALID_SNAKE) && snake.camelize.underscore == snake
+
+      raise InvalidName, "#{name.inspect} cannot name an app: use letters, digits and single underscores, starting with a letter"
+    end
+
     def initialize(root:, new_name:)
+      self.class.validate_name!(new_name)
       @root = Pathname.new(root)
       @new_snake = new_name.underscore
     end
