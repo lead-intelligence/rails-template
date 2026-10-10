@@ -26,10 +26,7 @@ class Chat < ApplicationRecord
     support.open.inactive.find_each(&:close!)
   end
 
-  def to_llm
-    preload_history unless messages.loaded?
-    super
-  end
+  def as_json(options = nil) = serializable_hash(options)
 
   def closed?
     closed_at.present?
@@ -50,12 +47,5 @@ class Chat < ApplicationRecord
     blob_ids = pending_photos.blobs.ids
     pending_photos.detach
     ActiveStorage::Blob.unattached.where(id: blob_ids).find_each(&:purge_later)
-  end
-
-  def preload_history
-    ActiveRecord::Associations::Preloader.new(
-      records: [ self ],
-      associations: { messages: [ :tool_calls, :parent_tool_call, :model, { attachments_attachments: :blob } ] }
-    ).call
   end
 end

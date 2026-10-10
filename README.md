@@ -67,7 +67,7 @@ bin/dev
 
 `bin/dev` runs two processes side by side (see `Procfile.dev`): the Rails server and the Tailwind watcher. The Solid Queue supervisor runs inside Puma, so it comes up with the server — see [Background jobs](#background-jobs), and note that the queue logs to `log/development.log`, not to your terminal.
 
-`db:prepare` seeds the database only the first time it creates it, so a fresh clone signs in with `dev@example.com` / `password`. On an existing checkout — the database already exists — run `bin/rails db:seed` to get that user; the same seed loads RubyLLM's model registry into the `models` table, which the AI chat and semantic search need once the table is no longer empty.
+`db:prepare` seeds the database only the first time it creates it, so a fresh clone signs in with `dev@example.com` / `password`. On an existing checkout — the database already exists — run `bin/rails db:seed` to get that user; the same seed loads RubyLLM's model registry into the `ruby_llm_models` table, which the AI chat and semantic search need once the table is no longer empty.
 
 ## Starting a new app
 
@@ -272,7 +272,7 @@ To reuse one shared pair across every app born from this template, keep the valu
 
 ### Resource browser (madmin)
 
-`/madmin` is a [madmin](https://github.com/excid3/madmin) panel for browsing and editing the app's records, gated by the same superadmin auth (`Madmin::ApplicationController` includes the concern). It ships dashboards for the domain models only — `Chat`, `Document`, `Feedback`, `Message`, `Model`, `Session`, `ToolCall`, `User`, plus `Noticed::Notification` and `Noticed::Event`. The framework-internal and sensitive resources the installer generates (Active Storage, Action Text, console1984 audit logs, and Solid Errors — which already has `/errors`) were removed from `config/routes/madmin.rb`, `app/madmin/resources/`, and `app/controllers/madmin/`. Adding a dashboard for a new model is a manual, deliberate step — there is no "auto-generate a dashboard for every model" option, in madmin or here. The resource generator reads the model's columns (`attribute_names`/`attribute_types`), so the table has to exist first; run it **after** the migration:
+`/madmin` is a [madmin](https://github.com/excid3/madmin) panel for browsing and editing the app's records, gated by the same superadmin auth (`Madmin::ApplicationController` includes the concern). It ships dashboards for the domain models only — `Chat`, `Document`, `Feedback`, `Message`, `Session`, `User`, plus `Noticed::Notification` and `Noticed::Event`. The framework-internal and sensitive resources the installer generates (Active Storage, Action Text, console1984 audit logs, and Solid Errors — which already has `/errors`) were removed from `config/routes/madmin.rb`, `app/madmin/resources/`, and `app/controllers/madmin/`. Adding a dashboard for a new model is a manual, deliberate step — there is no "auto-generate a dashboard for every model" option, in madmin or here. The resource generator reads the model's columns (`attribute_names`/`attribute_types`), so the table has to exist first; run it **after** the migration:
 
 ```bash
 bin/rails g model Widget name:string
@@ -727,7 +727,7 @@ Since this repo doubles as a living app, keeping it current means:
 
 1. Bump `.ruby-version` and the `rails` constraint in the `Gemfile`, then `bundle update rails`.
 2. Re-download the vendored DaisyUI files (`app/assets/tailwind/daisyui.mjs`, `app/assets/tailwind/daisyui-theme.mjs`) from the DaisyUI release you're targeting.
-3. Run any `ruby_llm:upgrade_to_*` generators RubyLLM ships when you bump its version, to pick up new migrations/config.
+3. Run the `ruby_llm:upgrade` generator RubyLLM ships when you bump its version, to pick up new migrations/config. Its migrations can need the gem version that generated them; check that a fresh `bin/rails db:migrate` still runs.
 4. Run `bin/ci` before committing the upgrade.
 
 Also worth re-checking after a Rails upgrade: whether Lexxy still needs to monkey-patch `rich_text_area` (see `CLAUDE.md`'s Subsystem map) — a new Rails version may ship the official `ActionText::Editor` adapter API Lexxy prefers.

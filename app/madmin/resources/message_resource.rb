@@ -3,7 +3,6 @@ class MessageResource < Madmin::Resource
   attribute :id, form: false
   attribute :role
   attribute :content
-  attribute :content_raw
   attribute :thinking_text
   attribute :thinking_signature
   attribute :thinking_tokens
@@ -13,15 +12,10 @@ class MessageResource < Madmin::Resource
   attribute :cache_creation_tokens
   attribute :created_at, form: false
   attribute :updated_at, form: false
-  attribute :tool_call_id
   attribute :attachments, index: false
 
   # Associations
   attribute :chat
-  attribute :tool_calls
-  attribute :parent_tool_call
-  attribute :tool_results
-  attribute :model
 
   # Add scopes to easily filter records
   # scope :published

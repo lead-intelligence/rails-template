@@ -10,7 +10,6 @@ class ChatResource < Madmin::Resource
 
   # Associations
   attribute :messages
-  attribute :model
   attribute :user
 
   # Add scopes to easily filter records

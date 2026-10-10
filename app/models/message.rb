@@ -4,7 +4,7 @@ class Message < ApplicationRecord
 
   scope :visible_to_person, -> {
     where(chat: Chat.where(support: false))
-      .or(where.not(role: %w[system tool]).where.not(id: ToolCall.select(:message_id)))
+      .or(where.not(role: %w[system tool]).where.not(id: RubyLLM::ActiveRecord::ToolCall.where(message_type: name).select(:message_id)))
   }
 
   after_create_commit :broadcast_new_message
@@ -42,6 +42,6 @@ class Message < ApplicationRecord
   end
 
   def hidden_from_person?
-    role.to_s == "system" || role.to_s == "tool" || to_llm.tool_call?
+    role.to_s == "system" || role.to_s == "tool" || tool_call?
   end
 end

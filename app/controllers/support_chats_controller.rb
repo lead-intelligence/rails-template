@@ -11,7 +11,7 @@ class SupportChatsController < ApplicationController
   def show
     @chat = conversations.find(params[:id])
     @message = @chat.messages.build
-    @messages = @chat.messages.includes(:tool_calls, :parent_tool_call, :model, attachments_attachments: :blob).order(:created_at)
+    @messages = @chat.messages.includes(:ruby_llm_tool_calls).order(:created_at)
   end
 
   def create

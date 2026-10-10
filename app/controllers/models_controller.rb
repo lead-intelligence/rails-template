@@ -8,11 +8,13 @@ class ModelsController < ApplicationController
   end
 
   def show
-    @model = Model.find(params[:id])
+    @model = RubyLLM.models.find(params[:id])
+  rescue RubyLLM::ModelNotFoundError
+    raise ActiveRecord::RecordNotFound
   end
 
   def refresh
-    Model.refresh!
+    RubyLLM.models.refresh
     redirect_to models_path, notice: t("models.refresh.notice")
   end
 end
