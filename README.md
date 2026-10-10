@@ -119,7 +119,7 @@ The chat and embedding model names are also configurable, via `OPENAI_CHAT_MODEL
 
 ### Mobile apps
 
-The app is born ready to ship as native iOS and Android apps through the [charco_mobile](https://github.com/bruno-costanzo/charco_mobile) gem. `config/charco_mobile.yml` declares the tab bar, the colors and the error screens; the views describe the rest with `native_*` helpers, and the native shells read it from every page. Nothing in Swift or Kotlin is written per app.
+The app is born ready to ship as native iOS and Android apps through the [charco_mobile](https://github.com/lead-intelligence/charco_mobile) gem. `config/charco_mobile.yml` declares the tab bar, the colors and the error screens; the views describe the rest with `native_*` helpers, and the native shells read it from every page. Nothing in Swift or Kotlin is written per app.
 
 To preview on a phone, run the server and the tunnel in two terminals, then scan the QR code with the preview app:
 
