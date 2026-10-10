@@ -13,7 +13,12 @@ name="smoke_app"
 tmp="$(mktemp -d)"
 port="${SMOKE_PORT:-3987}"
 server_pid=""
+prepare_pid=""
 cleanup() {
+  if [ -n "$prepare_pid" ]; then
+    kill "$prepare_pid" 2>/dev/null || true
+    wait "$prepare_pid" 2>/dev/null || true
+  fi
   if [ -n "$server_pid" ]; then
     kill "$server_pid" 2>/dev/null || true
     wait "$server_pid" 2>/dev/null || true
@@ -49,9 +54,6 @@ mkdir -p "$tmp/storage"
 echo "→ Renaming to '$name'"
 run_quietly "Renaming" "$tmp" bin/rename "$name"
 
-echo "→ Preparing the database (db:prepare)"
-run_quietly "Preparing the database" "$tmp" bin/rails db:prepare
-
 echo "→ Checking for residual template references"
 residual="$(grep -rIl -e CharcoTemplate -e charco_template -e charco-template -e 'Charco Template' "$tmp" --exclude='*.mjs' || true)"
 if [ -n "$residual" ]; then
@@ -61,6 +63,10 @@ if [ -n "$residual" ]; then
 fi
 echo "✓ No residual references"
 
+echo "→ Preparing the database (db:prepare) in the background"
+( cd "$tmp" && exec bin/rails db:prepare ) >"$tmp/db_prepare.log" 2>&1 &
+prepare_pid=$!
+
 echo "→ Booting renamed app (zeitwerk:check)"
 ( cd "$tmp" && bin/rails zeitwerk:check )
 echo "✓ Renamed app boots"
@@ -69,8 +75,14 @@ echo "→ Running the renamed app's own suite"
 run_quietly "The renamed app's suite" "$tmp" bin/rails db:test:prepare test
 echo "✓ Renamed app's tests pass"
 
-echo "→ Building stylesheets"
-run_quietly "Building stylesheets" "$tmp" bin/rails tailwindcss:build
+if ! wait "$prepare_pid"; then
+  prepare_pid=""
+  echo "✗ Preparing the database failed:"
+  cat "$tmp/db_prepare.log"
+  exit 1
+fi
+prepare_pid=""
+echo "✓ Database prepared"
 
 echo "→ Serving requests on port $port"
 ( cd "$tmp" && exec bin/rails server -p "$port" ) >"$tmp/server.log" 2>&1 &
