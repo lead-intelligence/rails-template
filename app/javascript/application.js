@@ -2,11 +2,10 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 
-import "lexxy"
-
 import confirmDialog from "confirm_dialog"
 import discardStaleStreamUpdates from "discard_stale_stream_updates"
 import reportJavascriptErrors from "error_reporting"
+import loadRichTextEditorOnDemand from "load_rich_text_editor"
 
 Turbo.config.forms.confirm = confirmDialog
 document.addEventListener("turbo:load", () => {
@@ -14,6 +13,7 @@ document.addEventListener("turbo:load", () => {
 })
 discardStaleStreamUpdates()
 reportJavascriptErrors()
+loadRichTextEditorOnDemand()
 
 function controllersLoaded() {
   const importmap = JSON.parse(document.querySelector("script[type=importmap]").text)
