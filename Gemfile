@@ -121,7 +121,7 @@ gem "mission_control-jobs", "~> 1.1"
 
 gem "railspress-engine", "~> 1.4"
 
-gem "rubyzip", "~> 3.0"
+gem "rubyzip", "~> 3.6"
 
 # Markdown rendering for the /docs site (already in the bundle through railspress-engine)
 gem "redcarpet", "~> 3.6"
