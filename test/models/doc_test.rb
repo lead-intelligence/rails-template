@@ -107,22 +107,28 @@ class DocTest < ActiveSupport::TestCase
   end
 
   test "links to other pages become documentation links and external links stay" do
-    html = Doc::MARKDOWN.render("[auth](auth.md) and [rails](https://rubyonrails.org)")
+    html = Doc.markdown.render("[auth](auth.md) and [rails](https://rubyonrails.org)")
 
     assert_includes html, %(href="/docs/architecture/auth")
     assert_includes html, %(href="https://rubyonrails.org")
   end
 
   test "a backticked page reference becomes a link and any other code span does not" do
-    html = Doc::MARKDOWN.render("See `auth.md` in `app/models/user.rb`")
+    html = Doc.markdown.render("See `auth.md` in `app/models/user.rb`")
 
     assert_includes html, %(<a href="/docs/architecture/auth"><code>auth.md</code></a>)
     assert_includes html, "<code>app/models/user.rb</code>"
     assert_not_includes html, %(href="app/models/user.rb")
   end
 
+  test "every render gets parsers of its own, because Redcarpet aborts the process when threads share one" do
+    assert_not_same Doc.markdown, Doc.markdown
+    assert_not_same Doc.table_of_contents, Doc.table_of_contents
+    assert_not_same Doc.plain_text, Doc.plain_text
+  end
+
   test "raw html in a page is filtered out" do
-    html = Doc::MARKDOWN.render("<script>alert(1)</script>\n\nplain")
+    html = Doc.markdown.render("<script>alert(1)</script>\n\nplain")
 
     assert_not_includes html, "<script>"
   end

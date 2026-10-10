@@ -25,17 +25,7 @@ class Doc
       end
   end
 
-  MARKDOWN = Redcarpet::Markdown.new(
-    Renderer.new(filter_html: true, with_toc_data: true),
-    fenced_code_blocks: true, tables: true, autolink: true, no_intra_emphasis: true, strikethrough: true
-  )
-
-  TABLE_OF_CONTENTS = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC.new(nesting_level: 2..2))
-
-  PLAIN_TEXT = Redcarpet::Markdown.new(
-    Redcarpet::Render::StripDown,
-    fenced_code_blocks: true, tables: true, autolink: true, no_intra_emphasis: true, strikethrough: true
-  )
+  EXTENSIONS = { fenced_code_blocks: true, tables: true, autolink: true, no_intra_emphasis: true, strikethrough: true }.freeze
 
   attr_reader :path
 
@@ -46,6 +36,18 @@ class Doc
   class << self
     def root
       Rails.root
+    end
+
+    def markdown
+      Redcarpet::Markdown.new(Renderer.new(filter_html: true, with_toc_data: true), EXTENSIONS)
+    end
+
+    def table_of_contents
+      Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC.new(nesting_level: 2..2))
+    end
+
+    def plain_text
+      Redcarpet::Markdown.new(Redcarpet::Render::StripDown, EXTENSIONS)
     end
 
     def all
@@ -76,7 +78,7 @@ class Doc
     end
 
     def strip_markdown(markdown)
-      PLAIN_TEXT.render(markdown.to_s).squish
+      plain_text.render(markdown.to_s).squish
     end
 
     def slug_of(path)
@@ -119,7 +121,7 @@ class Doc
   end
 
   def html
-    @html ||= MARKDOWN.render(content)
+    @html ||= self.class.markdown.render(content)
   end
 
   def body_text
@@ -127,7 +129,7 @@ class Doc
   end
 
   def headings
-    @headings ||= Nokogiri::HTML5.fragment(TABLE_OF_CONTENTS.render(content)).css("a").map do |link|
+    @headings ||= Nokogiri::HTML5.fragment(self.class.table_of_contents.render(content)).css("a").map do |link|
       { text: link.text.strip, anchor: link["href"] }
     end
   end
