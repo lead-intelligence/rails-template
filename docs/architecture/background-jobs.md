@@ -8,6 +8,8 @@ Development and test each get their own `queue` database in `config/database.yml
 
 Solid Queue performs **no automatic retries**. Its own README is explicit that retrying is Active Job's job, not the queue's. A job that raises and declares no `retry_on` lands in `solid_queue_failed_executions` and stays there until someone retries or discards it from `/jobs` or a console, and Solid Errors records the exception. Jobs also persist across restarts in development, which is faithful to production and occasionally surprising.
 
+An idle worker sleeps its `polling_interval` between polls, and nothing wakes it when a job arrives. `config/queue.yml` sets 0.1 seconds, Solid Queue's own default, not the installer's 1 second: at 1 second a chat reply waits half a second on average before it starts. The idle polling costs under one percent of a core. `test/integration/queue_configuration_test.rb` guards it.
+
 Solid Queue logs to `log/development.log`, not to stdout, so the terminal stays quiet even while the supervisor works.
 
 Recurring work is declared in `config/recurring.yml`: clearing finished jobs, purging expired data exports, closing inactive support conversations, purging expired analytics visits and purging never-confirmed users. Those run in production only.
