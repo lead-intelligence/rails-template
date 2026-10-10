@@ -37,6 +37,7 @@ class AuthenticationTest < ApplicationSystemTestCase
 
     visit new_session_url
     click_link t("sessions.new.forgot_password")
+    assert_current_path new_password_path
     fill_in "email_address", with: user.email_address
     click_button t("passwords.new.submit")
 
