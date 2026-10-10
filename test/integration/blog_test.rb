@@ -84,4 +84,38 @@ class BlogTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "show serves a repeat visit without loading the rich text or its embeds" do
+    post = published_post_with_embed("Cached body")
+    get blog_post_url(post.slug)
+
+    content_queries = []
+    collect = ->(*, payload) { content_queries << payload[:sql] if payload[:sql].match?(/action_text_rich_texts|active_storage_blobs/) }
+    ActiveSupport::Notifications.subscribed(collect, "sql.active_record") { get blog_post_url(post.slug) }
+
+    assert_response :success
+    assert_includes response.body, "Cached body"
+    assert_select "figure.attachment img"
+    assert_empty content_queries
+  end
+
+  test "show renders the new content after the post is edited" do
+    post = published_post_with_embed("Old body")
+    get blog_post_url(post.slug)
+
+    post.update!(content: "New body")
+    get blog_post_url(post.slug)
+
+    assert_includes response.body, "New body"
+    assert_no_match(/Old body/, response.body)
+    assert_select "meta[name=description][content=?]", "New body"
+  end
+
+  private
+
+  def published_post_with_embed(text)
+    blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture("avatar.png").open, filename: "avatar.png", content_type: "image/png")
+    content = "<p>#{text}</p>#{ActionText::Attachment.from_attachable(blob).to_html}"
+    Railspress::Post.create!(title: "Embedded", status: :published, published_at: 1.day.ago, content: content)
+  end
 end

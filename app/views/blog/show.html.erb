@@ -12,7 +12,9 @@
   <h1 class="font-bold text-4xl mt-2 mb-1"><%= @post.title %></h1>
   <p class="text-sm text-base-content/60 mb-6"><%= l(@post.published_at.to_date, format: :long) %></p>
 
-  <div class="max-w-none"><%= @post.content %></div>
+  <% cache [ @post, I18n.locale ] do %>
+    <div class="max-w-none"><%= @post.content %></div>
+  <% end %>
 
   <% if @post.tags.any? %>
     <div class="flex flex-wrap gap-1 mt-6">

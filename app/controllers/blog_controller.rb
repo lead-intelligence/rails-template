@@ -15,7 +15,13 @@ class BlogController < ApplicationController
     @post = Railspress::Post.published.find_by!(slug: params[:id])
     set_meta_tags(
       title: @post.meta_title.presence || @post.title,
-      description: @post.meta_description.presence || @post.content.to_plain_text.truncate(160)
+      description: @post.meta_description.presence || plain_text_description
     )
+  end
+
+  private
+
+  def plain_text_description
+    Rails.cache.fetch([ @post, :description ]) { @post.content.to_plain_text.truncate(160) }
   end
 end
