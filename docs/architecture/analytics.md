@@ -6,4 +6,6 @@
 
 `User` declares `has_many :ahoy_visits` and `:ahoy_events` with `dependent: :destroy`, which puts analytics inside both the deletion cascade and the data export for free. `Ahoy::Visit::RETENTION` is 90 days and `purge_expired_visits` in `config/recurring.yml` sweeps nightly.
 
+The sweep finds `Ahoy::Visit.expired` through the `started_at` index; Ahoy's own `visitor_token, started_at` index cannot serve a range on its second column. Without it each purge scans the whole visits table while it holds SQLite's single write lock, so every other write waits for a scan that grows with traffic: about 300 ms at 900,000 visits, against 145 ms with the index.
+
 Two wiring details fail silently if changed. `Ahoy.user_method` is overridden to return `Current.user`, because Ahoy looks for a `current_user` method this app does not define — the same override as `pundit_user`. And `ApplicationController` re-registers Ahoy's callback after its own `resume_session`, because sessions here resolve lazily: without that ordering, `Current.session` is not set until the layout renders, long after every `before_action`, and every visit on a publicly reachable page is recorded as anonymous even for a signed-in person.

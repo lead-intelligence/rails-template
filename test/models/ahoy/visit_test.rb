@@ -19,6 +19,12 @@ class Ahoy::VisitTest < ActiveSupport::TestCase
     end
   end
 
+  test "purge_expired finds expired visits through the started_at index instead of scanning every visit" do
+    plan = ActiveRecord::Base.connection.select_rows("EXPLAIN QUERY PLAN #{Ahoy::Visit.expired.to_sql}").map(&:last)
+
+    assert plan.any? { |step| step.include?("index_ahoy_visits_on_started_at") }, plan.inspect
+  end
+
   test "a deleted user takes their visits and events with them" do
     user = users(:one)
     visit = visit_at(1.day.ago, user: user)

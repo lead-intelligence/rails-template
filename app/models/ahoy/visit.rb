@@ -6,8 +6,9 @@ class Ahoy::Visit < ApplicationRecord
   has_many :events, class_name: "Ahoy::Event", dependent: :destroy
   belongs_to :user, optional: true
 
+  scope :expired, -> { where(started_at: ...RETENTION.ago) }
+
   def self.purge_expired
-    expired = where(started_at: ...RETENTION.ago)
     Ahoy::Event.where(visit_id: expired.select(:id)).delete_all
     expired.delete_all
   end

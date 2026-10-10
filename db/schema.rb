@@ -90,6 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_233640) do
     t.string "utm_term"
     t.string "visit_token"
     t.string "visitor_token"
+    t.index ["started_at"], name: "index_ahoy_visits_on_started_at"
     t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
     t.index ["visitor_token", "started_at"], name: "index_ahoy_visits_on_visitor_token_and_started_at"
