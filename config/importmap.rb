@@ -12,4 +12,7 @@ pin "error_reporting"
 pin "load_rich_text_editor"
 
 # ActiveStorage for file uploads
-pin "@rails/activestorage", to: "activestorage.esm.js"
+pin "@rails/activestorage", to: "activestorage.esm.js", preload: false
+
+pin "railspress", to: "railspress/index.js", preload: false
+pin_all_from Railspress::Engine.root.join("app/javascript/railspress/controllers"), under: "railspress/controllers", to: "railspress/controllers", preload: false
