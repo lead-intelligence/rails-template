@@ -2,6 +2,8 @@
 
 onlylogs is mounted at `/onlylogs`, next to Solid Errors. Production logging broadcasts to both STDOUT, so Kamal's capture is unchanged, and `storage/logs/production.log`, rotated by Ruby's own `Logger` to five files of 100 megabytes — a hard ceiling of roughly half a gigabyte on the storage volume. `config/initializers/onlylogs.rb` whitelists exactly that path; the gem also permits the numbered rotation suffixes and lists them. Outside production the environment's own log file is added so the viewer works locally.
 
+The two sinks are plain loggers inside one `BroadcastLogger`, and `TaggedLogging` wraps the broadcast, not each sink. `BroadcastLogger` forwards `tagged` to every sink that answers it, so two tagged sinks run each `tagged { }` block twice. Active Job wraps enqueue and perform in that block, so every job would be enqueued twice and every job would run twice. `test/integration/production_logger_test.rb` loads the production config and guards it.
+
 Authorization goes through the gem's documented custom-auth hook rather than its built-in basic auth: the initializer disables the built-in gate and points `parent_controller` at `OnlylogsBaseController`, which only includes `SuperadminAuthentication`. The gem's own authenticate method then no-ops and the shared, deny-by-default superadmin gate does the work.
 
 `config.default_log_file_path` is deliberately an empty string, and it must stay that way. The channel's fallback for a blank requested path streams the default path with no decryption and no whitelist check, so pointing it at a real log turns the socket into an unauthenticated tail of that file. `test/channels/onlylogs_logs_channel_test.rb` guards it.

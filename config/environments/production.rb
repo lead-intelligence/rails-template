@@ -37,9 +37,11 @@ Rails.application.configure do
   config.log_tags = [ :request_id ]
   onlylogs_file = Rails.root.join("storage/logs/production.log")
   FileUtils.mkdir_p(onlylogs_file.dirname)
-  config.logger = ActiveSupport::BroadcastLogger.new(
-    ActiveSupport::TaggedLogging.logger(STDOUT),
-    ActiveSupport::TaggedLogging.logger(onlylogs_file.to_s, 5, 100.megabytes)
+  config.logger = ActiveSupport::TaggedLogging.new(
+    ActiveSupport::BroadcastLogger.new(
+      ActiveSupport::Logger.new(STDOUT),
+      ActiveSupport::Logger.new(onlylogs_file.to_s, 5, 100.megabytes)
+    )
   )
 
   # Change to "debug" to log everything (including potentially personally-identifiable information!).
