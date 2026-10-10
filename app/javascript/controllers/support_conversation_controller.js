@@ -13,8 +13,12 @@ export default class extends Controller {
     this.observer.disconnect()
   }
 
+  sending() {
+    this.replyBeforeSending = this.lastReply()
+  }
+
   awaiting() {
-    this.pendingTarget.classList.remove("hidden")
+    if (!this.repliedSinceSending()) this.pendingTarget.classList.remove("hidden")
     this.scrollToEnd()
   }
 
@@ -23,10 +27,18 @@ export default class extends Controller {
     this.scrollToEnd()
   }
 
+  repliedSinceSending() {
+    return this.answered() && this.lastReply() !== this.replyBeforeSending
+  }
+
   answered() {
-    const bubbles = this.messagesTarget.querySelectorAll(".chat-start .chat-bubble")
-    const last = bubbles[bubbles.length - 1]
+    const last = this.lastReply()
     return Boolean(last && last.textContent.trim().length > 0)
+  }
+
+  lastReply() {
+    const bubbles = this.messagesTarget.querySelectorAll(".chat-start .chat-bubble")
+    return bubbles[bubbles.length - 1]
   }
 
   scrollToEnd() {
