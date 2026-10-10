@@ -9,6 +9,8 @@ Capybara.disable_animation = true
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   include AccessibilityHelper
 
+  parallelize(threshold: 10)
+
   driven_by :cuprite, screen_size: [ 1400, 1400 ], options: {
     process_timeout: 30,
     timeout: 15,
