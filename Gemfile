@@ -135,3 +135,6 @@ gem "reactionview", "~> 0.6.0"
 
 # HTML-aware ERB parser and engine; `bin/herb analyze` checks every template in bin/ci [https://herb-tools.dev]
 gem "herb", "~> 0.11"
+
+# Pagination for the unbounded lists, with its own es and en locales [https://ddnexus.github.io/pagy]
+gem "pagy", "~> 43.7"

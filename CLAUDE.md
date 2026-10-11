@@ -13,6 +13,7 @@ Rails starter template. This repo is both a working app and the template new app
 - console1984 for audited production console access (depends on Active Record encryption)
 - money-rails for currency handling (default currency in `config/initializers/money.rb`, no monetized model ships — apps opt in per-model)
 - letter_opener_web for development-only email preview at `/letter_opener` (development Gemfile group only)
+- pagy for every list that grows with use, translated through Rails I18n with its own es and en dictionaries
 - noticed for in-app notifications (bell UI + `/notifications`); zero notifiers ship — capability only
 - pundit and ahoy_matey, also capability only: zero policies, zero tracked events
 - Developer panels behind one shared basic auth: madmin `/madmin`, Mission Control `/jobs`, Solid Errors `/errors`, onlylogs `/onlylogs`
@@ -123,3 +124,4 @@ verified against a library's source, and not knowing it is how they break.
 - **Security headers / CSP** — nonce-based CSP active in every environment: scripts strict, styles inline. → `security-headers.md`
 - **Mobile apps** — `charco_mobile` signals in the layout and form pages; a mistyped signal is SILENTLY ignored, so `charco_mobile check` runs in CI. Push tokens land on `User#push_devices`; `config/push.yml` needs real credentials before anything is delivered. → `mobile.md`
 - **Templates** — `Herb::Engine` intercepts every `.html.erb`; malformed HTML is a compile-time error, not a silent render. `herb analyze` (no Node) gates `bin/ci`; `herb lint`/`format` need Node, which this stack doesn't have. → `templates.md`
+- **Pagination** — pagy on every list that grows. Its own translator ignores `I18n.with_locale`, so the initializer routes it through Rails I18n or the nav renders English on Spanish pages. → `pagination.md`
