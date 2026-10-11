@@ -60,7 +60,7 @@ Rails.application.configure do
 
     Bullet.add_safelist type: :unused_eager_loading, class_name: "TestNotifier::Notification", association: :event
     Bullet.add_safelist type: :unused_eager_loading, class_name: "Railspress::Post", association: :taggings
-    %i[ruby_llm_usages attachments_attachments].each do |association|
+    %i[ruby_llm_usages attachments_attachments ruby_llm_parent_tool_call].each do |association|
       Bullet.add_safelist type: :unused_eager_loading, class_name: "Message", association: association
     end
   end

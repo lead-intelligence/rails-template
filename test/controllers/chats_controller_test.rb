@@ -44,6 +44,17 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_equal one_chat, queries_to { get chats_url }
   end
 
+  test "the queries to show a chat do not grow with its tool results" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    add_tool_round(chat, 1)
+    one_round = queries_to { get chat_url(chat) }
+
+    2.upto(4) { |round| add_tool_round(chat, round) }
+
+    assert_equal one_round, queries_to { get chat_url(chat) }
+  end
+
   test "excludes support chats from the index" do
     sign_in_as users(:one)
     support_chat = users(:one).chats.create!(support: true)
@@ -165,5 +176,12 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_no_match I18n.t("chats.form.submit"), @response.body
     assert_match I18n.t("messages.composer.exhausted", count: User::DAILY_MESSAGE_LIMIT), @response.body
+  end
+
+  private
+
+  def add_tool_round(chat, round)
+    call = chat.messages.create!(role: :assistant, content: "").ruby_llm_tool_calls.create!(tool_call_id: "call_#{round}", name: "lookup", arguments: {})
+    call.update!(result: chat.messages.create!(role: :tool, content: "Found #{round}"))
   end
 end

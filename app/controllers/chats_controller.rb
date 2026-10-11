@@ -32,7 +32,7 @@ class ChatsController < ApplicationController
 
   def show
     @message = @chat.messages.build
-    @messages = @chat.messages.where.not(id: nil).includes(:ruby_llm_tool_calls)
+    @messages = @chat.messages.where.not(id: nil).includes(:ruby_llm_tool_calls, :ruby_llm_parent_tool_call)
   end
 
   def destroy

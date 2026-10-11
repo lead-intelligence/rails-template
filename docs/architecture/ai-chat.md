@@ -4,6 +4,8 @@ The app owns `Chat` (`acts_as_chat`) and `Message` (`acts_as_message`), scoped p
 
 `Message#to_partial_path` and `#hidden_from_person?` ask each message whether it carries tool calls. Both `ChatsController#show` and `SupportChatsController#show` therefore load `@messages` with `.includes(:ruby_llm_tool_calls)`; without it the strict Bullet gate fails the moment a chat has more than one message.
 
+`ChatsController#show` also renders tool results, and `MessagesHelper#tool_result_partial` reads each one's parent tool call, so it adds `:ruby_llm_parent_tool_call` to the `includes`; without it every tool result costs one query, and `test/controllers/chats_controller_test.rb` asserts the count does not grow with them. A chat without tool results leaves that preload unread, so `config/environments/test.rb` safelists it for Bullet. A support chat blanks tool results before reading the parent, so `SupportChatsController#show` does not preload it.
+
 `ChatsController#index` lists chats with `includes(:model)` and a grouped `COUNT(messages.id) AS messages_count`, which `app/views/chats/_chat.html.erb` reads. Calling `messages.count` in the row instead runs one query per chat; `test/controllers/chats_controller_test.rb` asserts the query count does not grow with the number of chats.
 
 The gem's `to_llm` rebuilds the whole history and preloads each message's tool calls, parent tool call, usage and attachments itself. A message with no usage or attachments leaves two of those preloads unread, so `config/environments/test.rb` safelists them for Bullet. `test/jobs/chat_response_job_test.rb` asserts the query count of a turn does not grow with the history.
