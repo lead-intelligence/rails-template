@@ -21,6 +21,7 @@
         </li>
       <% end %>
     </ul>
+    <%= render "shared/pagination", pagy: @pagy if @pagy %>
   <% else %>
     <p class="text-center my-10"><%= t(".empty") %></p>
   <% end %>

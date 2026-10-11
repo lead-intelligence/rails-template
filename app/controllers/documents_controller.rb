@@ -1,6 +1,9 @@
 class DocumentsController < ApplicationController
+  PER_PAGE = 25
+
   def index
-    @documents = params[:q].present? ? search(params[:q]) : listed_documents
+    @documents = search(params[:q]) if params[:q].present?
+    @pagy, @documents = pagy(listed_documents, limit: PER_PAGE) unless @documents
   end
 
   def show
@@ -47,7 +50,7 @@ class DocumentsController < ApplicationController
   rescue RubyLLM::Error => error
     Rails.error.report(error)
     flash.now[:alert] = t("documents.index.search_unavailable")
-    listed_documents
+    nil
   end
 
   def listed_documents

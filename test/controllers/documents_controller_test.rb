@@ -33,6 +33,51 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_not_embedding_loaded
   end
 
+  test "lists one page of own documents and links to the next" do
+    sign_in_as users(:one)
+    (DocumentsController::PER_PAGE + 1).times { |index| users(:one).documents.create!(title: "Document #{index}") }
+
+    get documents_url
+
+    assert_select "li.list-row", count: DocumentsController::PER_PAGE
+    assert_select "nav.pagy a[rel=next][href=?]", documents_path(page: 2)
+    assert_not_embedding_loaded
+  end
+
+  test "lists the remaining own documents on the second page" do
+    sign_in_as users(:one)
+    (DocumentsController::PER_PAGE + 1).times { |index| users(:one).documents.create!(title: "Document #{index}") }
+
+    get documents_url(page: 2)
+
+    assert_select "li.list-row", count: users(:one).documents.count - DocumentsController::PER_PAGE
+  end
+
+  test "shows the empty state when there are no documents" do
+    sign_in_as users(:one)
+    users(:one).documents.destroy_all
+
+    get documents_url
+
+    assert_select "p", text: I18n.t("documents.index.empty")
+    assert_select "nav.pagy", count: 0
+  end
+
+  test "paginates the plain list it falls back to when the search provider fails" do
+    sign_in_as users(:one)
+    (DocumentsController::PER_PAGE + 1).times { |index| users(:one).documents.create!(title: "Document #{index}") }
+    stub_request(:post, "https://api.openai.com/v1/embeddings").to_return(
+      status: 503, headers: { "Content-Type" => "application/json" }, body: { error: { message: "Service unavailable" } }.to_json
+    )
+
+    assert_error_reported(RubyLLM::Error) do
+      get documents_url, params: { q: "How do I deploy?" }
+    end
+
+    assert_select "li.list-row", count: DocumentsController::PER_PAGE
+    assert_select "nav.pagy a[rel=next]"
+  end
+
   test "searches own documents semantically" do
     sign_in_as users(:one)
     document = users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")
