@@ -27,6 +27,7 @@
         </article>
       <% end %>
     </div>
+    <%= render "shared/pagination", pagy: @pagy %>
   <% else %>
     <p class="text-base-content/60"><%= t(".empty") %></p>
   <% end %>

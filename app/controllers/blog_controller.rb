@@ -1,4 +1,6 @@
 class BlogController < ApplicationController
+  PER_PAGE = 10
+
   allow_unauthenticated_access
 
   def index
@@ -8,7 +10,7 @@ class BlogController < ApplicationController
                             .order(published_at: :desc)
     scope = scope.where(category: Railspress::Category.find_by(slug: params[:category])) if params[:category].present?
     scope = scope.joins(:tags).where(railspress_tags: { slug: params[:tag] }) if params[:tag].present?
-    @posts = scope
+    @pagy, @posts = pagy(scope, limit: PER_PAGE)
   end
 
   def show

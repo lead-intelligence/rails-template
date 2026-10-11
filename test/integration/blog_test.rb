@@ -23,6 +23,41 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_select "p", text: I18n.t("blog.index.empty")
   end
 
+  test "index renders one page of posts and links to the next" do
+    (BlogController::PER_PAGE + 1).times do |index|
+      Railspress::Post.create!(title: "Post #{index}", status: :published, published_at: index.hours.ago)
+    end
+
+    get blog_url
+
+    assert_select "article", count: BlogController::PER_PAGE
+    assert_select "h2", text: "Post 0"
+    assert_select "nav.pagy a[rel=next][href=?]", blog_path(page: 2)
+  end
+
+  test "index renders the remaining posts on the second page" do
+    (BlogController::PER_PAGE + 1).times do |index|
+      Railspress::Post.create!(title: "Post #{index}", status: :published, published_at: index.hours.ago)
+    end
+
+    get blog_url(page: 2)
+
+    assert_select "article", count: 1
+    assert_select "h2", text: "Post #{BlogController::PER_PAGE}"
+  end
+
+  test "index keeps the tag filter in its page links" do
+    ruby = Railspress::Tag.create!(name: "ruby")
+    (BlogController::PER_PAGE + 1).times do |index|
+      Railspress::Post.create!(title: "Post #{index}", status: :published, published_at: index.hours.ago, tags: [ ruby ])
+    end
+
+    get blog_url(tag: ruby.slug)
+
+    assert_select "article", count: BlogController::PER_PAGE
+    assert_select "nav.pagy a[rel=next][href=?]", "#{blog_path}?tag=#{ruby.slug}&page=2"
+  end
+
   test "index filters by category" do
     news = Railspress::Category.create!(name: "News")
     Railspress::Post.create!(title: "In News", status: :published, published_at: 1.day.ago, category: news)
