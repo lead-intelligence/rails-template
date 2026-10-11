@@ -55,4 +55,35 @@ class MadminTest < ActionDispatch::IntegrationTest
       assert_response :success, "expected #{path} to render for the superadmin"
     end
   end
+
+  test "an index page loads the owner of every row in one query" do
+    ENV["SUPERADMIN_USER"] = "superadmin"
+    ENV["SUPERADMIN_PASSWORD"] = "secret"
+    create_owned_rows(users(:one))
+    baseline = owned_index_queries
+
+    3.times do |index|
+      create_owned_rows(User.create!(name: "Owner #{index}", email_address: "owner#{index}@example.com", password: "password"))
+    end
+
+    assert_equal baseline, owned_index_queries
+  end
+
+  private
+
+  def create_owned_rows(user)
+    chat = user.chats.create!(model: "gpt-4o-mini")
+    user.documents.create!(title: "Notes", content: "Notes")
+    user.feedbacks.create!(message: "Nice", chat: chat)
+    user.sessions.create!(ip_address: "127.0.0.1", user_agent: "Test")
+  end
+
+  def owned_index_queries
+    %w[/madmin/chats /madmin/documents /madmin/feedbacks /madmin/sessions].to_h do |path|
+      count = 0
+      counter = ->(*, payload) { count += 1 unless payload[:name] == "SCHEMA" }
+      ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { get path, headers: superadmin_headers }
+      [ path, count ]
+    end
+  end
 end
