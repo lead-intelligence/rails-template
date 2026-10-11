@@ -1,6 +1,10 @@
 # Templates
 
-ReActionView puts `Herb::Engine` in front of every `.html.erb` template: `config/initializers/reactionview.rb` sets `config.intercept_erb = true`, so a mismatched or unclosed HTML tag is a compile-time error instead of a silently broken render. `debug_mode` and `validation_mode` keep their gem defaults — an overlay outside test, a hard raise inside it — so a malformed template still fails `bin/rails test` the same way it always would have, just for a clearer reason.
+ReActionView puts `Herb::Engine` in front of every `.html.erb` template in every environment: `config/initializers/reactionview.rb` sets `config.intercept_erb = true`, so a mismatched or unclosed HTML tag is a compile-time error instead of a silently broken render.
+
+Validation follows the environment. Test keeps the gem default, a hard raise, so a malformed template fails `bin/rails test` for a clear reason. Development keeps the gem default too, the in-browser overlay with the debug attributes and the dev tools. Production sets `validation_mode` to `:none`: with the overlay on, ReActionView mounts `Herb::Engine::Runtime::Middleware`, which wraps every request and, when a template has a finding, writes a report with template paths into the page a visitor receives. CI already rejects those templates, so production has nothing to show. `test/integration/template_engine_test.rb` boots each environment and asserts the mode and the middleware.
+
+The gem pins its client, `reactionview.esm.js`, as a preloaded module, and its installer imports it from the JavaScript entry point. That client is the runtime of reactive templates only — the overlay and the dev tools load their own script — so with reactive templates off nothing uses it. `app/javascript/application.js` does not import it and `config/importmap.rb` pins it again with `preload: false`, which takes about 113 KB raw and 33 KB gzipped off every page. Turning reactive templates on means importing it again.
 
 `config.slots` stays at its default, `false`: ReActionView's reactive templates are still marked experimental upstream (their markup, payload and JS API can change between releases), so this app only takes the HTML-aware rendering engine, never that feature.
 
