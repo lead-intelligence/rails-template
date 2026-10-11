@@ -21,6 +21,13 @@ class ActiveSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", revoke_others_active_sessions_path, count: 1
   end
 
+  test "reads the list of sessions once" do
+    sign_in_as users(:one)
+    users(:one).sessions.create!(ip_address: "10.0.0.1", user_agent: "Other Browser")
+
+    assert_queries_match(/FROM "sessions" WHERE "sessions"."user_id"/, count: 1) { get active_sessions_url }
+  end
+
   test "hides the revoke_others button when there is only one session" do
     sign_in_as users(:one)
 

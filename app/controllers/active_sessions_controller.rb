@@ -1,6 +1,6 @@
 class ActiveSessionsController < ApplicationController
   def index
-    @sessions = Current.user.sessions.order(created_at: :desc)
+    @sessions = Current.user.sessions.order(created_at: :desc).load
   end
 
   def destroy
