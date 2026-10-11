@@ -11,7 +11,8 @@ class CreateSupportTicketTool < RubyLLM::Tool
   end
 
   def execute(title:, summary:)
-    feedback = @user.feedbacks.create!(message: "#{title}\n\n#{summary}", context: @chat.ticket_context, chat: @chat)
+    message = "#{title}\n\n#{summary}".truncate(Feedback::MESSAGE_MAX_LENGTH)
+    feedback = @user.feedbacks.create!(message:, context: @chat.ticket_context, chat: @chat)
     photo_count = transfer_pending_photos(feedback)
 
     confirmation(photo_count)

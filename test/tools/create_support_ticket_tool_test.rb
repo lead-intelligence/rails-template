@@ -18,6 +18,17 @@ class CreateSupportTicketToolTest < ActiveSupport::TestCase
     assert_includes feedback.message, "Pages take a long time to load for this person."
   end
 
+  test "files a summary longer than the feedback limit, cut to the limit" do
+    tool = CreateSupportTicketTool.new(users(:one).chats.create!(support: true))
+
+    result = tool.execute(title: "Long report", summary: "a" * Feedback::MESSAGE_MAX_LENGTH)
+
+    feedback = users(:one).feedbacks.last
+    assert_equal Feedback::MESSAGE_MAX_LENGTH, feedback.message.length
+    assert feedback.message.start_with?("Long report\n\naaa")
+    assert_equal "Got it - I've passed this along to the team. Thank you!", result
+  end
+
   test "returns a human-friendly confirmation with no technical details" do
     tool = CreateSupportTicketTool.new(users(:one).chats.create!(support: true))
     result = tool.execute(title: "Chat page is slow", summary: "Pages take a long time to load.")
