@@ -34,6 +34,7 @@ class SupportChatTest < ApplicationSystemTestCase
     click_button t("support_chats.widget.support")
     within "dialog.modal" do
       click_button t("support_chats.index.start")
+      assert_selector "turbo-cable-stream-source[connected]", visible: :all
       fill_in t("support_chats.composer.label"), with: "The chat page loads slowly for me"
       click_button t("support_chats.composer.send")
 
@@ -53,6 +54,7 @@ class SupportChatTest < ApplicationSystemTestCase
     click_button t("support_chats.widget.support")
     within "dialog.modal" do
       click_button t("support_chats.index.start")
+      assert_selector "turbo-cable-stream-source[connected]", visible: :all
       fill_in t("support_chats.composer.label"), with: "The chat page loads slowly for me"
       click_button t("support_chats.composer.send")
 
@@ -71,6 +73,7 @@ class SupportChatTest < ApplicationSystemTestCase
     within "dialog.modal" do
       click_button t("support_chats.index.start")
       assert_selector "[id^='new_message_']"
+      assert_selector "turbo-cable-stream-source[connected]", visible: :all
     end
 
     without_raising_server_errors do
@@ -114,6 +117,7 @@ class SupportChatTest < ApplicationSystemTestCase
       chat = users(:one).chats.support.sole
       attach_file "chat_pending_photos", file_fixture("avatar.png"), make_visible: true
       assert_text t("support_chats.photos.attached", count: 1)
+      assert_selector "turbo-cable-stream-source[connected]", visible: :all
 
       fill_in t("support_chats.composer.label"), with: "The layout looks broken on this page"
       click_button t("support_chats.composer.send")
