@@ -65,6 +65,21 @@ class DataExportTest < ActiveSupport::TestCase
     assert_empty data["chats/messages/ruby_llm_tool_calls"]
   end
 
+  test "leaves out the usage of the technical messages a support chat hides from the person" do
+    chat = users(:one).chats.create!(support: true)
+    tool_call = chat.messages.create!(role: :assistant, content: "")
+    tool_call.ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: {})
+    reply = chat.messages.create!(role: :assistant, content: "Thanks, I've filed this for the team.")
+    hidden_usage = record_usage(chat, tool_call)
+    visible_usage = record_usage(chat, reply)
+    unlinked_usage = record_usage(chat, nil)
+
+    data = JSON.parse(zip_entries(export(users(:one)))["data.json"])
+
+    assert_equal [ visible_usage.id, unlinked_usage.id ].sort, data["chats/ruby_llm_usages"].map { |record| record["id"] }.sort
+    assert_not_includes data["chats/ruby_llm_usages"].map { |record| record["id"] }, hidden_usage.id
+  end
+
   test "skips a file missing from storage and lists it instead of failing the export" do
     feedback = users(:one).feedbacks.create!(message: "Nice app")
     feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "lost.png", content_type: "image/png")
@@ -151,6 +166,10 @@ class DataExportTest < ActiveSupport::TestCase
   end
 
   private
+
+  def record_usage(chat, message)
+    chat.ruby_llm_usages.create!(message: message, operation: "chat", provider: "openai", model: "gpt-4o-mini", status: "succeeded")
+  end
 
   def export(user)
     StringIO.new.tap { |io| DataExport.new(user).write(io) }.string

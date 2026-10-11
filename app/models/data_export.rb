@@ -10,7 +10,10 @@ class DataExport
 
   EXCLUDED_ATTACHMENTS = %w[data_export].freeze
 
-  RECORD_SCOPES = { "Message" => :visible_to_person }.freeze
+  RECORD_SCOPES = {
+    "Message" => ->(messages) { messages.visible_to_person },
+    "RubyLLM::ActiveRecord::Usage" => ->(usages) { usages.where(message: nil).or(usages.where(message: Message.visible_to_person)) }
+  }.freeze
 
   RETENTION = 48.hours
 
@@ -72,7 +75,7 @@ class DataExport
 
   def scoped(relation)
     scope = RECORD_SCOPES[relation.klass.name]
-    scope ? relation.public_send(scope) : relation
+    scope ? scope.call(relation) : relation
   end
 
   def destroyed_associations(klass)
