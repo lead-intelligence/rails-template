@@ -12,4 +12,6 @@ RubyLLM resolves the embedding model against its model registry. In a Rails app 
 
 `db/seeds.rb` is what keeps the table complete: it writes the bundled JSON into the table through the gem's idempotent `RubyLLM.config.model_registry_store.write`. `bin/rails ruby_llm:load_models` does the same against a running app. `bin/setup` seeds on first creation; an existing checkout runs `bin/rails db:seed`. `test/db/seeds_test.rb` reproduces the one-row table and proves the seed repairs it.
 
+A chat created against an empty table makes the gem write the whole registry into it first, nearly two thousand rows one at a time. Rails never seeds a test database and truncates every parallel worker's database on each run, so without rows every test that creates a chat would pay that write. `test/fixtures/ruby_llm_models.yml` renders the bundled JSON through the gem's own `RubyLLM::ActiveRecord::Model.from_llm`, so each test database starts with the same full registry the seed writes, in one insert.
+
 `Document::EMBEDDING_DIMENSIONS` is tied to the embedding model. Changing `OPENAI_EMBEDDING_MODEL` to one with a different output size means a migration, which is why the variable is documented in `.env.example` and nowhere else.

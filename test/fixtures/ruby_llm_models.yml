@@ -1,0 +1,6 @@
+_fixture:
+  model_class: RubyLLM::ActiveRecord::Model
+
+<% RubyLLM.models.load_from_json.each do |model| %>
+<%= "#{model.provider}/#{model.id}".to_json %>: <%= RubyLLM::ActiveRecord::Model.from_llm(model).attributes.compact.to_json %>
+<% end %>
