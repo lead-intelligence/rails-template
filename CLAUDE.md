@@ -105,7 +105,7 @@ verified against a library's source, and not knowing it is how they break.
 - **Superadmin panels** — one concern gates eight surfaces. **Deny-by-default**: unconfigured means 401 everywhere, never open. → `superadmin-panels.md`
 - **Design** — DaisyUI themes in OKLCH, warm neutral with one accent. The accessibility gate decides the palette, and the NEUTRALS fail before the accent does. → `design.md`
 - **Documentation site** — `/docs` renders these pages with Redcarpet. `Doc.find` matches a listed slug, so traversal is impossible by construction. → `docs-site.md`
-- **Background jobs** — Solid Queue runs INSIDE Puma in development too, so `Procfile.dev` has no jobs line. No automatic retries: a failed job sits in the failed-executions table. → `background-jobs.md`
+- **Background jobs** — Solid Queue runs INSIDE Puma in development too, so `Procfile.dev` has no jobs line. No automatic retries: a failed job sits in the failed-executions table. The DB pool is request threads plus cable workers. → `background-jobs.md`
 - **Analytics** — capability only, zero events tracked. Two wiring details (`Ahoy.user_method`, the callback reorder) fail SILENTLY if touched. → `analytics.md`
 - **Health checks** — `/up` stays shallow (Kamal gates deploys on it), `/health` is the deep one. The supervisor reports `Supervisor(fork)`, never `Supervisor`: match with `LIKE`. → `health-checks.md`
 - **Error tracking** — Solid Errors subscribes to `Rails.error` and deduplicates into the primary DB; dashboard at `/errors`. `/error_feed` hands new errors to an outside watcher behind a bearer token, `404` until one is set. → `error-tracking.md`
