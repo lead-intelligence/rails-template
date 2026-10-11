@@ -12,6 +12,15 @@ class GenerateDocumentEmbeddingJobTest < ActiveJob::TestCase
     assert_no_enqueued_jobs only: GenerateDocumentEmbeddingJob
   end
 
+  test "records the embedding's usage against the document's owner" do
+    doc = users(:one).documents.create!(title: "Kamal", content: "Deploy")
+    stub_openai_embedding(vector: Array.new(Document::EMBEDDING_DIMENSIONS, 0.5))
+
+    GenerateDocumentEmbeddingJob.perform_now(doc)
+
+    assert_equal [ "embedding" ], users(:one).ruby_llm_usages.pluck(:operation)
+  end
+
   test "sends no more of a long document than the embedding model accepts" do
     doc = users(:one).documents.create!(title: "Long", content: "ñandú 日本 " * 5_000)
     request = stub_openai_embedding(vector: Array.new(Document::EMBEDDING_DIMENSIONS, 0.5))

@@ -41,7 +41,9 @@ class DocumentsController < ApplicationController
   private
 
   def search(query)
-    Document.where(user: Current.user).select(:id, :title).semantic_search(query)
+    RubyLLM.with_usage_owner(Current.user) do
+      Document.where(user: Current.user).select(:id, :title).semantic_search(query)
+    end
   rescue RubyLLM::Error => error
     Rails.error.report(error)
     flash.now[:alert] = t("documents.index.search_unavailable")

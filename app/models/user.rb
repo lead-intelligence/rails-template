@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :chats, dependent: :destroy
   has_many :messages, through: :chats
   has_many :documents, dependent: :destroy
+  has_many :ruby_llm_usages, as: :owner, class_name: "RubyLLM::ActiveRecord::Usage", dependent: :destroy
   has_many :feedbacks, dependent: :destroy
   has_many :notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"
   has_many :ahoy_visits, dependent: :destroy, class_name: "Ahoy::Visit"

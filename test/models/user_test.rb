@@ -196,6 +196,15 @@ class UserTest < ActiveSupport::TestCase
     assert_nil User.find_by_token_for(:email_change, token)
   end
 
+  test "destroying a user erases the usage it owns" do
+    user = users(:one)
+    usage = user.ruby_llm_usages.create!(operation: "embedding", provider: "openai", model: "text-embedding-3-small", status: "succeeded")
+
+    user.destroy!
+
+    assert_not RubyLLM::ActiveRecord::Usage.exists?(usage.id)
+  end
+
   test "purge_unconfirmed destroys unconfirmed accounts past the retention window" do
     old_unconfirmed = unconfirmed_user_at((User::UNCONFIRMED_RETENTION + 1.day).ago)
 

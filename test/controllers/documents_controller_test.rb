@@ -47,6 +47,15 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_not_embedding_loaded
   end
 
+  test "records the search embedding's usage against the person searching" do
+    sign_in_as users(:one)
+    stub_openai_embedding(vector: Array.new(Document::EMBEDDING_DIMENSIONS, 0.5))
+
+    get documents_url, params: { q: "How do I deploy?" }
+
+    assert_equal [ "embedding" ], users(:one).ruby_llm_usages.pluck(:operation)
+  end
+
   test "falls back to the plain list when the search provider fails" do
     sign_in_as users(:one)
     users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")

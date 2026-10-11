@@ -80,6 +80,15 @@ class DataExportTest < ActiveSupport::TestCase
     assert_not_includes data["chats/ruby_llm_usages"].map { |record| record["id"] }, hidden_usage.id
   end
 
+  test "includes the usage the person owns outside any chat" do
+    user = users(:one)
+    usage = user.ruby_llm_usages.create!(operation: "embedding", provider: "openai", model: "text-embedding-3-small", status: "succeeded")
+
+    data = JSON.parse(zip_entries(export(user))["data.json"])
+
+    assert_equal [ usage.id ], data["ruby_llm_usages"].map { |record| record["id"] }
+  end
+
   test "skips a file missing from storage and lists it instead of failing the export" do
     feedback = users(:one).feedbacks.create!(message: "Nice app")
     feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "lost.png", content_type: "image/png")
