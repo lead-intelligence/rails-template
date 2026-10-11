@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_10_233640) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_204106) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -39,6 +39,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_10_233640) do
     t.bigint "record_id", null: false
     t.string "record_type", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["name", "created_at"], name: "index_active_storage_attachments_on_name_and_created_at"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 

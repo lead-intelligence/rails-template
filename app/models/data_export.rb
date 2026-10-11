@@ -20,10 +20,12 @@ class DataExport
   REQUEST_LIMIT = 3
   REQUEST_WINDOW = 1.hour
 
+  def self.expired
+    ActiveStorage::Attachment.where(name: "data_export", created_at: ..RETENTION.ago)
+  end
+
   def self.purge_expired
-    ActiveStorage::Attachment
-      .where(name: "data_export", created_at: ..RETENTION.ago)
-      .find_each(&:purge_later)
+    expired.find_each(&:purge_later)
   end
 
   def initialize(user)

@@ -146,6 +146,12 @@ class DataExportTest < ActiveSupport::TestCase
     assert fresh_user.reload.data_export.attached?
   end
 
+  test "purge_expired finds expired exports through an index instead of scanning every attachment" do
+    plan = ActiveRecord::Base.connection.select_rows("EXPLAIN QUERY PLAN #{DataExport.expired.to_sql}").map(&:last)
+
+    assert plan.any? { |step| step.include?("index_active_storage_attachments_on_name_and_created_at") }, plan.inspect
+  end
+
   test "the query count does not grow with the number of exported records" do
     user = users(:one)
     user.documents.create!(title: "First", content: "Notes")
