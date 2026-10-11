@@ -1,4 +1,6 @@
 class ChatResponseJob < ApplicationJob
+  STREAM_INTERVAL = 0.1
+
   limits_concurrency to: 1, key: ->(chat_id) { chat_id }, duration: 15.minutes
   discard_on ActiveRecord::RecordNotFound
 
@@ -8,10 +10,7 @@ class ChatResponseJob < ApplicationJob
 
     begin
       chat.complete do |chunk|
-        if chunk.content && !chunk.content.empty?
-          message = chat.messages.last
-          message.broadcast_append_chunk(chunk.content)
-        end
+        stream(chat.messages.last, chunk.content) unless chunk.content.to_s.empty?
       end
     rescue RubyLLM::Error
       broadcast_failure(chat)
@@ -22,6 +21,23 @@ class ChatResponseJob < ApplicationJob
   end
 
   private
+
+  def stream(message, content)
+    @pending = +"" unless message == @streaming
+    @streaming = message
+    @pending << content
+
+    time = now
+    return if @streamed_at && time - @streamed_at < STREAM_INTERVAL
+
+    message.broadcast_append_chunk(@pending)
+    @pending = +""
+    @streamed_at = time
+  end
+
+  def now
+    Process.clock_gettime(Process::CLOCK_MONOTONIC)
+  end
 
   def broadcast_failure(chat)
     Turbo::StreamsChannel.broadcast_append_to "chat_#{chat.id}",

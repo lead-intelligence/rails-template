@@ -14,16 +14,32 @@ class ChatResponseJobTest < ActiveJob::TestCase
     end
   end
 
-  test "broadcasts each non-empty streamed chunk to the chat" do
+  test "broadcasts each non-empty chunk that arrives a stream interval after the last one" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
     stub_openai_chat_stream(chunks: [ "", "Sure", ", here", " is how." ])
+    clear_messages("chat_#{chat.id}")
 
-    assert_broadcasts("chat_#{chat.id}", 6) do
-      chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
-      ChatResponseJob.perform_now(chat.id)
-    end
+    respond_with_clock(chat, step: ChatResponseJob::STREAM_INTERVAL * 2)
 
+    assert_equal [ "Sure", ", here", " is how." ], streamed_chunks(chat)
     assert_equal "Sure, here is how.", chat.messages.order(:created_at).last.content
+  end
+
+  test "coalesces chunks that arrive faster than the stream interval into one broadcast" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat.messages.create!(role: :user, content: "Tell me a story")
+    chunks = Array.new(500) { |index| " word#{index}" }
+    stub_openai_chat_stream(chunks: chunks)
+    clear_messages("chat_#{chat.id}")
+
+    respond_with_clock(chat, step: ChatResponseJob::STREAM_INTERVAL / 4)
+
+    reply = chat.messages.order(:created_at).last
+    assert_equal chunks.join, reply.content
+    assert_operator streamed_chunks(chat).size, :<=, 126
+    assert reply.content.start_with?(streamed_chunks(chat).join)
+    assert(broadcasts("chat_#{chat.id}").last.include?(ERB::Util.html_escape(chunks.join)))
   end
 
   test "a normal chat has no support instructions or tool attached" do
@@ -150,6 +166,19 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   private
+
+  def respond_with_clock(chat, step:)
+    ticks = 0.0
+    job = ChatResponseJob.new(chat.id)
+    job.define_singleton_method(:now) { ticks += step }
+    job.perform_now
+  end
+
+  def streamed_chunks(chat)
+    broadcasts("chat_#{chat.id}").map { |raw| JSON.parse(raw) }
+      .grep(/target="message_\d+_content"/)
+      .map { |stream| stream[%r{<template>(.*)</template>}m, 1] }
+  end
 
   def queries_to_answer(history:, support: false)
     chat = users(:one).chats.create!(model: "gpt-4o-mini", support: support)
