@@ -71,4 +71,16 @@ class DocsTest < ApplicationSystemTestCase
 
     assert_selector "article.docs h1", text: "Blog and content"
   end
+
+  test "on a narrow screen the menu button is accessible and opens the sidebar" do
+    page.current_window.resize_to(390, 844)
+
+    visit doc_url("CLAUDE")
+
+    find("label[for=docs-drawer]", text: t("layouts.docs.open_menu")).click
+
+    assert_selector "#docs-drawer:checked", visible: :all
+  ensure
+    page.current_window.resize_to(1400, 1400)
+  end
 end

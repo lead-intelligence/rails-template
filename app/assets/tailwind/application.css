@@ -141,7 +141,8 @@
     background-color: var(--color-base-200);
     border-radius: var(--radius-box);
     padding: 1rem;
-    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .docs pre code {

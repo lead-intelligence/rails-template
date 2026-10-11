@@ -24,4 +24,8 @@ The light/dark control is DaisyUI's `theme-controller` input, and `docs_theme_co
 
 Prose styling is about a hundred lines of `@layer components` in `app/assets/tailwind/application.css`, keyed on `.docs` and written against DaisyUI tokens, because no typography plugin is vendored. Links there are underlined in the primary colour rather than coloured with it: the primary token does not reach the required contrast ratio against the page background in the dark theme, and every accessibility audit of a page full of links fails on it.
 
+The topbar's menu control (`app/views/docs/_topbar.html.erb`) is a `<label>` for the drawer checkbox, and it names itself with an `sr-only` span, never `aria-label`. A label has no role that permits `aria-label`, so axe reports `aria-prohibited-attr` whenever the label is rendered: below the `lg` breakpoint, and on any page audited before its stylesheet applies, which is how the attribute once failed the suite intermittently at desktop width. The search button's text uses `sr-only sm:not-sr-only` for the same reason — hidden with `hidden`, a narrow screen leaves the button with no name. The narrow-screen case in `test/system/docs_test.rb` audits that state.
+
+Code blocks wrap instead of scrolling sideways. A `pre` that scrolls horizontally is a scrollable region a keyboard cannot reach, which axe reports on any screen narrow enough for a line to overflow.
+
 `layouts/docs.html.erb` is a layout of its own, so the application navbar, the flash and the support widget stay out of the documentation. The sidebar arrives through `content_for :sidebar`, which is what distinguishes a page (drawer plus sidebar) from the landing (hero plus cards) without a second layout.
