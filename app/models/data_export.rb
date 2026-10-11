@@ -4,7 +4,8 @@ class DataExport
   EXCLUDED_COLUMNS = {
     "User" => %w[password_digest],
     "Document" => %w[embedding],
-    "Message" => %w[content_raw thinking_signature cache_until_here]
+    "Message" => %w[content_raw raw_content raw_reasoning thinking_signature cache_until_here],
+    "RubyLLM::ActiveRecord::ToolCall" => %w[thought_signature]
   }.freeze
 
   EXCLUDED_ATTACHMENTS = %w[data_export].freeze

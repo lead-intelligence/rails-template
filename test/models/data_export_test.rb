@@ -41,6 +41,17 @@ class DataExportTest < ActiveSupport::TestCase
     assert_includes entries.keys, "files/chats/messages/#{message.id}/attachments/#{message.attachments.first.id}/photo.png"
   end
 
+  test "leaves out the opaque provider payloads of messages and tool calls" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat.messages.create!(role: :assistant, content: "", raw_content: { "blocks" => [] }, raw_reasoning: { "encrypted" => "x" })
+      .ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "lookup", arguments: {}, thought_signature: "opaque")
+
+    data = JSON.parse(zip_entries(export(users(:one)))["data.json"])
+
+    assert_empty data["chats/messages"].first.keys & %w[raw_content raw_reasoning]
+    assert_not data["chats/messages/ruby_llm_tool_calls"].first.key?("thought_signature")
+  end
+
   test "leaves out the technical messages a support chat hides from the person" do
     chat = users(:one).chats.create!(support: true)
     reply = chat.messages.create!(role: :assistant, content: "Thanks, I've filed this for the team.")
