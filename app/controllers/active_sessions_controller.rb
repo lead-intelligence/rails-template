@@ -1,6 +1,8 @@
 class ActiveSessionsController < ApplicationController
+  PER_PAGE = 20
+
   def index
-    @sessions = Current.user.sessions.order(created_at: :desc).load
+    @pagy, @sessions = pagy(Current.user.sessions.order(created_at: :desc), limit: PER_PAGE)
   end
 
   def destroy

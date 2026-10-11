@@ -21,11 +21,11 @@ class ActiveSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", revoke_others_active_sessions_path, count: 1
   end
 
-  test "reads the list of sessions once" do
+  test "counts the sessions once and reads one page of them" do
     sign_in_as users(:one)
     users(:one).sessions.create!(ip_address: "10.0.0.1", user_agent: "Other Browser")
 
-    assert_queries_match(/FROM "sessions" WHERE "sessions"."user_id"/, count: 1) { get active_sessions_url }
+    assert_queries_match(/FROM "sessions" WHERE "sessions"."user_id"/, count: 2) { get active_sessions_url }
   end
 
   test "hides the revoke_others button when there is only one session" do
@@ -36,6 +36,26 @@ class ActiveSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "#sessions li", count: 1
     assert_select "form[action=?]", revoke_others_active_sessions_path, count: 0
+  end
+
+  test "lists one page of sessions and links to the next" do
+    sign_in_as users(:one)
+    ActiveSessionsController::PER_PAGE.times { |index| users(:one).sessions.create!(ip_address: "10.0.0.#{index}", user_agent: "Browser #{index}") }
+
+    get active_sessions_url
+
+    assert_select "#sessions li", count: ActiveSessionsController::PER_PAGE
+    assert_select "nav.pagy a[rel=next][href=?]", active_sessions_path(page: 2)
+  end
+
+  test "lists the remaining sessions on the second page and still offers to revoke the others" do
+    sign_in_as users(:one)
+    ActiveSessionsController::PER_PAGE.times { |index| users(:one).sessions.create!(ip_address: "10.0.0.#{index}", user_agent: "Browser #{index}") }
+
+    get active_sessions_url(page: 2)
+
+    assert_select "#sessions li", count: 1
+    assert_select "form[action=?]", revoke_others_active_sessions_path, count: 1
   end
 
   test "cannot revoke another user's session" do
