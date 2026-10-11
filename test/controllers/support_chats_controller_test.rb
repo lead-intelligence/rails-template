@@ -124,7 +124,7 @@ class SupportChatsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
     chat = users(:one).chats.create!(support: true)
     message = chat.messages.create!(role: :assistant, content: "")
-    message.tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: { title: "x", summary: "y" })
+    message.ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: { title: "x", summary: "y" })
 
     get support_chat_url(chat)
 

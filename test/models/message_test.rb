@@ -58,7 +58,7 @@ class MessageTest < ActiveSupport::TestCase
   test "does not broadcast technical tool-call details when a message updates in a support chat" do
     chat = users(:one).chats.create!(support: true)
     message = chat.messages.create!(role: :assistant, content: "")
-    message.tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: { title: "x", summary: "y" })
+    message.ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: { title: "x", summary: "y" })
 
     clear_messages("chat_#{chat.id}")
     message.update!(updated_at: Time.current)
@@ -95,7 +95,7 @@ class MessageTest < ActiveSupport::TestCase
   test "hides a tool call message from the person in a support chat" do
     chat = users(:one).chats.create!(support: true)
     message = chat.messages.create!(role: :assistant, content: "")
-    message.tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: { title: "x", summary: "y" })
+    message.ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "create_support_ticket", arguments: { title: "x", summary: "y" })
 
     assert_equal "messages/blank", message.to_partial_path
   end

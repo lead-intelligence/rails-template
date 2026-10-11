@@ -6,3 +6,13 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
+
+inherit_mode:
+  merge:
+    - Exclude
+AllCops:
+  Exclude:
+    - "db/migrate/20261010233516_prepare_ruby_llm_v2_upgrade.rb"
+    - "db/migrate/20261010233517_backfill_ruby_llm_v2_data.rb"
+    - "db/migrate/20261010233518_finish_ruby_llm_v2_upgrade.rb"
+    - "db/migrate/20261010233534_upgrade_ruby_llm_to_2_1.rb"

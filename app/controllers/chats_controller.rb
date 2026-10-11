@@ -17,7 +17,7 @@ class ChatsController < ApplicationController
     prompt = params.dig(:chat, :prompt)
     if prompt.present?
       @chat = Current.user.chats.create!(model: params.dig(:chat, :model).presence)
-      @chat.create_user_message(prompt)
+      @chat.add_message(role: :user, content: prompt)
       ChatResponseJob.perform_later(@chat.id)
 
       redirect_to @chat, notice: t("chats.create.notice")
@@ -32,7 +32,7 @@ class ChatsController < ApplicationController
 
   def show
     @message = @chat.messages.build
-    @messages = @chat.messages.where.not(id: nil).includes(:tool_calls, :parent_tool_call, :model, attachments_attachments: :blob)
+    @messages = @chat.messages.where.not(id: nil).includes(:ruby_llm_tool_calls)
   end
 
   def destroy

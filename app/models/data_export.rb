@@ -4,14 +4,12 @@ class DataExport
   EXCLUDED_COLUMNS = {
     "User" => %w[password_digest],
     "Document" => %w[embedding],
-    "Message" => %w[content_raw thinking_signature]
+    "Message" => %w[content_raw thinking_signature cache_until_here]
   }.freeze
 
   EXCLUDED_ATTACHMENTS = %w[data_export].freeze
 
   RECORD_SCOPES = { "Message" => :visible_to_person }.freeze
-
-  SERIALIZED_ASSOCIATIONS = { "Chat" => %i[model] }.freeze
 
   RETENTION = 48.hours
 
@@ -49,13 +47,9 @@ class DataExport
   def data
     { "user" => serialize(user) }.merge(
       exported_relations.transform_values do |relation|
-        relation.includes(preloads_for(relation.klass)).map { |record| serialize(record) }
+        relation.includes(rich_text_reflections(relation.klass).map(&:name)).map { |record| serialize(record) }
       end
     )
-  end
-
-  def preloads_for(klass)
-    rich_text_reflections(klass).map(&:name) + SERIALIZED_ASSOCIATIONS.fetch(klass.name, [])
   end
 
   def exported_relations

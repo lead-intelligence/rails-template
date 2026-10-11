@@ -12,7 +12,7 @@ class ChatsTest < ApplicationSystemTestCase
   test "sending a message streams the assistant's reply into the chat" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
     sign_in_via_browser(users(:one))
-    stub_openai_chat(content: "Deploying with Kamal")
+    stub_openai_chat(content: { title: "Deploying with Kamal", tags: [ "kamal" ] }.to_json)
     stub_openai_chat_stream(chunks: [ "Sure", ", here", " is how." ])
 
     visit chat_url(chat)

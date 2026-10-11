@@ -22,7 +22,7 @@ Rails starter template. This repo is both a working app and the template new app
 - Minitest + fixtures + WebMock (tests NEVER hit the network), Capybara + cuprite for system tests, axe-core for accessibility, bullet for N+1, Kamal deploys
 
 ## Commands
-- `bin/setup` — install and prepare everything. `db:prepare` seeds only on first creation (`db/seeds.rb`): RubyLLM's model registry into the `models` table in every environment, plus a confirmed `dev@example.com` / `password` user in development; an existing checkout needs `bin/rails db:seed`.
+- `bin/setup` — install and prepare everything. `db:prepare` seeds only on first creation (`db/seeds.rb`): the RubyLLM model registry into `ruby_llm_models` everywhere, plus a confirmed `dev@example.com` / `password` user in development; an existing checkout needs `bin/rails db:seed`.
 - `bin/dev` — app + Tailwind watcher. The job supervisor runs inside Puma, so there is no separate jobs process (see `docs/architecture/background-jobs.md`).
 - `bin/rails test test/models/user_test.rb` — one file; `…_test.rb:42` runs that line's case, `-n test_the_name` one by name.
   **Gotcha:** SimpleCov demands 100% over the whole project, so any subset fails the gate at the end even when the asserts pass. While iterating use `SKIP_COVERAGE=1`.
@@ -98,7 +98,7 @@ verified against a library's source, and not knowing it is how they break.
 - **Data export** — automatic: every `dependent: :destroy` on `User` lands in the ZIP. An `encrypts`'d column comes out in PLAINTEXT — add it to `EXCLUDED_COLUMNS`. → `data-export.md`
 - **Email** — active provider-agnostic SMTP. Without `APP_HOST` every mailer link points at `example.com`. → `email.md`
 - **AI chat** — `@messages` needs its four-association `includes` or Bullet fails the test; the update broadcast is an APPEND because Action Cable reorders; the daily quota lives on `User`. → `ai-chat.md`
-- **Semantic search** — the embedding callback is guarded by the SOURCE having changed, or it re-enqueues itself forever. A non-empty `models` table IS the registry: seed it or the embedding model is unknown. → `semantic-search.md`
+- **Semantic search** — the embedding callback is guarded by the SOURCE having changed, or it re-enqueues itself forever. A non-empty `ruby_llm_models` table IS the registry: seed it or the embedding model is unknown. → `semantic-search.md`
 - **Rich text** — on Rails 8.1 Lexxy monkey-patches `rich_text_area`; re-check `Lexxy.supports_editor_adapter?` after every upgrade. → `rich-text.md`
 - **Console auditing** — console1984 depends on Active Record encryption; a new app must generate its own credentials. → `console-auditing.md`
 - **Superadmin panels** — one concern gates eight surfaces. **Deny-by-default**: unconfigured means 401 everywhere, never open. → `superadmin-panels.md`

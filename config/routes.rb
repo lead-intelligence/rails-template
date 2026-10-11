@@ -17,7 +17,7 @@ Rails.application.routes.draw do
       patch :mark_all_read
     end
   end
-  resources :models, only: [ :index, :show ] do
+  resources :models, only: [ :index, :show ], constraints: { id: /[^\/]+/ } do
     collection do
       post :refresh
     end

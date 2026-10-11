@@ -7,9 +7,7 @@ class MadminTest < ActionDispatch::IntegrationTest
     /madmin/documents
     /madmin/feedbacks
     /madmin/messages
-    /madmin/models
     /madmin/sessions
-    /madmin/tool_calls
     /madmin/users
     /madmin/noticed/notifications
     /madmin/noticed/events

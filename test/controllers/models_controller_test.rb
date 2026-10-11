@@ -42,14 +42,23 @@ class ModelsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "shows a model for the superadmin" do
+  test "shows a model from the registry by its id, dots and all" do
     ENV["SUPERADMIN_USER"] = "superadmin"
     ENV["SUPERADMIN_PASSWORD"] = "secret"
-    model = Model.create!(model_id: "gpt-4o-mini", name: "GPT-4o mini", provider: "openai")
 
-    get model_url(model), headers: superadmin_headers
+    get model_url("gpt-4.1-mini"), headers: superadmin_headers
 
     assert_response :success
+    assert_includes response.body, RubyLLM.models.find("gpt-4.1-mini").name
+  end
+
+  test "answers not found for a model the registry does not have" do
+    ENV["SUPERADMIN_USER"] = "superadmin"
+    ENV["SUPERADMIN_PASSWORD"] = "secret"
+
+    get model_url("no-such-model"), headers: superadmin_headers
+
+    assert_response :not_found
   end
 
   test "refreshes the model registry for the superadmin" do
@@ -57,11 +66,11 @@ class ModelsControllerTest < ActionDispatch::IntegrationTest
     ENV["SUPERADMIN_PASSWORD"] = "secret"
 
     refreshed = false
-    Model.define_singleton_method(:refresh!) { refreshed = true }
+    RubyLLM.models.define_singleton_method(:refresh) { refreshed = true }
     begin
       post refresh_models_url, headers: superadmin_headers
     ensure
-      Model.singleton_class.send(:remove_method, :refresh!)
+      RubyLLM.models.singleton_class.send(:remove_method, :refresh)
     end
 
     assert refreshed

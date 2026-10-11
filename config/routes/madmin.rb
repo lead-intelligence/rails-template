@@ -10,9 +10,7 @@ namespace :madmin do
   resources :documents
   resources :feedbacks
   resources :messages
-  resources :models
   resources :sessions
-  resources :tool_calls
   resources :users
   root to: "dashboard#show"
 end
