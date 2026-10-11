@@ -121,7 +121,7 @@ verified against a library's source, and not knowing it is how they break.
 - **Sitemap / robots** — dynamic, not static: `Sitemap:` needs an absolute URL and a file in `public/` cannot know its host. → `sitemap-robots.md`
 - **Deploy** — Kamal; UPPERCASE placeholders, and the `storage/` volume is mandatory (SQLite + Active Storage). → `deploy.md`
 - **Backups** — the restic accessory is ACTIVE: it refuses to boot until the repository and secrets are set. Deliberate. → `backups.md`
-- **Security headers / CSP** — nonce-based CSP active in every environment: scripts strict, styles inline. → `security-headers.md`
+- **Security headers / CSP** — nonce-based CSP active in every environment: scripts strict (nonce, plus the hash of the RailsPress admin inline import), styles inline. → `security-headers.md`
 - **Mobile apps** — `charco_mobile` signals in the layout and form pages; a mistyped signal is SILENTLY ignored, so `charco_mobile check` runs in CI. Push tokens land on `User#push_devices`; `config/push.yml` needs real credentials before anything is delivered. → `mobile.md`
 - **Templates** — `Herb::Engine` intercepts every `.html.erb`; malformed HTML is a compile-time error, not a silent render. The overlay is development-only and its client JS is not imported. `herb analyze` (no Node) gates `bin/ci`; `herb lint`/`format` need Node. → `templates.md`
 - **Pagination** — pagy on every list that grows. Its own translator ignores `I18n.with_locale`, so the initializer routes it through Rails I18n or the nav renders English on Spanish pages. → `pagination.md`

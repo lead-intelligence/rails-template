@@ -13,7 +13,7 @@ Rails.application.configure do
     policy.frame_ancestors  :self
     policy.img_src          :self, :data, :blob, :https
     policy.object_src       :none
-    policy.script_src       :self
+    policy.script_src       :self, "'sha256-#{Digest::SHA256.base64digest('import "railspress"')}'"
     policy.style_src        :self, :unsafe_inline
     policy.connect_src      :self
   end

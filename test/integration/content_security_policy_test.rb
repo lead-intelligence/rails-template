@@ -8,6 +8,7 @@ class ContentSecurityPolicyTest < ActionDispatch::IntegrationTest
     assert csp.present?, "expected a Content-Security-Policy header"
     assert_match "default-src 'self'", csp
     assert_match "object-src 'none'", csp
-    assert_match %r{script-src 'self' 'nonce-[^']+'}, csp
+    assert_match %r{\Ascript-src 'self' 'sha256-DmLQcd2u48I2hHTg60qKOUbXlfzfga1g8zGJmQ0JIvA=' 'nonce-[^']+'\z}, csp[/script-src [^;]+/],
+      "Beyond the nonce, scripts allow only the RailsPress admin layout's inline `import \"railspress\"`."
   end
 end
