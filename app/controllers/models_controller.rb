@@ -4,7 +4,7 @@ class ModelsController < ApplicationController
   allow_unauthenticated_access
 
   def index
-    @models = available_chat_models
+    @models = RubyLLM.models.chat_models.sort_by { |model| [ model.provider.to_s, model.name.to_s ] }
   end
 
   def show

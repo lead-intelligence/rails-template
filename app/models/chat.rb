@@ -1,6 +1,7 @@
 class Chat < ApplicationRecord
   INACTIVITY_WINDOW = 12.hours
   MAX_PENDING_PHOTOS = 5
+  PROVIDER = :openai
 
   acts_as_chat
   belongs_to :user
@@ -21,6 +22,10 @@ class Chat < ApplicationRecord
     last_activity_at = Arel::Nodes::NamedFunction.new("COALESCE", [ last_message_at.arel, arel_table[:created_at] ])
     where(last_activity_at.lteq(INACTIVITY_WINDOW.ago))
   }
+
+  def self.selectable_models
+    RubyLLM.models.chat_models.by_provider(PROVIDER)
+  end
 
   def self.close_inactive_support_conversations
     support.open.inactive.find_each(&:close!)

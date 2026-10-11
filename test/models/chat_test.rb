@@ -39,6 +39,14 @@ class ChatTest < ActiveSupport::TestCase
     assert_not chat.valid?
   end
 
+  test "offers only the chat models of the configured provider" do
+    models = Chat.selectable_models
+
+    assert models.any?
+    assert models.all? { |model| model.type == :chat && model.provider == Chat::PROVIDER.to_s }
+    assert_operator models.count, :<, RubyLLM.models.chat_models.count
+  end
+
   test "destroying a conversation keeps the ticket it filed" do
     chat = users(:one).chats.create!(support: true)
     feedback = users(:one).feedbacks.create!(message: "No puedo entrar", chat: chat)

@@ -40,9 +40,4 @@ class ApplicationController < ActionController::Base
   def ensure_within_quota
     head :forbidden if Current.user.messages_remaining_today.zero?
   end
-
-  def available_chat_models
-    RubyLLM.models.chat_models.all
-           .sort_by { |model| [ model.provider.to_s, model.name.to_s ] }
-  end
 end

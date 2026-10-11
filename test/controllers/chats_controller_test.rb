@@ -66,6 +66,9 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
     get new_chat_url
     assert_response :success
+    assert_select "select[name='chat[model]'] option", count: Chat.selectable_models.count + 1
+    assert_select "option[value='gpt-4o-mini']"
+    assert_select "option[value='text-embedding-3-small']", count: 0
   end
 
   test "shows an own chat" do
@@ -111,6 +114,26 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select "#error_explanation", text: /#{I18n.t("activerecord.errors.models.chat.attributes.model.unknown")}/
+  end
+
+  test "refuses a model the registry knows but the form does not offer" do
+    sign_in_as users(:one)
+    other_provider_model = RubyLLM.models.chat_models.detect { |model| model.provider != Chat::PROVIDER.to_s }
+
+    assert_no_difference("Chat.count") do
+      post chats_url, params: { chat: { model: other_provider_model.id, prompt: "Hola" } }
+    end
+
+    assert_response :unprocessable_entity
+    assert_select "#error_explanation", text: /#{I18n.t("activerecord.errors.models.chat.attributes.model.unknown")}/
+  end
+
+  test "creates a chat on the default model when none is chosen" do
+    sign_in_as users(:one)
+
+    post chats_url, params: { chat: { model: "", prompt: "Hola" } }
+
+    assert_equal RubyLLM.config.default_model, Chat.last.model.model_id
   end
 
   test "does not create a chat when the prompt is blank" do

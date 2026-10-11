@@ -10,13 +10,13 @@ class ChatsController < ApplicationController
   def new
     @chat = Chat.new
     @selected_model = params[:model]
-    @chat_models = available_chat_models
+    @chat_models = selectable_chat_models
   end
 
   def create
     prompt = params.dig(:chat, :prompt)
     if prompt.present?
-      @chat = Current.user.chats.create!(model: params.dig(:chat, :model).presence)
+      @chat = Current.user.chats.create!(model: chosen_model)
       @chat.add_message(role: :user, content: prompt)
       ChatResponseJob.perform_later(@chat.id)
 
@@ -26,7 +26,7 @@ class ChatsController < ApplicationController
     @chat = Chat.new
     @chat.errors.add(:model, :unknown)
     @selected_model = params.dig(:chat, :model)
-    @chat_models = available_chat_models
+    @chat_models = selectable_chat_models
     render :new, status: :unprocessable_entity
   end
 
@@ -44,5 +44,14 @@ class ChatsController < ApplicationController
 
   def set_chat
     @chat = Current.user.chats.find(params[:id])
+  end
+
+  def chosen_model
+    model = params.dig(:chat, :model).presence
+    model && Chat.selectable_models.find(model).id
+  end
+
+  def selectable_chat_models
+    Chat.selectable_models.sort_by { |model| model.name.to_s }
   end
 end
