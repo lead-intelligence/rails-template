@@ -172,6 +172,22 @@
     border-color: var(--color-base-300);
     margin: 2rem 0;
   }
+
+  .pagy.series-nav {
+    @apply join;
+  }
+
+  .pagy.series-nav a {
+    @apply join-item btn btn-sm;
+  }
+
+  .pagy.series-nav a[aria-current] {
+    @apply btn-primary;
+  }
+
+  .pagy.series-nav a[aria-disabled]:not([aria-current]) {
+    @apply btn-disabled;
+  }
 }
 
 [data-native-app] .support-launcher {

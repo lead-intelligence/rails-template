@@ -3,7 +3,7 @@
 <div class="py-6 w-full">
   <div class="flex items-center justify-between mb-6">
     <h1 class="font-bold text-4xl"><%= t(".title") %></h1>
-    <% if @notifications.unread.any? %>
+    <% if unread_notifications_count.positive? %>
       <%= button_to t(".mark_all_read"), mark_all_read_notifications_path, method: :patch, class: "btn btn-sm btn-primary" %>
     <% end %>
   </div>
@@ -14,6 +14,7 @@
         <li><%= render "notifications/notification", notification: notification %></li>
       <% end %>
     </ul>
+    <%= render "shared/pagination", pagy: @pagy %>
   <% else %>
     <div class="text-center my-10">
       <%= lucide_icon("bell-off", class: "size-8 mx-auto mb-2 opacity-60") %>

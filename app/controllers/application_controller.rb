@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   include Authentication
   include Pundit::Authorization
+  include Pagy::Method
 
   skip_before_action :track_ahoy_visit
   before_action :resume_session

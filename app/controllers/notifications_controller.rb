@@ -1,6 +1,9 @@
 class NotificationsController < ApplicationController
+  PER_PAGE = 25
+
   def index
-    @notifications = Current.user.notifications.newest_first.includes(:event)
+    @pagy, @notifications = pagy(Current.user.notifications.newest_first.includes(:event), limit: PER_PAGE)
+    @notifications.load
   end
 
   def mark_all_read

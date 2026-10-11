@@ -42,6 +42,20 @@ class NotificationsTest < ApplicationSystemTestCase
     assert_no_text "Test notification"
   end
 
+  test "pages through the notifications" do
+    sign_in_via_browser(users(:one))
+    (NotificationsController::PER_PAGE + 1).times { TestNotifier.deliver(users(:one)) }
+
+    visit notifications_path
+    assert_selector "#notification_list li", count: NotificationsController::PER_PAGE
+
+    find("nav.pagy a[aria-label='#{t("pagy.aria_label.next")}']").click
+
+    assert_current_path notifications_path(page: 2)
+    assert_selector "#notification_list li", count: 1
+    assert_selector "nav.pagy a[aria-current='page']", text: "2"
+  end
+
   test "shows a designed empty state when there are no notifications" do
     sign_in_via_browser(users(:one))
 

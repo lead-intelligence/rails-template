@@ -1,6 +1,6 @@
 # Design
 
-The visual language is DaisyUI 5 over Tailwind v4, with both vendored in `app/assets/tailwind/` (`daisyui.mjs`, `daisyui-theme.mjs`) so no Node toolchain is needed. `app/assets/tailwind/application.css` declares the two themes the app ships, `light` and `dark`, as full OKLCH palettes through the theme plugin, and holds the `.docs` component styles the documentation site renders into.
+The visual language is DaisyUI 5 over Tailwind v4, with both vendored in `app/assets/tailwind/` (`daisyui.mjs`, `daisyui-theme.mjs`) so no Node toolchain is needed. `app/assets/tailwind/application.css` declares the two themes the app ships, `light` and `dark`, as full OKLCH palettes through the theme plugin, holds the `.docs` component styles the documentation site renders into, and maps Pagy's pagination nav onto DaisyUI classes (see pagination.md).
 
 The palette is warm neutral with one accent: base and content in the sand hues, a terracotta `primary`, a muted teal `accent`, and semantic colors desaturated toward the same warmth. `primary` is dark in the light theme and light in the dark one, with `primary-content` inverted to match, because a single lightness cannot carry legible text on both grounds.
 
