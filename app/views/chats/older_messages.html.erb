@@ -1,0 +1,6 @@
+<%= turbo_frame_tag @chat, "messages_before_#{params[:page]}" do %>
+  <%= render "older_messages", chat: @chat, pagy: @pagy %>
+  <% @messages.each do |message| %>
+    <%= render message %>
+  <% end %>
+<% end %>

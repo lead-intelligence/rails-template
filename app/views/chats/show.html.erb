@@ -12,6 +12,7 @@
   </div>
 
   <div id="chat_<%= @chat.id %>_messages" class="min-w-full divide-y divide-gray-200 space-y-5 my-5">
+    <%= render "older_messages", chat: @chat, pagy: @pagy %>
     <% @messages.each do |message| %>
       <%= render message %>
     <% end %>

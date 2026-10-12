@@ -105,6 +105,8 @@ en:
     new:
       back: Back to chats
       title: New chat
+    older_messages:
+      load: Load earlier messages
     show:
       back: Back to chats
       heading: 'Showing chat #%{id}'

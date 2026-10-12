@@ -23,6 +23,20 @@ class ChatsTest < ApplicationSystemTestCase
     assert_text "Sure, here is how."
   end
 
+  test "a long chat loads its older messages on demand" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    oldest = chat.messages.create!(role: :user, content: "The very first question")
+    ChatsController::MESSAGES_PER_PAGE.times { |index| chat.messages.create!(role: :assistant, content: "Reply #{index}") }
+    sign_in_via_browser(users(:one))
+
+    visit chat_url(chat)
+    assert_no_text oldest.content
+    click_link t("chats.older_messages.load")
+
+    assert_text oldest.content
+    assert_no_link t("chats.older_messages.load")
+  end
+
   test "a failed completion shows a human-friendly failure instead of leaking the error" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
     sign_in_via_browser(users(:one))

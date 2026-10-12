@@ -1,0 +1,5 @@
+<% if pagy.next %>
+  <%= turbo_frame_tag chat, "messages_before_#{pagy.next}" do %>
+    <%= link_to t(".load"), pagy.page_url(:next), class: "btn btn-ghost btn-sm" %>
+  <% end %>
+<% end %>

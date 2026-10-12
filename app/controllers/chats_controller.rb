@@ -1,5 +1,6 @@
 class ChatsController < ApplicationController
   PER_PAGE = 25
+  MESSAGES_PER_PAGE = 50
 
   before_action :set_chat, only: [ :show, :destroy ]
   before_action :ensure_within_quota, only: :create
@@ -36,8 +37,12 @@ class ChatsController < ApplicationController
   end
 
   def show
+    @pagy, newest_first = pagy(:keyset, @chat.messages.includes(:ruby_llm_tool_calls, :ruby_llm_parent_tool_call).reorder(id: :desc),
+      limit: MESSAGES_PER_PAGE)
+    @messages = newest_first.reverse
+    return render :older_messages if turbo_frame_request?
+
     @message = @chat.messages.build
-    @messages = @chat.messages.where.not(id: nil).includes(:ruby_llm_tool_calls, :ruby_llm_parent_tool_call)
   end
 
   def destroy

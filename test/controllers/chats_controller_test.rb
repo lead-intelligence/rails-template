@@ -120,6 +120,54 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "shows the newest page of messages and links to the older ones" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    messages = Array.new(ChatsController::MESSAGES_PER_PAGE + 1) { |index| chat.messages.create!(role: :user, content: "Message #{index}") }
+
+    get chat_url(chat)
+
+    assert_select "#chat_#{chat.id}_messages [id^=message_]:not([id$=_content])", count: ChatsController::MESSAGES_PER_PAGE
+    assert_select "#message_#{messages.first.id}", count: 0
+    assert_select "#message_#{messages.last.id}"
+    assert_select "turbo-frame a", text: I18n.t("chats.older_messages.load")
+  end
+
+  test "loads the older messages into the frame that asked for them" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    messages = Array.new(ChatsController::MESSAGES_PER_PAGE + 1) { |index| chat.messages.create!(role: :user, content: "Message #{index}") }
+    get chat_url(chat)
+    frame = css_select("#chat_#{chat.id}_messages turbo-frame").first
+
+    get frame.at("a")["href"], headers: { "Turbo-Frame" => frame["id"] }
+
+    assert_select "turbo-frame##{frame["id"]} #message_#{messages.first.id}"
+    assert_select "#message_#{messages.last.id}", count: 0
+    assert_select "turbo-frame turbo-frame", count: 0
+  end
+
+  test "shows no older link when every message fits on one page" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat.messages.create!(role: :user, content: "Only one")
+
+    get chat_url(chat)
+
+    assert_select "#chat_#{chat.id}_messages turbo-frame", count: 0
+  end
+
+  test "a malformed page param shows the newest messages" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    message = chat.messages.create!(role: :user, content: "Hi")
+
+    get chat_url(chat, page: "not-a-cutoff")
+
+    assert_response :success
+    assert_select "#message_#{message.id}"
+  end
+
   test "creates a chat and enqueues the first response when a prompt is given" do
     sign_in_as users(:one)
     prompt = "How do I deploy with Kamal?"

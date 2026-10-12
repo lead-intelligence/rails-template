@@ -105,6 +105,8 @@ es:
     new:
       back: Volver a los chats
       title: Nuevo chat
+    older_messages:
+      load: Cargar mensajes anteriores
     show:
       back: Volver a los chats
       heading: Mostrando chat n.º %{id}

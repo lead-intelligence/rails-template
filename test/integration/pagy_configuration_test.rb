@@ -10,7 +10,7 @@ class PagyConfigurationTest < ActiveSupport::TestCase
     calls = Rails.root.glob("app/controllers/**/*.rb").flat_map { |file| file.read.scan(/\bpagy\(.*\)/) }
 
     assert_not_empty calls
-    assert_empty calls.grep_v(/raise_range_error: true/),
+    assert_empty calls.grep_v(/raise_range_error: true|\Apagy\(:keyset/),
       "Without raise_range_error, a page number past the 64-bit range reaches SQLite as the offset and fails."
   end
 end
