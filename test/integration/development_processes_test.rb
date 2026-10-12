@@ -11,6 +11,10 @@ class DevelopmentProcessesTest < ActiveSupport::TestCase
       "With the supervisor inside Puma, a separate jobs process would run every job twice."
   end
 
+  test "bin/dev runs the Herb dev server, which the dev tools connect to" do
+    assert_includes Rails.root.join("Procfile.dev").read.lines.map(&:strip), "herb: bin/herb dev"
+  end
+
   test "development broadcasts the way production does" do
     cable = YAML.load_file(Rails.root.join("config/cable.yml"), aliases: true)
 

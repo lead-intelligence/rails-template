@@ -15,7 +15,7 @@ Rails starter template. This repo is both a working app and the template new app
 Run Ruby commands as `mise exec ruby@4.0.6 -- <command>` in shells without mise shims.
 
 - `bin/setup` — install and prepare. Seeds only on first creation (`db/seeds.rb`: the model registry, plus `dev@example.com` / `password` in development); an existing checkout runs `bin/rails db:seed`.
-- `bin/dev` — app + Tailwind watcher. The job supervisor runs inside Puma, so there is no jobs process.
+- `bin/dev` — app, Tailwind watcher and `herb dev`, which reloads the page when a template changes. The job supervisor runs inside Puma, so there is no jobs process.
 - `bin/rails test test/models/user_test.rb:42` — one file or one case. Prefix `SKIP_COVERAGE=1`: the 100% gate fails any subset.
 - `bin/rails test:system` — cuprite + axe. `bin/rails test` does not include it.
 - `bin/ci` — the pre-commit gate, exactly what CI runs (`config/ci.rb`, nine steps: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `bin/rails test`, `bin/rails test:system`, `bin/smoke-rename`).

@@ -55,7 +55,7 @@ Copy the three printed keys into an `active_record_encryption:` block with `bin/
 bin/dev
 ```
 
-`bin/dev` runs the Rails server and the Tailwind watcher (`Procfile.dev`). The job supervisor runs inside Puma and logs to `log/development.log`, not to your terminal.
+`bin/dev` runs the Rails server, the Tailwind watcher and the Herb dev server (`Procfile.dev`). The Herb dev server reloads the page in the browser when you save a template. The job supervisor runs inside Puma and logs to `log/development.log`, not to your terminal.
 
 A fresh clone signs in with `dev@example.com` / `password`. `db:prepare` seeds only when it creates the database, so on an existing checkout run `bin/rails db:seed`; the same seed loads the AI model registry that chat and search need.
 

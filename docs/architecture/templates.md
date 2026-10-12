@@ -8,6 +8,10 @@ The gem pins its client, `reactionview.esm.js`, as a preloaded module, and its i
 
 `config.slots` stays at its default, `false`: ReActionView's reactive templates are still marked experimental upstream (their markup, payload and JS API can change between releases), so this app only takes the HTML-aware rendering engine, never that feature.
 
+`bin/dev` runs `herb dev` from `Procfile.dev`. The dev tools read its port from a meta tag and open `ws://localhost:<port>`, so the development policy allows that origin in `connect-src`. When a template changes on disk, the page reloads. With `config.slots` off, ReActionView never starts the embedded dev server, so this process is the only one.
+
+`herb dev` misses a save that replaces the file through a rename, such as `sed -i` or an editor set to write a new file. A normal in-place save works.
+
 Herb ships a linter (`herb lint`) and a formatter (`herb format`), but both only delegate to npm packages (`@herb-tools/linter`, `@herb-tools/formatter`) — they refuse to run without a `node` binary on `PATH`. This stack has no Node, so neither is part of `bin/ci`.
 
 `herb analyze`, unlike those two, runs entirely through the gem's native extension: it parses and compiles every template with the same engine ReActionView renders through, and exits non-zero on a parse or validation error. `bin/herb` (the Bundler-generated binstub) runs it in `bin/ci`'s "Templates: Herb analyze" step (`config/ci.rb`), so a malformed template fails the gate before any test boots the app.
