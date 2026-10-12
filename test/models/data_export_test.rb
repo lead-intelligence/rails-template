@@ -169,6 +169,23 @@ class DataExportTest < ActiveSupport::TestCase
     assert_equal baseline, queries_during { export(User.find(user.id)) }
   end
 
+  test "holds at most one batch of records in memory at a time" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    now = Time.current
+    Message.insert_all(Array.new(DataExport::BATCH_SIZE + 1) do |index|
+      { chat_id: chat.id, role: "user", content: "Message #{index}", created_at: now, updated_at: now }
+    end)
+    largest_load = 0
+    track = ->(*, payload) { largest_load = [ largest_load, payload[:record_count] ].max }
+
+    data = ActiveSupport::Notifications.subscribed(track, "instantiation.active_record") do
+      JSON.parse(zip_entries(export(users(:one)))["data.json"])
+    end
+
+    assert_operator largest_load, :<=, DataExport::BATCH_SIZE
+    assert_equal chat.messages.ids.sort, data["chats/messages"].map { |record| record["id"] }.sort
+  end
+
   test "stores attached files as they are instead of compressing them again" do
     user = users(:one)
     feedback = user.feedbacks.create!(message: "Nice app")

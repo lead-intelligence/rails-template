@@ -17,6 +17,8 @@ class DataExport
 
   RETENTION = 48.hours
 
+  BATCH_SIZE = 1000
+
   REQUEST_LIMIT = 3
   REQUEST_WINDOW = 1.hour
 
@@ -42,7 +44,7 @@ class DataExport
         attachment.blob.download { |chunk| zip.write(chunk) }
       end
       zip.put_next_entry("data.json")
-      zip.write(JSON.pretty_generate(data.merge("missing_files" => missing_files)))
+      write_data(zip, missing_files)
     end
   end
 
@@ -50,12 +52,17 @@ class DataExport
 
   attr_reader :user
 
-  def data
-    { "user" => serialize(user) }.merge(
-      exported_relations.transform_values do |relation|
-        relation.includes(rich_text_reflections(relation.klass).map(&:name)).map { |record| serialize(record) }
+  def write_data(zip, missing_files)
+    zip.write("{\n  \"user\": #{JSON.pretty_generate(serialize(user), depth: 1)}")
+    exported_relations.each do |path, relation|
+      zip.write(",\n  #{path.to_json}: [")
+      relation.includes(rich_text_reflections(relation.klass).map(&:name)).find_in_batches(batch_size: BATCH_SIZE).with_index do |records, batch|
+        entries = records.map { |record| "\n    #{JSON.pretty_generate(serialize(record), depth: 2)}" }
+        zip.write("#{"," unless batch.zero?}#{entries.join(",")}")
       end
-    )
+      zip.write("\n  ]")
+    end
+    zip.write(",\n  \"missing_files\": #{JSON.pretty_generate(missing_files, depth: 1)}\n}")
   end
 
   def exported_relations
