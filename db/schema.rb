@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_103511) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_104617) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -569,6 +569,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_103511) do
     t.datetime "created_at", null: false
     t.integer "error_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["error_id", "created_at"], name: "index_solid_errors_occurrences_on_error_id_and_created_at"
     t.index ["error_id"], name: "index_solid_errors_occurrences_on_error_id"
   end
 
