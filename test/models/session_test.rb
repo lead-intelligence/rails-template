@@ -17,6 +17,12 @@ class SessionTest < ActiveSupport::TestCase
     assert Session.exists?(recent.id)
   end
 
+  test "purge_inactive finds inactive sessions through the updated_at index instead of scanning every session" do
+    plan = ActiveRecord::Base.connection.select_rows("EXPLAIN QUERY PLAN #{Session.inactive.to_sql}").map(&:last)
+
+    assert plan.any? { |step| step.include?("index_sessions_on_updated_at") }, plan.inspect
+  end
+
   test "a session unused past the inactivity limit is inactive" do
     assert session_last_used((Session::INACTIVITY_LIMIT + 1.day).ago).inactive?
     assert_not session_last_used(1.day.ago).inactive?
