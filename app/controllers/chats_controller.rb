@@ -5,7 +5,7 @@ class ChatsController < ApplicationController
   before_action :ensure_within_quota, only: :create
 
   def index
-    @pagy, @chats = pagy(listed_chats, limit: PER_PAGE)
+    @pagy, @chats = pagy(listed_chats, limit: PER_PAGE, raise_range_error: true)
   end
 
   def new

@@ -66,6 +66,15 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#chat_#{chats.last.id}"
   end
 
+  test "sends a page past the last one to the last page" do
+    sign_in_as users(:one)
+    Array.new(ChatsController::PER_PAGE + 1) { users(:one).chats.create!(model: "gpt-4o-mini") }
+
+    get chats_url(page: "9" * 25)
+
+    assert_redirected_to chats_url(page: 2)
+  end
+
   test "the queries to show a chat do not grow with its tool results" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
