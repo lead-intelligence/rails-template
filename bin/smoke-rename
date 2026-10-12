@@ -63,6 +63,11 @@ if [ -n "$residual" ]; then
 fi
 echo "✓ No residual references"
 
+# db:prepare and zeitwerk:check below would both create tmp/local_secret.txt, and Rails writes it
+# non-atomically: the slower process can read it empty and abort on secret_key_base.
+mkdir -p "$tmp/tmp"
+ruby -rsecurerandom -e 'print SecureRandom.hex(64)' >"$tmp/tmp/local_secret.txt"
+
 echo "→ Preparing the database (db:prepare) in the background"
 ( cd "$tmp" && exec bin/rails db:prepare ) >"$tmp/db_prepare.log" 2>&1 &
 prepare_pid=$!
