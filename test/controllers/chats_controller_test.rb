@@ -134,6 +134,17 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to chat
   end
 
+  test "answers 422 and keeps no chat when the prompt is over the limit" do
+    sign_in_as users(:one)
+
+    assert_no_difference("Chat.count") do
+      post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "a" * (Message::CONTENT_MAX_LENGTH + 1) } }
+    end
+
+    assert_response :unprocessable_entity
+    assert_no_enqueued_jobs only: ChatResponseJob
+  end
+
   test "re-renders the form when the chosen model is unknown" do
     sign_in_as users(:one)
 

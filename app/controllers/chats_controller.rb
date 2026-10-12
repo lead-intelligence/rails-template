@@ -17,12 +17,16 @@ class ChatsController < ApplicationController
   def create
     prompt = chat_params[:prompt]
     if prompt.present?
-      @chat = Current.user.chats.create!(model: chosen_model)
-      @chat.add_message(role: :user, content: prompt)
+      Chat.transaction do
+        @chat = Current.user.chats.create!(model: chosen_model)
+        @chat.add_message(role: :user, content: prompt)
+      end
       ChatResponseJob.perform_later(@chat.id)
 
       redirect_to @chat, notice: t("chats.create.notice")
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   rescue RubyLLM::ModelNotFoundError
     @chat = Chat.new
     @chat.errors.add(:model, :unknown)

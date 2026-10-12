@@ -8,7 +8,7 @@
           <div class="alert alert-error mb-4"><%= document.errors.full_messages.to_sentence %></div>
         <% end %>
         <%= form.label :title, class: "label" %>
-        <%= form.text_field :title, class: "input input-bordered w-full", required: true %>
+        <%= form.text_field :title, class: "input input-bordered w-full", required: true, maxlength: Document::TITLE_MAX_LENGTH %>
         <%= form.label :content, class: "label" %>
         <%= form.rich_text_area :content %>
         <%= form.submit document.new_record? ? t(".create") : t(".update"), class: "btn btn-primary w-full mt-4" %>

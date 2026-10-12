@@ -15,6 +15,8 @@ class MessagesController < ApplicationController
         format.html { redirect_to @chat }
       end
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   end
 
   private

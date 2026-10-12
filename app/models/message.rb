@@ -1,6 +1,10 @@
 class Message < ApplicationRecord
+  CONTENT_MAX_LENGTH = 10_000
+
   acts_as_message
   has_many_attached :attachments
+
+  validates :content, length: { maximum: CONTENT_MAX_LENGTH }, if: -> { role == "user" }
 
   scope :visible_to_person, -> {
     where(chat: Chat.where(support: false))

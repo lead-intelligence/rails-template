@@ -33,6 +33,18 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "text/vnd.turbo-stream.html", @response.media_type
   end
 
+  test "answers 422 when the content is over the limit" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+
+    assert_no_difference("chat.messages.count") do
+      post chat_messages_url(chat), params: { message: { content: "a" * (Message::CONTENT_MAX_LENGTH + 1) } }, as: :turbo_stream
+    end
+
+    assert_response :unprocessable_entity
+    assert_no_enqueued_jobs only: ChatResponseJob
+  end
+
   test "does nothing when the content is blank" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(model: "gpt-4o-mini")

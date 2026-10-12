@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   DAILY_MESSAGE_LIMIT = 100
+  NAME_MAX_LENGTH = 100
   EMAIL_CONFIRMATION_EXPIRES_IN = 1.day
   UNCONFIRMED_RETENTION = 7.days
   DELETION_SWEEP_DELAY = 1.hour
@@ -34,7 +35,7 @@ class User < ApplicationRecord
 
   has_one_attached :data_export
 
-  validates :name, presence: true
+  validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :unconfirmed_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_nil: true
   validates :password, length: { minimum: 8 }, allow_nil: true

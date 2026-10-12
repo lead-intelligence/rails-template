@@ -2,7 +2,7 @@
       class: "flex items-end gap-2",
       data: { controller: "composer", action: "turbo:submit-start->support-conversation#sending turbo:submit-end->support-conversation#awaiting" }) do |form| %>
   <%= form.label :content, t(".label"), class: "sr-only" %>
-  <%= form.text_area :content, rows: 1, required: true, placeholder: t(".placeholder"),
+  <%= form.text_area :content, rows: 1, required: true, maxlength: Message::CONTENT_MAX_LENGTH, placeholder: t(".placeholder"),
       class: "textarea textarea-bordered flex-1 resize-none leading-snug min-h-0 h-11 py-2",
       data: { action: "keydown.enter->composer#submit" } %>
   <%= form.button type: :submit, class: "btn btn-primary btn-square" do %>

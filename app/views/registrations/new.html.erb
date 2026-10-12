@@ -9,7 +9,7 @@
           <div class="alert alert-error mb-4"><%= @user.errors.full_messages.to_sentence %></div>
         <% end %>
         <%= form.label :name, class: "label" %>
-        <%= form.text_field :name, class: "input input-bordered w-full", required: true %>
+        <%= form.text_field :name, class: "input input-bordered w-full", required: true, maxlength: User::NAME_MAX_LENGTH %>
         <%= form.label :email_address, class: "label" %>
         <%= form.email_field :email_address, class: "input input-bordered w-full", required: true %>
         <%= form.label :password, class: "label" %>

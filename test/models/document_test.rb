@@ -58,4 +58,9 @@ class DocumentTest < ActiveSupport::TestCase
       doc.touch
     end
   end
+
+  test "a title is at most the title limit" do
+    assert users(:one).documents.build(title: "a" * Document::TITLE_MAX_LENGTH).valid?
+    assert_not users(:one).documents.build(title: "a" * (Document::TITLE_MAX_LENGTH + 1)).valid?
+  end
 end

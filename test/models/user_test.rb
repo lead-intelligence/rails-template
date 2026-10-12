@@ -272,6 +272,16 @@ class UserTest < ActiveSupport::TestCase
     assert plan.any? { |step| step.include?("index_users_deletion_requested") }, plan.inspect
   end
 
+
+  test "a name is at most the name limit" do
+    user = users(:one)
+
+    user.name = "a" * User::NAME_MAX_LENGTH
+    assert user.valid?
+    user.name = "a" * (User::NAME_MAX_LENGTH + 1)
+    assert_not user.valid?
+  end
+
   private
 
   def unconfirmed_user_at(created_at)
