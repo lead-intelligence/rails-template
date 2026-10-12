@@ -48,7 +48,9 @@ class ChatsController < ApplicationController
 
   def chosen_model
     model = params.dig(:chat, :model).presence
-    model && Chat.selectable_models.find(model).id
+    return unless model
+
+    Chat.selectable_models.detect { |selectable| selectable.id == model }&.id or raise RubyLLM::ModelNotFoundError, model
   end
 
   def selectable_chat_models

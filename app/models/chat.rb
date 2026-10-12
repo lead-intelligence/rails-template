@@ -24,7 +24,7 @@ class Chat < ApplicationRecord
   }
 
   def self.selectable_models
-    RubyLLM.models.chat_models.by_provider(PROVIDER)
+    RubyLLM.models.chat_models.by_provider(PROVIDER).select { |model| model.modalities.output.include?("text") }
   end
 
   def self.close_inactive_support_conversations
