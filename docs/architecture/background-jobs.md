@@ -8,6 +8,8 @@ One Puma process runs its request threads and Action Cable's worker pool side by
 
 Development and test each get their own `queue` database in `config/database.yml`, loaded from `db/queue_schema.rb`, with `config.solid_queue.connects_to` set in both environment files; `bin/setup` and `bin/rails db:prepare` create them. Only development sets `queue_adapter = :solid_queue`; test keeps Rails' `:test` adapter and system tests use `:inline`, so the suite's job behaviour is unchanged and the queue database exists purely so code that reads Solid Queue's own tables — the health check — can be tested against real rows.
 
+A Solid Queue upgrade can ship a migration. `bin/rails generate solid_queue:update` copies it to `db/queue_migrate`, and `bin/rails db:migrate` applies it and updates `db/queue_schema.rb`. Until then, every boot logs that Solid Queue has pending database migrations.
+
 Solid Queue performs **no automatic retries**. Its own README is explicit that retrying is Active Job's job, not the queue's. A job that raises and declares no `retry_on` lands in `solid_queue_failed_executions` and stays there until someone retries or discards it from `/jobs` or a console, and Solid Errors records the exception. Jobs also persist across restarts in development, which is faithful to production and occasionally surprising.
 
 An idle worker sleeps its `polling_interval` between polls, and nothing wakes it when a job arrives. `config/queue.yml` sets 0.1 seconds, Solid Queue's own default, not the installer's 1 second: at 1 second a chat reply waits half a second on average before it starts. The idle polling costs under one percent of a core. `test/integration/queue_configuration_test.rb` guards it.
