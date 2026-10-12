@@ -165,4 +165,23 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     patch profile_url, params: { user: { name: "" } }
     assert_response :unprocessable_entity
   end
+
+  test "renders the form again with the saved avatar when the new one is not an image" do
+    sign_in_as users(:one)
+    patch profile_url, params: { user: { avatar: fixture_file_upload("avatar.png", "image/png") } }
+
+    patch profile_url, params: { user: { avatar: fixture_file_upload("note.txt", "text/plain") } }
+
+    assert_response :unprocessable_entity
+    assert_equal "avatar.png", users(:one).reload.avatar.filename.to_s
+  end
+
+  test "renders the form again when a valid avatar comes with an invalid name" do
+    sign_in_as users(:one)
+
+    patch profile_url, params: { user: { name: "", avatar: fixture_file_upload("avatar.png", "image/png") } }
+
+    assert_response :unprocessable_entity
+    assert_not users(:one).reload.avatar.attached?
+  end
 end

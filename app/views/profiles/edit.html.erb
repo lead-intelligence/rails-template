@@ -7,7 +7,7 @@
 
   <div class="card bg-base-100 shadow w-full max-w-md">
     <div class="card-body">
-      <%= render "users/avatar", user: @user %>
+      <%= render "users/avatar", user: Current.user %>
       <h1 class="card-title"><%= t(".title") %></h1>
       <%= form_with model: @user, url: profile_path, method: :patch do |form| %>
         <%= form.label :name, class: "label" %>

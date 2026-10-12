@@ -8,7 +8,7 @@ class ProfilesController < ApplicationController
   end
 
   def update
-    @user = Current.user
+    @user = User.find(Current.user.id)
     @user.assign_attributes(profile_params)
 
     if @user.save(context: :profile)
