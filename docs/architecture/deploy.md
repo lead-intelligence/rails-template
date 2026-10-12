@@ -1,6 +1,8 @@
 # Deploy
 
-Kamal, configured in `config/deploy.yml`. Every value an app must replace is an UPPERCASE placeholder: the registry user, the server address, the host.
+Kamal, configured in `config/deploy.yml`. Every value an app must replace is an UPPERCASE placeholder: the registry user, the server address, the host. `kamal setup` is the first deploy.
+
+`.kamal/secrets` injects `RAILS_MASTER_KEY` from the gitignored master key and `OPENAI_API_KEY` from the environment; real values are never written into it. The `env` block also declares `APP_HOST` in clear and `SUPERADMIN_USER`, `SUPERADMIN_PASSWORD`, `ERROR_FEED_TOKEN`, `SMTP_USER_NAME` and `SMTP_PASSWORD` as secrets, which ship commented out in `.kamal/secrets`. A first deploy that leaves them out sends mailer links to `example.com`, sends no email, answers `401` on every developer panel and lets no watcher read the errors.
 
 The `storage/` volume is mandatory, not an optimization. SQLite databases and locally-stored Active Storage files both live there, so a deploy without it loses the entire database on the next container rotation.
 

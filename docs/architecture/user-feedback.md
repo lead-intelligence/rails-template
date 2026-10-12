@@ -13,3 +13,7 @@ A non-2xx response raises, and nothing retries it. Solid Queue has no automatic 
 Photos are linked through the permanent public route `/feedback/photos/:signed_id` rather than a raw Active Storage URL, because those expire and GitHub cannot authenticate to fetch them. `FeedbackPhotosController` resolves the signed id and then checks the blob is actually attached to some `Feedback#photos` before redirecting, so it cannot be turned into a general "serve any blob by signed id" proxy for avatars or message attachments.
 
 Those links are absolute URLs built from `config.action_mailer.default_url_options`, because a job has no request to infer a host from. In production the host comes from `APP_HOST` and falls back to `example.com`, so an app that deploys without setting it files issues whose photo links point nowhere.
+
+The token is a GitHub fine-grained personal access token scoped to the single repository, with the Issues read-and-write repository permission and nothing else. Both variables live in `.env` (see `.env.example`).
+
+Photos are whatever the person attaches. Nothing captures a screenshot of the page automatically, and the support chat's context capture carries plain text only.

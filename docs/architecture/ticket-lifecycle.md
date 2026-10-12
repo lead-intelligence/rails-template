@@ -2,7 +2,7 @@
 
 `Feedback` has a `status` enum of `open` and `resolved`, defaulting to open, plus a `resolved_at` timestamp. `Feedback#resolve!` sets both, closes the support conversation the ticket came from if there is one, and is idempotent — resolving twice does not move `resolved_at` and does not raise.
 
-`Admin::FeedbacksController` at `/admin/feedbacks` lists open tickets newest first, eager-loading the reporter and the photo blobs, and exposes a single `resolve` member action. The view links photos through the same public `/feedback/photos/:signed_id` route the GitHub issue body uses.
+`Admin::FeedbacksController` at `/admin/feedbacks` lists open tickets newest first, eager-loading the reporter and the photo blobs, and exposes a single `resolve` member action. Each row shows the reporter's email, the message, the context and links to the photos, through the same public `/feedback/photos/:signed_id` route the GitHub issue body uses. A resolved ticket drops off the list; there is no archive view.
 
 Nothing is notified on resolution. This panel is ticket control for the developer, not a customer-facing workflow; the person learns their conversation is over because it renders closed.
 

@@ -6,6 +6,10 @@ The palette is warm neutral with one accent: base and content in the sand hues, 
 
 Depth is off (`--depth: 0`, `--noise: 0`) and borders are a single pixel, so hierarchy comes from spacing and weight rather than shadow.
 
+Icons are Lucide through the `lucide-rails` gem: `lucide_icon "house", class: "size-4"` renders inline SVG, with no icon font and no CDN. The first argument is the kebab-case name from the Lucide library; every keyword becomes an attribute of the `svg`, and the stroke follows `currentColor`, so `class:` sets size and colour. `LucideRails.default_options=` in an initializer would set global defaults; none is set.
+
+A new app's own theme comes from a design tool fed with the design substrate and the brand brief under `docs/`. What comes back is a DaisyUI theme block for `app/assets/tailwind/application.css`, and the accessibility gate decides whether it ships.
+
 ## Gotchas
 
 The accessibility gate decides the palette. `ApplicationSystemTestCase#visit` audits axe-core against WCAG 2.1 A/AA in both color schemes on every visit, so a color that reads well but falls under 4.5:1 turns the whole system suite red rather than producing a subtle regression.
