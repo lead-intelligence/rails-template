@@ -35,4 +35,12 @@ class EmailConfirmationsMailerTest < ActionMailer::TestCase
 
     assert_no_emails { perform_enqueued_jobs }
   end
+
+  test "a mail for an account deleted before it is sent is dropped" do
+    user = User.create!(name: "Gone", email_address: "gone@example.com", password: "password1234")
+    EmailConfirmationsMailer.confirm(user).deliver_later
+    user.destroy!
+
+    assert_no_emails { perform_enqueued_jobs }
+  end
 end
