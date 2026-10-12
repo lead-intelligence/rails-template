@@ -38,6 +38,16 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert cookies[:session_id].blank?
   end
 
+  test "an account awaiting deletion cannot sign in" do
+    users(:one).update!(deletion_requested_at: Time.current)
+
+    sign_in_as users(:one)
+
+    assert_redirected_to new_session_url
+    assert_equal I18n.t("sessions.create.alert"), flash[:alert]
+    assert_empty users(:one).sessions
+  end
+
   test "a session unused past the inactivity limit is closed instead of resumed" do
     sign_in_as users(:one)
     session = users(:one).sessions.sole

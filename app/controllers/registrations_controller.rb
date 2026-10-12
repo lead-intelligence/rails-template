@@ -18,8 +18,9 @@ class RegistrationsController < ApplicationController
 
   def destroy
     if params[:confirmation].to_s.strip == t("registrations.destroy.confirmation_phrase") && Current.user.authenticate(params[:password])
-      Current.user.destroy
+      user = Current.user
       terminate_session
+      user.request_deletion!
       redirect_to new_session_path, notice: t("registrations.destroy.notice")
     else
       redirect_to edit_profile_path, alert: t("registrations.destroy.error")

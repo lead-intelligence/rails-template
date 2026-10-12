@@ -355,7 +355,7 @@ en:
     destroy:
       confirmation_phrase: I WANT TO DELETE MY ACCOUNT
       error: Account not deleted — check the confirmation phrase and your password.
-      notice: Your account and all its data have been permanently deleted.
+      notice: Your account is closed. All its data is permanently erased within minutes.
     new:
       meta_title: Sign up
       sign_up: Sign up

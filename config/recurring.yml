@@ -28,3 +28,6 @@ production:
   purge_inactive_sessions:
     command: "Session.purge_inactive"
     schedule: every day at 6am
+  finish_requested_deletions:
+    command: "User.finish_requested_deletions"
+    schedule: every hour at minute 42

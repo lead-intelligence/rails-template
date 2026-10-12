@@ -360,7 +360,8 @@ es:
     destroy:
       confirmation_phrase: QUIERO BORRAR MI CUENTA
       error: No se eliminó la cuenta — revisa la frase de confirmación y tu contraseña.
-      notice: Tu cuenta y todos sus datos se eliminaron permanentemente.
+      notice: Cerramos tu cuenta. Todos sus datos se borran de forma permanente en
+        los próximos minutos.
     new:
       meta_title: Registrarse
       sign_up: Registrarse

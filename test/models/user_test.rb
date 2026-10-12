@@ -233,6 +233,24 @@ class UserTest < ActiveSupport::TestCase
     assert User.exists?(old_confirmed.id)
   end
 
+  test "finish_requested_deletions erases accounts whose queued erasure never finished" do
+    stuck = users(:one)
+    stuck.update!(deletion_requested_at: (User::DELETION_SWEEP_DELAY + 1.minute).ago)
+
+    User.finish_requested_deletions
+
+    assert_not User.exists?(stuck.id)
+  end
+
+  test "finish_requested_deletions leaves a fresh request to its job" do
+    fresh = users(:one)
+    fresh.update!(deletion_requested_at: 1.minute.ago)
+
+    User.finish_requested_deletions
+
+    assert User.exists?(fresh.id)
+  end
+
   private
 
   def unconfirmed_user_at(created_at)

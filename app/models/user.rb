@@ -2,6 +2,7 @@ class User < ApplicationRecord
   DAILY_MESSAGE_LIMIT = 100
   EMAIL_CONFIRMATION_EXPIRES_IN = 1.day
   UNCONFIRMED_RETENTION = 7.days
+  DELETION_SWEEP_DELAY = 1.hour
 
   has_secure_password
   has_many :sessions, dependent: :destroy
@@ -67,6 +68,22 @@ class User < ApplicationRecord
 
   def self.purge_unconfirmed
     where(confirmed_at: nil, created_at: ...UNCONFIRMED_RETENTION.ago).find_each(&:destroy)
+  end
+
+  def self.finish_requested_deletions
+    where(deletion_requested_at: ...DELETION_SWEEP_DELAY.ago).find_each(&:destroy)
+  end
+
+  def request_deletion!
+    transaction do
+      touch(:deletion_requested_at)
+      sessions.delete_all
+    end
+    AccountDeletionJob.perform_later(self)
+  end
+
+  def deletion_requested?
+    deletion_requested_at.present?
   end
 
   private
