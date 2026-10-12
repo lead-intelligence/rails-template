@@ -153,6 +153,19 @@ class SupportChatsControllerTest < ActionDispatch::IntegrationTest
     assert_nil users(:one).chats.support.sole.ticket_context
   end
 
+  test "ignores a context that is a list" do
+    sign_in_as users(:one)
+
+    [ [ "x" ], [ { page_url: "https://example.com" } ] ].each do |context|
+      get support_chats_url, params: { context: context }
+      assert_response :success
+
+      post support_chats_url, params: { context: context }
+    end
+
+    assert_equal [ nil, nil ], users(:one).chats.support.pluck(:ticket_context)
+  end
+
   test "truncates context values to 2 kilobytes" do
     sign_in_as users(:one)
 
