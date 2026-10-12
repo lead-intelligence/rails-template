@@ -9,7 +9,7 @@ class Message < ApplicationRecord
 
   after_create_commit :broadcast_new_message
   after_update_commit :broadcast_updated_message
-  after_destroy_commit :broadcast_removed_message
+  after_destroy_commit :broadcast_removed_message, unless: :destroyed_by_association
 
   def broadcast_append_chunk(content)
     broadcast_append_to "chat_#{chat_id}",

@@ -55,6 +55,15 @@ class MessageTest < ActiveSupport::TestCase
     end
   end
 
+  test "destroying the whole chat broadcasts no remove per message" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    3.times { |index| chat.messages.create!(role: :assistant, content: "Hello #{index}") }
+
+    assert_no_broadcasts("chat_#{chat.id}") do
+      chat.destroy!
+    end
+  end
+
   test "does not broadcast technical tool-call details when a message updates in a support chat" do
     chat = users(:one).chats.create!(support: true)
     message = chat.messages.create!(role: :assistant, content: "")
