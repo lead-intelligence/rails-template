@@ -25,3 +25,6 @@ production:
   purge_unconfirmed_users:
     command: "User.purge_unconfirmed"
     schedule: every day at 5am
+  purge_inactive_sessions:
+    command: "Session.purge_inactive"
+    schedule: every day at 6am

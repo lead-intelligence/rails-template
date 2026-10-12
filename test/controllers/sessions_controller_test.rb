@@ -38,6 +38,29 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert cookies[:session_id].blank?
   end
 
+  test "a session unused past the inactivity limit is closed instead of resumed" do
+    sign_in_as users(:one)
+    session = users(:one).sessions.sole
+    session.update_column(:updated_at, (Session::INACTIVITY_LIMIT + 1.day).ago)
+
+    get active_sessions_url
+
+    assert_redirected_to new_session_url
+    assert_not Session.exists?(session.id)
+    assert cookies[:session_id].blank?
+  end
+
+  test "resuming a session records its activity" do
+    sign_in_as users(:one)
+    session = users(:one).sessions.sole
+    session.update_column(:updated_at, 2.days.ago)
+
+    get active_sessions_url
+
+    assert_response :success
+    assert_in_delta Time.current, session.reload.updated_at, 1.second
+  end
+
   test "signs out" do
     sign_in_as users(:one)
     delete session_url

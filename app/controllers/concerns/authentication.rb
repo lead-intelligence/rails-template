@@ -31,7 +31,14 @@ module Authentication
       @session_cookie_checked = true
       return unless (session_id = cookies.signed[:session_id])
 
-      Session.find_by(id: session_id).tap { |found| cookies.delete(:session_id) unless found }
+      live_session(Session.find_by(id: session_id)).tap { |found| cookies.delete(:session_id) unless found }
+    end
+
+    def live_session(found)
+      return found&.tap(&:record_activity) unless found&.inactive?
+
+      found.destroy
+      nil
     end
 
     def request_authentication

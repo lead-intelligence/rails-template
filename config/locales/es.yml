@@ -5,6 +5,7 @@ es:
       notice: Cerraste esa sesión.
     index:
       confirm: "¿Confirmas?"
+      inactivity_rule: Las sesiones sin uso durante %{days} días se cierran solas.
       meta_title: Sesiones activas
       revoke: Cerrar sesión
       revoke_others: Cerrar las demás

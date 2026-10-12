@@ -21,6 +21,14 @@ class ActiveSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", revoke_others_active_sessions_path, count: 1
   end
 
+  test "states the inactivity rule from the limit the model enforces" do
+    sign_in_as users(:one)
+
+    get active_sessions_url
+
+    assert_select "p", text: I18n.t("active_sessions.index.inactivity_rule", days: Session::INACTIVITY_LIMIT.in_days.to_i)
+  end
+
   test "counts the sessions once and reads one page of them" do
     sign_in_as users(:one)
     users(:one).sessions.create!(ip_address: "10.0.0.1", user_agent: "Other Browser")

@@ -14,4 +14,4 @@ An idle worker sleeps its `polling_interval` between polls, and nothing wakes it
 
 Solid Queue logs to `log/development.log`, not to stdout, so the terminal stays quiet even while the supervisor works.
 
-Recurring work is declared in `config/recurring.yml`: clearing finished jobs, purging expired data exports, closing inactive support conversations, purging expired analytics visits and purging never-confirmed users. Those run in production only.
+Recurring work is declared in `config/recurring.yml`: clearing finished jobs, purging expired data exports, closing inactive support conversations, purging expired analytics visits, purging never-confirmed users and purging inactive sessions. Those run in production only.

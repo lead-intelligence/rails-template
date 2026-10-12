@@ -5,6 +5,7 @@ en:
       notice: That session was signed out.
     index:
       confirm: Are you sure?
+      inactivity_rule: Sessions unused for %{days} days close on their own.
       meta_title: Active sessions
       revoke: Sign out
       revoke_others: Sign out other sessions

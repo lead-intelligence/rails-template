@@ -8,6 +8,8 @@
     <% end %>
   </div>
 
+  <p class="text-sm text-base-content/70 mb-4"><%= t(".inactivity_rule", days: Session::INACTIVITY_LIMIT.in_days.to_i) %></p>
+
   <ul id="sessions" class="list bg-base-100 rounded-box shadow">
     <% @sessions.each do |active_session| %>
       <li class="list-row items-center">
