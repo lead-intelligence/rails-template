@@ -5,7 +5,7 @@ class MessagesController < ApplicationController
   before_action :ensure_within_quota, only: :create
 
   def create
-    content = params.dig(:message, :content)
+    content = params.expect(message: [ :content ])[:content]
     if content.present?
       @user_message = @chat.add_message(role: :user, content: content)
       ChatResponseJob.perform_later(@chat.id)

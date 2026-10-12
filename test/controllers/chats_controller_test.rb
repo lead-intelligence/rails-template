@@ -146,6 +146,16 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_response :no_content
   end
 
+  test "answers 400 when the prompt is not text" do
+    sign_in_as users(:one)
+    assert_no_difference("users(:one).chats.count") do
+      [ "Hola", { prompt: [ "Hola" ] }, { prompt: { text: "Hola" } } ].each do |chat|
+        post chats_url, params: { chat: chat }
+        assert_response :bad_request
+      end
+    end
+  end
+
   test "destroys an own chat" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(model: "gpt-4o-mini")

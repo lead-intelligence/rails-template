@@ -14,7 +14,7 @@ class ChatsController < ApplicationController
   end
 
   def create
-    prompt = params.dig(:chat, :prompt)
+    prompt = chat_params[:prompt]
     if prompt.present?
       @chat = Current.user.chats.create!(model: chosen_model)
       @chat.add_message(role: :user, content: prompt)
@@ -25,7 +25,7 @@ class ChatsController < ApplicationController
   rescue RubyLLM::ModelNotFoundError
     @chat = Chat.new
     @chat.errors.add(:model, :unknown)
-    @selected_model = params.dig(:chat, :model)
+    @selected_model = chat_params[:model]
     @chat_models = selectable_chat_models
     render :new, status: :unprocessable_entity
   end
@@ -46,8 +46,12 @@ class ChatsController < ApplicationController
     @chat = Current.user.chats.find(params[:id])
   end
 
+  def chat_params
+    params.expect(chat: [ :prompt, :model ])
+  end
+
   def chosen_model
-    model = params.dig(:chat, :model).presence
+    model = chat_params[:model].presence
     return unless model
 
     Chat.selectable_models.detect { |selectable| selectable.id == model }&.id or raise RubyLLM::ModelNotFoundError, model

@@ -44,6 +44,18 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "answers 400 when the content is not text" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+
+    assert_no_enqueued_jobs(only: ChatResponseJob) do
+      [ "Hi", { content: [ "Hi" ] }, { content: { text: "Hi" } } ].each do |message|
+        post chat_messages_url(chat), params: { message: message }
+        assert_response :bad_request
+      end
+    end
+  end
+
   test "does not accept messages for another user's chat" do
     sign_in_as users(:one)
     other_chat = users(:two).chats.create!(model: "gpt-4o-mini")
