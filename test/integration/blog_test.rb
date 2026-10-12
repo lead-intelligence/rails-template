@@ -70,6 +70,16 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_no_match(/Uncategorized/, response.body)
   end
 
+  test "index lists nothing for an unknown category" do
+    Railspress::Post.create!(title: "Uncategorized", status: :published, published_at: 1.day.ago)
+
+    get blog_url(category: "no-such-category")
+
+    assert_response :success
+    assert_select "p", text: I18n.t("blog.index.empty")
+    assert_no_match(/Uncategorized/, response.body)
+  end
+
   test "index filters by tag" do
     ruby = Railspress::Tag.create!(name: "ruby")
     Railspress::Post.create!(title: "About Ruby", status: :published, published_at: 1.day.ago, tags: [ ruby ])

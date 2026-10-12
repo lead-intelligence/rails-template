@@ -8,7 +8,7 @@ class BlogController < ApplicationController
                             .includes(:category, :tags)
                             .with_attached_header_image
                             .order(published_at: :desc)
-    scope = scope.where(category: Railspress::Category.find_by(slug: params[:category])) if params[:category].present?
+    scope = scope.joins(:category).where(railspress_categories: { slug: params[:category] }) if params[:category].present?
     scope = scope.joins(:tags).where(railspress_tags: { slug: params[:tag] }) if params[:tag].present?
     @pagy, @posts = pagy(scope, limit: PER_PAGE)
   end
