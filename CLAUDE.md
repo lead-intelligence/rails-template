@@ -18,7 +18,7 @@ Run Ruby commands as `mise exec ruby@4.0.6 -- <command>` in shells without mise 
 - `bin/dev` — app + Tailwind watcher. The job supervisor runs inside Puma, so there is no jobs process.
 - `bin/rails test test/models/user_test.rb:42` — one file or one case. Prefix `SKIP_COVERAGE=1`: the 100% gate fails any subset.
 - `bin/rails test:system` — cuprite + axe. `bin/rails test` does not include it.
-- `bin/ci` — the pre-commit gate, exactly what CI runs (`config/ci.rb`, eight steps: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `bin/rails test`, `bin/rails test:system`, `bin/smoke-rename`).
+- `bin/ci` — the pre-commit gate, exactly what CI runs (`config/ci.rb`, nine steps: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `bin/rails test`, `bin/rails test:system`, `bin/smoke-rename`).
 - `bin/rename <name>` — turn the template into an app: rewrite the name in tracked files, then delete the template-only tooling and rewrite this file and the README.
   Without that deletion the app is born with a red `bin/ci`; `test/lib/template/cleanup_test.rb` guards it.
 - `bin/smoke-rename` — export the tracked tree, rename it, boot it, run its unit suite, serve its public pages.

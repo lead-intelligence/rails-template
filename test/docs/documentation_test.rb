@@ -7,6 +7,7 @@ class DocumentationTest < ActiveSupport::TestCase
   CITED_PATH = %r{\A(?:app|config|lib|test|bin|db)/[A-Za-z0-9_.*/-]+\z}
   CROSS_REFERENCE = /\b[a-z][a-z-]*\.md\b/
   CROSS_REFERENCE_WHITELIST = %w[README.md CLAUDE.md].freeze
+  NUMBER_WORDS = %w[zero one two three four five six seven eight nine ten eleven twelve].freeze
 
   test "every page the subsystem map points at exists, and every page is in the map" do
     assert_empty mapped_pages - architecture_pages,
@@ -40,6 +41,13 @@ class DocumentationTest < ActiveSupport::TestCase
     end
 
     assert_empty offenders, "lines over #{MAX_LINE_LENGTH} characters (the detail belongs in docs/architecture/)"
+  end
+
+  test "CLAUDE.md states as many CI steps as config/ci.rb runs" do
+    steps = Rails.root.join("config/ci.rb").read.scan(/^\s*step /).size
+    stated = CLAUDE_MD.read[/(\w+) steps:/, 1]
+
+    assert_equal NUMBER_WORDS.fetch(steps), stated, "config/ci.rb runs #{steps} steps"
   end
 
   test "every file path the documentation cites exists and is tracked" do
