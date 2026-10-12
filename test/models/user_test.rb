@@ -2,6 +2,7 @@ require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
   include MessageQuotaHelper
+  include QueryPlanHelper
 
   test "fixture password digests use the cheapest bcrypt cost" do
     assert_equal(BCrypt::Engine::MIN_COST, BCrypt::Password.new(users(:one).password_digest).cost)
@@ -249,6 +250,18 @@ class UserTest < ActiveSupport::TestCase
     User.finish_requested_deletions
 
     assert User.exists?(fresh.id)
+  end
+
+  test "purge_unconfirmed reads only the unconfirmed accounts instead of scanning every account" do
+    plan = query_plan_of_first_select_from("users") { User.purge_unconfirmed }
+
+    assert plan.any? { |step| step.include?("index_users_unconfirmed") }, plan.inspect
+  end
+
+  test "finish_requested_deletions reads only the requested erasures instead of scanning every account" do
+    plan = query_plan_of_first_select_from("users") { User.finish_requested_deletions }
+
+    assert plan.any? { |step| step.include?("index_users_deletion_requested") }, plan.inspect
   end
 
   private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_103416) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_103511) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -582,6 +582,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_103416) do
     t.string "unconfirmed_email"
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["id"], name: "index_users_deletion_requested", where: "deletion_requested_at IS NOT NULL"
+    t.index ["id"], name: "index_users_unconfirmed", where: "confirmed_at IS NULL"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
