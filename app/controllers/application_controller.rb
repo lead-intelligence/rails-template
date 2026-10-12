@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
     Rack::Request.new(request.env).accept_language
       .select { |_range, quality| quality.positive? }
       .sort_by.with_index { |(_range, quality), position| [ -quality, position ] }
-      .map { |range, _quality| range.split("-", 2).first.downcase.to_sym }
+      .map { |range, _quality| range.split("-", 2).first.to_s.downcase.to_sym }
       .find { |locale| I18n.available_locales.include?(locale) }
   end
 

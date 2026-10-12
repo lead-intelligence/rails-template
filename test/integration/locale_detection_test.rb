@@ -36,4 +36,10 @@ class LocaleDetectionTest < ActionDispatch::IntegrationTest
 
     assert_select "h1", I18n.t("sessions.new.title", locale: :es)
   end
+
+  test "skips an empty language range" do
+    get new_session_url, headers: { "Accept-Language" => ";q=1, en;q=0.5" }
+
+    assert_select "h1", I18n.t("sessions.new.title", locale: :en)
+  end
 end
