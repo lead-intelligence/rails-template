@@ -80,6 +80,15 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_no_match(/Uncategorized/, response.body)
   end
 
+  test "index ignores a filter that is not a slug" do
+    Railspress::Post.create!(title: "First Post", status: :published, published_at: 1.day.ago)
+
+    get blog_url, params: { category: { slug: "news" }, tag: { slug: "ruby" } }
+
+    assert_response :success
+    assert_select "h2", text: /First Post/
+  end
+
   test "index filters by tag" do
     ruby = Railspress::Tag.create!(name: "ruby")
     Railspress::Post.create!(title: "About Ruby", status: :published, published_at: 1.day.ago, tags: [ ruby ])

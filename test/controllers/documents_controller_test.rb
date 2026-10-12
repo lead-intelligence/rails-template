@@ -78,6 +78,18 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_select "nav.pagy a[rel=next]"
   end
 
+  test "lists own documents without searching when the query is not text" do
+    sign_in_as users(:one)
+    users(:one).documents.create!(title: "Deploy notes")
+
+    [ [ "deploy" ], { text: "deploy" } ].each do |query|
+      get documents_url, params: { q: query }
+
+      assert_response :success
+      assert_select "a", text: "Deploy notes"
+    end
+  end
+
   test "searches own documents semantically" do
     sign_in_as users(:one)
     document = users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")

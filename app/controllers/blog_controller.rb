@@ -4,12 +4,13 @@ class BlogController < ApplicationController
   allow_unauthenticated_access
 
   def index
+    filters = params.permit(:category, :tag, :page)
     scope = Railspress::Post.published
                             .includes(:category, :tags)
                             .with_attached_header_image
                             .order(published_at: :desc)
-    scope = scope.joins(:category).where(railspress_categories: { slug: params[:category] }) if params[:category].present?
-    scope = scope.joins(:tags).where(railspress_tags: { slug: params[:tag] }) if params[:tag].present?
+    scope = scope.joins(:category).where(railspress_categories: { slug: filters[:category] }) if filters[:category].present?
+    scope = scope.joins(:tags).where(railspress_tags: { slug: filters[:tag] }) if filters[:tag].present?
     @pagy, @posts = pagy(scope, limit: PER_PAGE)
   end
 
