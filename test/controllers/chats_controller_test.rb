@@ -44,6 +44,28 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_equal one_chat, queries_to { get chats_url }
   end
 
+  test "lists one page of own chats, newest first, and links to the next" do
+    sign_in_as users(:one)
+    chats = Array.new(ChatsController::PER_PAGE + 1) { |index| users(:one).chats.create!(model: "gpt-4o-mini", created_at: index.minutes.ago) }
+
+    get chats_url
+
+    assert_select "#chats > li.list-row", count: ChatsController::PER_PAGE
+    assert_select "#chat_#{chats.first.id}"
+    assert_select "#chat_#{chats.last.id}", count: 0
+    assert_select "nav.pagy a[rel=next][href=?]", chats_path(page: 2)
+  end
+
+  test "lists the remaining own chats on the second page" do
+    sign_in_as users(:one)
+    chats = Array.new(ChatsController::PER_PAGE + 1) { |index| users(:one).chats.create!(model: "gpt-4o-mini", created_at: index.minutes.ago) }
+
+    get chats_url(page: 2)
+
+    assert_select "#chats > li.list-row", count: 1
+    assert_select "#chat_#{chats.last.id}"
+  end
+
   test "the queries to show a chat do not grow with its tool results" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(model: "gpt-4o-mini")

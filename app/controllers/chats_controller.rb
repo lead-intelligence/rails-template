@@ -1,10 +1,11 @@
 class ChatsController < ApplicationController
+  PER_PAGE = 25
+
   before_action :set_chat, only: [ :show, :destroy ]
   before_action :ensure_within_quota, only: :create
 
   def index
-    @chats = Current.user.chats.where(support: false).includes(:model).left_joins(:messages).group(:id)
-      .select("chats.*, COUNT(messages.id) AS messages_count").order(created_at: :desc)
+    @pagy, @chats = pagy(listed_chats, limit: PER_PAGE)
   end
 
   def new
@@ -41,6 +42,11 @@ class ChatsController < ApplicationController
   end
 
   private
+
+  def listed_chats
+    Current.user.chats.where(support: false).includes(:model).left_joins(:messages).group(:id)
+      .select("chats.*, COUNT(messages.id) AS messages_count").order(created_at: :desc, id: :desc)
+  end
 
   def set_chat
     @chat = Current.user.chats.find(params[:id])

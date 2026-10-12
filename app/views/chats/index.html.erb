@@ -23,6 +23,7 @@
         </li>
       <% end %>
     </ul>
+    <%= render "shared/pagination", pagy: @pagy %>
   <% else %>
     <p class="text-center my-10" id="chats"><%= t(".empty") %></p>
   <% end %>
