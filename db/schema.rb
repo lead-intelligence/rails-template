@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_104617) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_104857) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -217,6 +217,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_104617) do
     t.string "type"
     t.datetime "updated_at", null: false
     t.index ["event_id"], name: "index_noticed_notifications_on_event_id"
+    t.index ["recipient_type", "recipient_id", "created_at"], name: "index_noticed_notifications_on_recipient_and_created_at"
+    t.index ["recipient_type", "recipient_id", "read_at"], name: "index_noticed_notifications_on_recipient_and_read_at"
     t.index ["recipient_type", "recipient_id"], name: "index_noticed_notifications_on_recipient"
   end
 
