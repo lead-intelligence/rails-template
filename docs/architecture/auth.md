@@ -22,7 +22,7 @@ Changing an email address or a password from `/profile` requires the current pas
 
 A pending address that another account already owns fails the `:profile` context with the standard `:taken` error, so `ProfilesController#update` re-renders the form and mails nothing. The check runs whenever a pending address is present, not only when it changes, so re-submitting an address someone else has claimed since does not mail that person either. `users.email_address` is unique, so such a change could never be confirmed anyway; without the check the only effect would be a confirmation mail in a stranger's inbox.
 
-The pending address is cancellable by submitting a blank one and resendable by submitting the same one again, because the mail is gated on the submitted parameter rather than on the dirty flag — a plain re-submit of the identical address still mails a fresh confirmation.
+The pending address is cancellable by submitting a blank one and resendable by submitting the same one again, because the mail is gated on the submitted parameter rather than on the dirty flag — a plain re-submit of the identical address still mails a fresh confirmation. The mail is built when its job runs, from the address pending at that moment, so a change cancelled before then sends nothing: `EmailConfirmationsMailer#change` returns without calling `mail`, and a mail with no recipient would otherwise fail the job.
 
 One consequence of the `:profile` context: a future validation declared `on: :update` will not run on this path, since `save(context: :profile)` only runs validations scoped to `:profile` (plus the context-less ones).
 

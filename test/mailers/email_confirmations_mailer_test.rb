@@ -26,4 +26,13 @@ class EmailConfirmationsMailerTest < ActionMailer::TestCase
     assert_equal I18n.t("email_confirmations_mailer.change.subject"), email.subject
     assert_match %r{http://example\.com/email_changes/[\w=-]+}, email.text_part.decoded
   end
+
+  test "change sends nothing once the pending email is cancelled" do
+    user = users(:one)
+    user.update!(unconfirmed_email: "ada-new@example.com")
+    EmailConfirmationsMailer.change(user).deliver_later
+    user.update!(unconfirmed_email: nil)
+
+    assert_no_emails { perform_enqueued_jobs }
+  end
 end
