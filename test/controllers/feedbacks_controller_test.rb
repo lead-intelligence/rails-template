@@ -56,6 +56,16 @@ class FeedbacksControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "Photos"
   end
 
+  test "answers 422 to a photo whose signed id does not verify" do
+    sign_in_as users(:one)
+
+    assert_no_difference("Feedback.count") do
+      post feedback_url, params: { feedback: { message: "Hola", photos: [ "forged" ] } }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   test "rate limits repeated feedback submissions" do
     sign_in_as users(:one)
     5.times { post feedback_url, params: { feedback: { message: "The chat page is slow" } } }

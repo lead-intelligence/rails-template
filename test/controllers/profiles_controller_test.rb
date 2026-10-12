@@ -27,6 +27,15 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".toast .alert.alert-success", /#{Regexp.escape(I18n.t("profiles.update.notice"))}/
   end
 
+  test "answers 422 to an avatar whose signed id does not verify" do
+    sign_in_as users(:one)
+
+    patch profile_url, params: { user: { avatar: "forged" } }
+
+    assert_response :unprocessable_entity
+    assert_not users(:one).reload.avatar.attached?
+  end
+
   test "ignores blank password fields" do
     sign_in_as users(:one)
     patch profile_url, params: { user: { name: "Ada King", password: "", password_confirmation: "" } }

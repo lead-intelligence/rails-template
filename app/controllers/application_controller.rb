@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  rescue_from ActiveSupport::MessageVerifier::InvalidSignature, with: -> { head :unprocessable_entity }
 
   around_action :switch_locale
 

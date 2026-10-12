@@ -52,6 +52,16 @@ class SupportChatPhotosControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, I18n.t("support_chat_photos.create.upload_error")
   end
 
+  test "answers 422 to a photo whose signed id does not verify" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(support: true)
+
+    post support_chat_photos_url(chat), params: { chat: { pending_photos: [ "forged" ] } }
+
+    assert_response :unprocessable_entity
+    assert_not chat.reload.pending_photos.attached?
+  end
+
   test "refuses photos for a closed conversation" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(support: true, closed_at: Time.current)
