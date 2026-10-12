@@ -2,7 +2,7 @@ class NotificationsController < ApplicationController
   PER_PAGE = 25
 
   def index
-    @pagy, @notifications = pagy(Current.user.notifications.newest_first.includes(:event), limit: PER_PAGE)
+    @pagy, @notifications = pagy(Current.user.notifications.newest_first.includes(:event), limit: PER_PAGE, raise_range_error: true)
     @notifications.load
   end
 

@@ -4,7 +4,7 @@ class DocumentsController < ApplicationController
   def index
     query = params.permit(:q, :page)[:q]
     @documents = search(query) if query.present?
-    @pagy, @documents = pagy(listed_documents, limit: PER_PAGE) unless @documents
+    @pagy, @documents = pagy(listed_documents, limit: PER_PAGE, raise_range_error: true) unless @documents
   end
 
   def show

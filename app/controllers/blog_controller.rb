@@ -11,7 +11,7 @@ class BlogController < ApplicationController
                             .order(published_at: :desc)
     scope = scope.joins(:category).where(railspress_categories: { slug: filters[:category] }) if filters[:category].present?
     scope = scope.joins(:tags).where(railspress_tags: { slug: filters[:tag] }) if filters[:tag].present?
-    @pagy, @posts = pagy(scope, limit: PER_PAGE)
+    @pagy, @posts = pagy(scope, limit: PER_PAGE, raise_range_error: true)
   end
 
   def show

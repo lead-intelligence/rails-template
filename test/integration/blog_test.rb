@@ -46,6 +46,17 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "Post #{BlogController::PER_PAGE}"
   end
 
+  test "index sends a page past the last one to the last page, keeping the filter" do
+    ruby = Railspress::Tag.create!(name: "ruby")
+    (BlogController::PER_PAGE + 1).times do |index|
+      Railspress::Post.create!(title: "Post #{index}", status: :published, published_at: index.hours.ago, tags: [ ruby ])
+    end
+
+    get blog_url(tag: ruby.slug, page: "9" * 25)
+
+    assert_redirected_to blog_url(page: 2, tag: ruby.slug)
+  end
+
   test "index keeps the tag filter in its page links" do
     ruby = Railspress::Tag.create!(name: "ruby")
     (BlogController::PER_PAGE + 1).times do |index|

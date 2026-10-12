@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
   rescue_from ActiveSupport::MessageVerifier::InvalidSignature, with: -> { head :unprocessable_entity }
+  rescue_from Pagy::RangeError, with: ->(error) { redirect_to error.pagy.page_url(:last) }
 
   around_action :switch_locale
 

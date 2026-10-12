@@ -8,4 +8,4 @@ Each controller declares its page size as a `PER_PAGE` constant and passes it to
 
 The nav is styled with DaisyUI and no markup of the app's own: `app/assets/tailwind/application.css` applies `join`, `join-item btn btn-sm`, `btn-primary` and `btn-disabled` to the `.pagy.series-nav` selectors. Pagy's helper accepts no class for the current, disabled or gap items, so a selector is the only seam that reaches all of them; a hand-written nav would have to restate the accessibility markup and would drift from it.
 
-A page past the last one is not an error: Pagy serves it as an empty page, so the list renders its empty state and no nav.
+A page past the last one redirects to the last page, with the rest of the query kept. Each `pagy` call passes `raise_range_error: true` and `ApplicationController` rescues `Pagy::RangeError` with a redirect to the error's own `page_url(:last)`. Served as an empty page instead, a crafted page number still reaches the query as its offset, and one past the 64-bit range fails SQLite with a datatype mismatch. The option is per call and not in `Pagy::OPTIONS`, because madmin paginates through the same Pagy and has no such rescue.
