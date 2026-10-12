@@ -9,6 +9,20 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert cookies[:session_id].present?
   end
 
+  test "returns to the page that asked for the sign-in" do
+    get documents_url
+    sign_in_as users(:one)
+    assert_redirected_to documents_url
+  end
+
+  test "does not return to a form submission that asked for the sign-in" do
+    patch mark_all_read_notifications_url
+    assert_redirected_to new_session_url
+
+    sign_in_as users(:one)
+    assert_redirected_to root_url
+  end
+
   test "rejects invalid credentials" do
     post session_url, params: { email_address: "ada@example.com", password: "wrong" }
     assert_redirected_to new_session_url
