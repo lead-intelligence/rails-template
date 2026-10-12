@@ -27,6 +27,14 @@ class ChatTest < ActiveSupport::TestCase
     assert chat.valid?
   end
 
+  test "rejects a text file sent as a png pending photo" do
+    chat = users(:one).chats.create!(support: true)
+    chat.pending_photos.attach(io: StringIO.new("plain text"), filename: "avatar.png", content_type: "image/png")
+
+    assert_not chat.valid?
+    assert chat.errors.of_kind?(:pending_photos, :content_type_spoofed)
+  end
+
   test "rejects a non-image pending photo" do
     chat = users(:one).chats.create!(support: true)
     chat.pending_photos.attach(io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain")
@@ -35,8 +43,9 @@ class ChatTest < ActiveSupport::TestCase
 
   test "rejects an oversize pending photo" do
     chat = users(:one).chats.create!(support: true)
-    chat.pending_photos.attach(io: StringIO.new("x" * 6.megabytes), filename: "big.png", content_type: "image/png")
+    chat.pending_photos.attach(io: StringIO.new(file_fixture("avatar.png").binread + ("\0" * 6.megabytes)), filename: "big.png", content_type: "image/png")
     assert_not chat.valid?
+    assert chat.errors.of_kind?(:pending_photos, :file_size_not_less_than)
   end
 
   test "offers only the chat models of the configured provider" do

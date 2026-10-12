@@ -29,6 +29,14 @@ class UserTest < ActiveSupport::TestCase
     assert user.valid?
   end
 
+  test "rejects a text file sent as a png avatar" do
+    user = users(:one)
+    user.avatar.attach(io: StringIO.new("plain text"), filename: "avatar.png", content_type: "image/png")
+
+    assert_not user.valid?
+    assert user.errors.of_kind?(:avatar, :content_type_spoofed)
+  end
+
   test "rejects a non-image avatar" do
     user = users(:one)
     user.avatar.attach(io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain")

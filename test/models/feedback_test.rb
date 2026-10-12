@@ -26,6 +26,14 @@ class FeedbackTest < ActiveSupport::TestCase
     assert feedback.valid?
   end
 
+  test "rejects a text file sent as a png photo" do
+    feedback = users(:one).feedbacks.build(message: "Broken layout")
+    feedback.photos.attach(io: StringIO.new("plain text"), filename: "avatar.png", content_type: "image/png")
+
+    assert_not feedback.valid?
+    assert feedback.errors.of_kind?(:photos, :content_type_spoofed)
+  end
+
   test "rejects a non-image photo" do
     feedback = users(:one).feedbacks.build(message: "Broken layout")
     feedback.photos.attach(io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain")
@@ -34,8 +42,9 @@ class FeedbackTest < ActiveSupport::TestCase
 
   test "rejects an oversize photo" do
     feedback = users(:one).feedbacks.build(message: "Broken layout")
-    feedback.photos.attach(io: StringIO.new("x" * 6.megabytes), filename: "big.png", content_type: "image/png")
+    feedback.photos.attach(io: StringIO.new(file_fixture("avatar.png").binread + ("\0" * 6.megabytes)), filename: "big.png", content_type: "image/png")
     assert_not feedback.valid?
+    assert feedback.errors.of_kind?(:photos, :file_size_not_less_than)
   end
 
   test "enqueues CreateFeedbackIssueJob after create" do

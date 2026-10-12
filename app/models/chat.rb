@@ -8,7 +8,7 @@ class Chat < ApplicationRecord
   has_many :feedbacks, dependent: :nullify
 
   has_many_attached :pending_photos
-  validates :pending_photos, content_type: %w[image/png image/jpeg image/webp], size: { less_than: 5.megabytes },
+  validates :pending_photos, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes },
     limit: { max: MAX_PENDING_PHOTOS }
 
   scope :support, -> { where(support: true) }

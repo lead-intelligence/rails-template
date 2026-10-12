@@ -16,4 +16,11 @@ class ImageBuildTest < ActiveSupport::TestCase
     assert_equal "default=$SSH_AUTH_SOCK", YAML.safe_load(DEPLOY.read).dig("builder", "ssh"),
       "the mount is inert unless the build is invoked with the agent forwarded"
   end
+
+  test "the runtime image installs the file command that checks an upload's real type" do
+    packages = DOCKERFILE.read[/FROM .* AS base.*?apt-get install[^\n]*/m]
+
+    assert_match(/ file /, packages,
+      "spoofing_protection runs `file` on every upload; the slim base image lacks it, so production would reject every photo")
+  end
 end
