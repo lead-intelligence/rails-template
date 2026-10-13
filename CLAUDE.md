@@ -8,7 +8,7 @@ Rails starter template. This repo is both a working app and the template new app
 - RubyLLM on OpenAI only, Schematist for structured output, Neighbor + sqlite-vec for vector search.
 - Native Rails auth, console1984, money-rails, pagy, noticed, pundit, ahoy. The last three are capability only: nothing uses them yet.
 - Developer panels behind one shared basic auth. RailsPress is the blog back-office; the public `/blog` is ours.
-- Spanish default, English fallback, locale from `Accept-Language`. `charco_mobile` drives native iOS and Android apps.
+- Spanish default, English fallback. Locale from a cookie the navbar switcher sets, else `Accept-Language`. `charco_mobile` drives native iOS and Android apps.
 - Minitest + fixtures + WebMock, cuprite system tests, axe-core, bullet, SimpleCov at 100%. Kamal deploys.
 
 ## Commands

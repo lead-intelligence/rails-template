@@ -8,12 +8,12 @@ class NotificationsTest < ApplicationSystemTestCase
     visit root_path
 
     find("[aria-label='Notifications']").click
-    assert_selector ".badge-primary", text: "1"
+    assert_selector ".indicator .badge-primary", text: "1"
     assert_text "Test notification"
 
     click_button t("notifications.index.mark_all_read")
 
-    assert_no_selector ".badge-primary"
+    assert_no_selector ".indicator .badge-primary"
   end
 
   test "the dropdown stays open after the bell loses browser focus" do

@@ -1,0 +1,18 @@
+<% if I18n.available_locales.many? %>
+  <details class="dropdown dropdown-end" data-controller="dropdown">
+    <summary class="btn btn-ghost gap-1.5 px-2.5" title="<%= t("shared.locale_switcher.label") %>">
+      <%= lucide_icon "languages", class: "size-5", "aria-hidden": true %>
+      <span class="sr-only"><%= t("shared.locale_switcher.label") %>:</span>
+      <span class="text-xs font-semibold uppercase"><%= I18n.locale %></span>
+    </summary>
+    <ul class="menu dropdown-content z-40 mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-1.5 shadow-lg">
+      <% I18n.available_locales.each do |locale| %>
+        <li>
+          <%= button_to t("locale_name", locale: locale), locale_path(locale: locale), method: :patch, form_class: "contents",
+                lang: locale, class: ["w-full cursor-pointer rounded-field px-3 py-1.5 text-start hover:bg-base-200", ("bg-base-200 font-semibold" if locale == I18n.locale)], aria: { current: locale == I18n.locale },
+                form: { data: { turbo: false } } %>
+        </li>
+      <% end %>
+    </ul>
+  </details>
+<% end %>

@@ -20,10 +20,10 @@ class DocsTest < ApplicationSystemTestCase
     assert_selector "h1", text: t("docs.index.hero_title")
     assert_link "Superadmin panels"
 
-    find("input.theme-controller[value='dark']").click
+    choose_theme :dark
+    refresh
 
-    assert_selector "input.theme-controller[value='dark']:checked"
-    assert_equal "dark", page.evaluate_script("window.localStorage.getItem('docs-theme')")
+    assert_selector "input.theme-controller[value='dark']:checked", visible: :all
 
     click_link "Superadmin panels"
 

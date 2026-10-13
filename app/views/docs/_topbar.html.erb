@@ -22,13 +22,7 @@
       </span>
     </button>
 
-    <div class="join" data-controller="docs-theme">
-      <input type="radio" name="docs-theme" value="light" class="btn btn-sm join-item theme-controller"
-             aria-label="<%= t("layouts.docs.theme_light") %>"
-             data-docs-theme-target="option" data-action="docs-theme#remember">
-      <input type="radio" name="docs-theme" value="dark" class="btn btn-sm join-item theme-controller"
-             aria-label="<%= t("layouts.docs.theme_dark") %>"
-             data-docs-theme-target="option" data-action="docs-theme#remember">
-    </div>
+    <%= render "shared/locale_switcher" %>
+    <%= render "shared/theme_switcher" %>
   </div>
 </header>

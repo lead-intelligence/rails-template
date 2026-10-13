@@ -45,6 +45,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.raise_server_errors = previous
   end
 
+  def choose_theme(theme)
+    find("summary[title='#{t("shared.theme_switcher.label")}']").click
+    find("label", text: t("shared.theme_switcher.#{theme}")).click
+  end
+
   def sign_in_via_browser(user)
     visit new_session_url
     fill_in "email_address", with: user.email_address

@@ -21,7 +21,11 @@ class ApplicationController < ActionController::Base
   private
 
   def switch_locale(&action)
-    I18n.with_locale(locale_from_accept_language || I18n.default_locale, &action)
+    I18n.with_locale(locale_from_cookie || locale_from_accept_language || I18n.default_locale, &action)
+  end
+
+  def locale_from_cookie
+    I18n.available_locales.find { |locale| locale.to_s == cookies[:locale] }
   end
 
   def locale_from_accept_language

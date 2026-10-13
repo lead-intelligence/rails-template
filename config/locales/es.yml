@@ -225,9 +225,8 @@ es:
       search: Buscar
       search_label: Buscar en la documentación
       search_placeholder: Busca una página o una sección
-      theme_dark: Tema oscuro
-      theme_light: Tema claro
       title: Documentación
+  locale_name: Español
   messages:
     assistant:
       role: Asistente
@@ -291,6 +290,7 @@ es:
       title: Notificaciones
   pages:
     home:
+      eyebrow: Template de Rails
       features:
       - body: Sesiones, registro y perfiles listos de entrada.
         title: Autenticación
@@ -301,6 +301,7 @@ es:
       headline: Construye tu próxima idea más rápido
       meta_description: Un template de Rails con IA incluida desde el primer día
       meta_title: Inicio
+      sign_in: Ya tengo cuenta
       start: Empezar
       subheadline: Rails, SQLite, Hotwire, DaisyUI y herramientas de IA listas desde
         el día uno.
@@ -387,6 +388,8 @@ es:
       confirm: Confirmar
     flash:
       dismiss: Cerrar
+    locale_switcher:
+      label: Idioma
     navbar:
       chats: Chats
       documents: Documentos
@@ -403,6 +406,11 @@ es:
       mark_all_read: Marcar todas como leídas
       see_all: Ver todas
       title: Notificaciones
+    theme_switcher:
+      dark: Oscuro
+      label: Tema
+      light: Claro
+      system: Sistema
   support_chat_photos:
     create:
       too_many: Puedes adjuntar hasta %{count} fotos a una conversación.

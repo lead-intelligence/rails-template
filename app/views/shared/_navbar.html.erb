@@ -1,15 +1,22 @@
-<div class="navbar bg-base-100 shadow-sm">
+<div class="navbar sticky top-0 z-30 gap-1 border-b border-base-300/70 bg-base-100/80 px-3 backdrop-blur-md sm:px-6">
   <div class="flex-1">
-    <%= link_to "CharcoTemplate", root_path, class: "btn btn-ghost text-xl" %>
+    <%= link_to root_path, class: "flex w-fit items-center gap-2.5 rounded-field p-1" do %>
+      <span class="grid size-8 place-items-center rounded-field bg-primary text-primary-content">
+        <%= lucide_icon "droplet", class: "size-4", "aria-hidden": true %>
+      </span>
+      <span class="sr-only text-lg font-semibold tracking-tight sm:not-sr-only">CharcoTemplate</span>
+    <% end %>
   </div>
-  <div class="flex-none gap-2">
+  <div class="flex flex-none items-center gap-1">
+    <%= render "shared/locale_switcher" %>
+    <%= render "shared/theme_switcher" %>
     <% if authenticated? %>
       <%= render "shared/notification_bell" %>
       <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle [&_.avatar>div]:w-9">
           <%= render "users/avatar", user: Current.user %>
         </div>
-        <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow">
+        <ul tabindex="0" class="menu dropdown-content z-40 mt-2 w-52 rounded-box border border-base-300 bg-base-100 p-1.5 shadow-lg">
           <li><%= link_to t("shared.navbar.chats"), chats_path %></li>
           <li><%= link_to t("shared.navbar.documents"), documents_path %></li>
           <li><%= link_to t("shared.navbar.profile"), edit_profile_path %></li>
@@ -19,8 +26,8 @@
         </ul>
       </div>
     <% else %>
-      <%= link_to t("shared.navbar.sign_in"), new_session_path, class: "btn btn-ghost" %>
-      <%= link_to t("shared.navbar.sign_up"), new_registration_path, class: "btn btn-primary" %>
+      <%= link_to t("shared.navbar.sign_in"), new_session_path, class: "btn btn-ghost btn-sm" %>
+      <%= link_to t("shared.navbar.sign_up"), new_registration_path, class: "btn btn-primary btn-sm" %>
     <% end %>
   </div>
 </div>

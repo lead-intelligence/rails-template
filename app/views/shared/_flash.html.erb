@@ -1,4 +1,4 @@
-<div id="flash" class="toast toast-top toast-center">
+<div id="flash" class="toast toast-top toast-center z-50">
   <% flash.each do |type, message| %>
     <% next if native_app? && type == "notice" %>
     <div class="alert <%= type == "alert" ? "alert-error" : "alert-success" %>" data-controller="flash">

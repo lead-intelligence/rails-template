@@ -1,20 +1,26 @@
 <% set_meta_tags title: t(".meta_title"), description: t(".meta_description") %>
-<div class="hero bg-base-200 min-h-[70vh]">
-  <div class="hero-content text-center">
-    <div class="max-w-xl">
-      <h1 class="text-5xl font-bold"><%= t(".headline") %></h1>
-      <p class="py-6"><%= t(".subheadline") %></p>
-      <%= link_to t(".start"), new_registration_path, class: "btn btn-primary" %>
-    </div>
+<section class="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 py-16 text-center sm:py-24">
+  <span class="badge badge-soft badge-primary"><%= t(".eyebrow") %></span>
+  <h1 class="text-4xl font-bold text-balance sm:text-6xl"><%= t(".headline") %></h1>
+  <p class="max-w-xl text-lg text-pretty text-base-content/75"><%= t(".subheadline") %></p>
+  <div class="flex flex-wrap justify-center gap-3">
+    <%= link_to new_registration_path, class: "btn btn-primary" do %>
+      <%= t(".start") %>
+      <%= lucide_icon "arrow-right", class: "size-4", "aria-hidden": true %>
+    <% end %>
+    <%= link_to t(".sign_in"), new_session_path, class: "btn btn-ghost" %>
   </div>
-</div>
-<div class="grid gap-6 md:grid-cols-3 p-10">
-  <% t(".features").each do |feature| %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <h2 class="card-title"><%= feature[:title] %></h2>
-        <p><%= feature[:body] %></p>
+</section>
+<section class="mx-auto grid w-full max-w-5xl gap-4 pb-16 md:grid-cols-3">
+  <% t(".features").zip(%w[shield-check sparkles rocket]).each do |feature, icon| %>
+    <div class="card border border-base-300 bg-base-100">
+      <div class="card-body gap-3">
+        <span class="grid size-10 place-items-center rounded-field bg-primary/10 text-primary">
+          <%= lucide_icon icon, class: "size-5", "aria-hidden": true %>
+        </span>
+        <h2 class="card-title text-base"><%= feature[:title] %></h2>
+        <p class="text-base-content/75"><%= feature[:body] %></p>
       </div>
     </div>
   <% end %>
-</div>
+</section>

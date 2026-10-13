@@ -4,7 +4,7 @@
   <% if @posts.any? %>
     <div class="grid gap-6">
       <% @posts.each do |post| %>
-        <article class="card bg-base-100 shadow-sm">
+        <article class="card border border-base-300 bg-base-100 shadow-sm">
           <% if post.header_image.attached? %>
             <figure><%= image_tag post.header_image, class: "w-full h-48 object-cover" %></figure>
           <% end %>

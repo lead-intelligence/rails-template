@@ -1,7 +1,7 @@
 <%= native_form_tag %>
 <% set_meta_tags title: t(".meta_title") %>
 <div class="flex justify-center py-16">
-  <div class="card bg-base-100 shadow w-full max-w-md">
+  <div class="card border border-base-300 bg-base-100 shadow-sm w-full max-w-md">
     <div class="card-body">
       <h1 class="card-title"><%= t(".title") %></h1>
       <%= form_with model: @user, url: registration_path do |form| %>

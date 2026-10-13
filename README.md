@@ -12,7 +12,7 @@ CharcoTemplate is a Rails 8.1.3.1 starter template. It is a fully working app on
 - A blog: RailsPress back-office at `/railspress/admin`, public pages at `/blog`
 - Solid Queue, Solid Cache and Solid Cable on SQLite — no Redis
 - Developer panels behind one password: records, jobs, errors, logs, tickets, docs
-- Spanish and English UI, chosen from the browser's language
+- Spanish and English UI, light and dark themes; the person picks both in the navbar
 - Native iOS and Android apps driven from the views (`charco_mobile`)
 - Tailwind v4 + DaisyUI 5 and Hotwire, with no Node
 - Kamal deploy with encrypted backups
