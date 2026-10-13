@@ -12,6 +12,13 @@ class ImageBuildTest < ActiveSupport::TestCase
       "charco_mobile lives in a private repository reached over SSH, so a build without the agent never resolves it"
   end
 
+  test "the build stage can reach github over ssh" do
+    build = DOCKERFILE.read[/FROM base AS build.*?bundle install/m]
+
+    assert_match(/ openssh-client /, build, "git fetches charco_mobile with ssh, which the slim image lacks")
+    assert_includes build, "ssh-keyscan -t ed25519 github.com", "without github in known_hosts, ssh refuses the host"
+  end
+
   test "kamal hands its builder the ssh agent the image build asks for" do
     assert_equal "default=$SSH_AUTH_SOCK", YAML.safe_load(DEPLOY.read).dig("builder", "ssh"),
       "the mount is inert unless the build is invoked with the agent forwarded"
