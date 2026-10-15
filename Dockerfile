@@ -32,8 +32,9 @@ FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y build-essential git libvips libyaml-dev openssh-client pkg-config && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives && \
+    mkdir -p ~/.ssh && ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
 
 # Install application gems
 COPY vendor/* ./vendor/
