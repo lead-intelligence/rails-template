@@ -16,4 +16,12 @@ if Rails.env.development?
     user.password = "password"
     user.confirmed_at = Time.current
   end
+  ENV["SEED_OWNER"] ||= "dev@example.com"
+end
+
+# The data to try each feature with: one file per feature in db/seeds/, for the user SEED_OWNER
+# names. Staging names its owner and runs this on every build, so each file finds or creates its
+# records. Production names nobody, and gets none.
+if ENV["SEED_OWNER"].present?
+  Dir[Rails.root.join("db/seeds/*.rb")].sort.each { |file| load file }
 end
