@@ -63,7 +63,7 @@ class MobileTest < ActionDispatch::IntegrationTest
     assert_equal %w[home chats documents notifications profile], tabs.map { |tab| tab["key"] }
     assert_equal({ "es" => I18n.t("charco_mobile.tabs.home.title", locale: :es), "en" => I18n.t("charco_mobile.tabs.home.title", locale: :en) }, tabs.first["titles"])
     assert_equal "house", tabs.first["icon"]
-    assert_equal [ "/profile", "/active_sessions", "/feedback" ], tabs.last["auto_route"]
+    assert_equal [ "/profile/edit", "/profile", "/active_sessions", "/feedback" ], tabs.last["auto_route"]
     assert_equal true, tabs.find { |tab| tab["key"] == "documents" }["search"]
     assert_equal "normal", response.parsed_body.dig("app", "mode")
     assert_equal "/", response.parsed_body.dig("app", "entry_path")
