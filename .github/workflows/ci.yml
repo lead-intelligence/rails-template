@@ -25,6 +25,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      # The checkout belongs to another user than the container's root: git
+      # refuses it, and the tests that list the tracked files find none.
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Look for the charco_mobile deploy key
         id: mobile_deploy_key
         run: echo "present=${{ secrets.CHARCO_MOBILE_DEPLOY_KEY != '' }}" >> $GITHUB_OUTPUT
