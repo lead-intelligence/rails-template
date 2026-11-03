@@ -35,6 +35,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.CHARCO_MOBILE_DEPLOY_KEY }}
 
+      # ssh in the container reads root's home, not the HOME the agent step
+      # wrote GitHub's host key to.
+      - name: Trust GitHub's host key
+        if: steps.mobile_deploy_key.outputs.present == 'true'
+        run: mkdir -p /etc/ssh && ssh-keyscan -t ed25519 github.com >> /etc/ssh/ssh_known_hosts
+
       - name: Cache gems
         uses: actions/cache@v4
         with:
