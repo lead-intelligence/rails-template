@@ -9,13 +9,26 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    # The Debian and libvips that production runs (Dockerfile), so a test
+    # passes here only where it passes in production: the runner's own
+    # packages change without notice. Keep the Ruby version as .ruby-version.
+    container: ruby:4.0.6-slim
+    env:
+      BUNDLE_PATH: vendor/bundle
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+        run: |
+          apt-get update -qq
+          apt-get install --no-install-recommends -y build-essential chromium curl file fonts-liberation git libvips libyaml-dev openssh-client pkg-config
 
       - name: Checkout code
         uses: actions/checkout@v7
+
+      # The checkout belongs to another user than the container's root: git
+      # refuses it, and the tests that list the tracked files find none.
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Look for the charco_mobile deploy key
         id: mobile_deploy_key
@@ -27,10 +40,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.CHARCO_MOBILE_DEPLOY_KEY }}
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      # ssh in the container reads root's home, not the HOME the agent step
+      # wrote GitHub's host key to.
+      - name: Trust GitHub's host key
+        if: steps.mobile_deploy_key.outputs.present == 'true'
+        run: mkdir -p /etc/ssh && ssh-keyscan -t ed25519 github.com >> /etc/ssh/ssh_known_hosts
+
+      - name: Cache gems
+        uses: actions/cache@v4
         with:
-          bundler-cache: true
+          path: vendor/bundle
+          key: gems-${{ hashFiles('Gemfile.lock', '.ruby-version') }}
+
+      - name: Install gems
+        run: bundle install --jobs 4
 
       - name: Run quality gate
         env:
