@@ -12,6 +12,9 @@ updates:
   directory: "/"
   registries:
   - charco-mobile
+  # Bundler evaluates the Gemfile and the gemspecs, our own code; the token
+  # they could read only reads charco_mobile.
+  insecure-external-code-execution: allow
   schedule:
     interval: weekly
   open-pull-requests-limit: 10

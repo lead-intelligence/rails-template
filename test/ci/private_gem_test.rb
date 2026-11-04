@@ -38,6 +38,8 @@ class PrivateGemTest < ActiveSupport::TestCase
     assert_equal({ "type" => "git", "url" => "https://github.com", "username" => "x-access-token",
                    "password" => "${{secrets.CHARCO_MOBILE_TOKEN}}" }, config.dig("registries", "charco-mobile"))
     assert_equal [ "charco-mobile" ], bundler["registries"]
+    assert_equal "allow", bundler["insecure-external-code-execution"],
+      "with a registry, Dependabot never evaluates the Gemfile and gemspecs unless told to, and every update fails"
   end
 
   test "nothing reaches the gem over SSH any more" do
