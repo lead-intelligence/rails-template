@@ -2,11 +2,11 @@
 <% recent = recent_notifications %>
 
 <details class="dropdown dropdown-end" data-controller="dropdown">
-  <summary class="btn btn-ghost btn-circle" aria-label="<%= t("shared.notification_bell.aria_label") %>">
+  <summary class="btn btn-ghost btn-circle" aria-label="<%= unread_count.positive? ? t("shared.notification_bell.aria_label_unread", count: unread_count) : t("shared.notification_bell.aria_label") %>">
     <div class="indicator">
       <%= lucide_icon("bell", class: "size-5") %>
       <% if unread_count.positive? %>
-        <span class="badge badge-xs badge-primary indicator-item"><%= unread_count %></span>
+        <span class="badge badge-xs badge-primary indicator-item" aria-hidden="true"><%= unread_count %></span>
       <% end %>
     </div>
   </summary>

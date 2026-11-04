@@ -396,6 +396,7 @@ en:
       sign_up: Sign up
     notification_bell:
       aria_label: Notifications
+      aria_label_unread: Notifications, %{count} unread
       empty: You're all caught up
       mark_all_read: Mark all read
       see_all: See all
