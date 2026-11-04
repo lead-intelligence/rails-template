@@ -2,8 +2,9 @@ require "test_helper"
 
 # charco_mobile lives in a private repository. Bundler reads it over HTTPS with
 # one read-only token, the organization's CHARCO_MOBILE_TOKEN secret, handed to
-# Bundler as BUNDLE_GITHUB__COM. Dependabot reads it the same way, through the
-# organization's grant, so it can open the updates Peronix merges.
+# Bundler as BUNDLE_GITHUB__COM. Dependabot reads it with the same token, from
+# the organization's Dependabot secrets, so it can open the
+# updates Peronix merges.
 class PrivateGemTest < ActiveSupport::TestCase
   CREDENTIAL = "BUNDLE_GITHUB__COM".freeze
   FROM_SECRET = "x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}".freeze
@@ -28,6 +29,15 @@ class PrivateGemTest < ActiveSupport::TestCase
     install = read("Dockerfile").lines.find { |line| line.include?("bundle install") }
 
     assert_includes install, "--mount=type=secret,id=#{CREDENTIAL},env=#{CREDENTIAL}"
+  end
+
+  test "Dependabot reads the gem with the same token, since a public repository gets no organization grant" do
+    config = YAML.safe_load(read(".github/dependabot.yml"))
+    bundler = config["updates"].find { |update| update["package-ecosystem"] == "bundler" }
+
+    assert_equal({ "type" => "git", "url" => "https://github.com", "username" => "x-access-token",
+                   "password" => "${{secrets.CHARCO_MOBILE_TOKEN}}" }, config.dig("registries", "charco-mobile"))
+    assert_equal [ "charco-mobile" ], bundler["registries"]
   end
 
   test "nothing reaches the gem over SSH any more" do
