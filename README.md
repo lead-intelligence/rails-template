@@ -65,7 +65,7 @@ The order to do things in, and the things nobody else can do for you.
 
 **Before you write code**
 
-1. From this template's own directory: `bin/spawn my_app [--github]`. It clones the template into `../my_app`, runs `bin/rename` there, removes the clone's `origin` remote (the new app must never push into the template), commits the rename, and registers the app in `children.yml` for later cherry-picks. It refuses any name `bin/rename` refuses, and a failure before registration removes `../my_app`, so you can fix the cause and re-run. `--github` also creates and pushes a private repo and sets its `CHARCO_MOBILE_DEPLOY_KEY` secret from the key file at `CHARCO_MOBILE_DEPLOY_KEY_PATH` (or prints the command when that is unset); without the flag it prints the `gh repo create` command for later. Then, inside `../my_app`: `bin/setup`, and regenerate the credentials and encryption keys as in [Quickstart](#quickstart).
+1. From this template's own directory: `bin/spawn my_app [--github]`. It clones the template into `../my_app`, runs `bin/rename` there, removes the clone's `origin` remote (the new app must never push into the template), commits the rename, and registers the app in `children.yml` for later cherry-picks. It refuses any name `bin/rename` refuses, and a failure before registration removes `../my_app`, so you can fix the cause and re-run. `--github` also creates and pushes a private repo; without the flag it prints the `gh repo create` command for later. Then, inside `../my_app`: `bin/setup`, and regenerate the credentials and encryption keys as in [Quickstart](#quickstart).
 2. **If you skipped `--github`, give the app its own repository now.** Commits pile up fast, and a clean `git log` looks the same whether or not it exists anywhere but your disk. To port a template improvement later you do not need a permanent remote:
 
    ```bash
@@ -110,7 +110,7 @@ cp .env.example .env
 | `SOLID_ERRORS_EMAIL_TO` | Email on each new error (credentials: `solid_errors/email_to`) | No error email |
 | `GITHUB_ISSUES_TOKEN`, `GITHUB_ISSUES_REPO` | Mirror feedback to GitHub Issues | Feedback is saved locally only |
 | `RESTIC_PASSWORD`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Backups (Kamal secrets, not app ENV) | The backup accessory does not boot |
-| `CHARCO_MOBILE_DEPLOY_KEY` | GitHub Actions secret to fetch the private `charco_mobile` gem | CI fails at `bundle install` |
+| `CHARCO_MOBILE_TOKEN` | Organization secret (Actions and Dependabot): a read-only token of the private `charco_mobile` repository, which Bundler gets as `BUNDLE_GITHUB__COM` | CI and the image build fail at `bundle install` |
 
 ## Developer panels
 

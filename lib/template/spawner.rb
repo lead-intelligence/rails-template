@@ -4,9 +4,6 @@ module Template
   class Spawner
     class AlreadyExists < StandardError; end
 
-    DEPLOY_KEY_SECRET = "CHARCO_MOBILE_DEPLOY_KEY".freeze
-    DEPLOY_KEY_PATH = "CHARCO_MOBILE_DEPLOY_KEY_PATH".freeze
-
     def initialize(root:, name:, github: false)
       Renamer.validate_name!(name)
       @root = Pathname.new(root)
@@ -72,31 +69,10 @@ module Template
 
     def create_github_repo
       system("gh", "repo", "create", @name, "--private", "--source=.", "--remote=origin", "--push", chdir: @dest.to_s, exception: true)
-      register_deploy_key
     end
 
     def print_github_command
       puts "gh repo create #{@name} --private --source=. --remote=origin --push"
-      puts deploy_key_command
-    end
-
-    def register_deploy_key
-      key = deploy_key
-      return puts(deploy_key_command) if key.nil?
-
-      system("gh", "secret", "set", DEPLOY_KEY_SECRET, chdir: @dest.to_s, in: key.to_s, exception: true)
-    end
-
-    def deploy_key
-      path = ENV[DEPLOY_KEY_PATH].to_s
-      return if path.empty?
-
-      key = Pathname.new(File.expand_path(path))
-      key.exist? ? key : nil
-    end
-
-    def deploy_key_command
-      "gh secret set #{DEPLOY_KEY_SECRET} --repo #{@name} < <the charco_mobile deploy key>"
     end
   end
 end

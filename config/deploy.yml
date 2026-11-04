@@ -81,7 +81,9 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: amd64
-  ssh: default=$SSH_AUTH_SOCK
+  # The read-only token of the private charco_mobile gem (Dockerfile).
+  secrets:
+    - BUNDLE_GITHUB__COM
 
   # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
   # remote: ssh://docker@docker-builder-server

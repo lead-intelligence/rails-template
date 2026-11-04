@@ -15,12 +15,15 @@ jobs:
     container: ruby:4.0.6-slim
     env:
       BUNDLE_PATH: vendor/bundle
+      # The read-only token of the private charco_mobile gem: bin/ci installs
+      # the gems again in its rename smoke, so the whole job needs it.
+      BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
 
     steps:
       - name: Install packages
         run: |
           apt-get update -qq
-          apt-get install --no-install-recommends -y build-essential chromium curl file fonts-liberation git libvips libyaml-dev openssh-client pkg-config
+          apt-get install --no-install-recommends -y build-essential chromium curl file fonts-liberation git libvips libyaml-dev pkg-config
 
       - name: Checkout code
         uses: actions/checkout@v7
@@ -29,22 +32,6 @@ jobs:
       # refuses it, and the tests that list the tracked files find none.
       - name: Trust the checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Look for the charco_mobile deploy key
-        id: mobile_deploy_key
-        run: echo "present=${{ secrets.CHARCO_MOBILE_DEPLOY_KEY != '' }}" >> $GITHUB_OUTPUT
-
-      - name: Let Bundler read the charco_mobile repository
-        if: steps.mobile_deploy_key.outputs.present == 'true'
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.CHARCO_MOBILE_DEPLOY_KEY }}
-
-      # ssh in the container reads root's home, not the HOME the agent step
-      # wrote GitHub's host key to.
-      - name: Trust GitHub's host key
-        if: steps.mobile_deploy_key.outputs.present == 'true'
-        run: mkdir -p /etc/ssh && ssh-keyscan -t ed25519 github.com >> /etc/ssh/ssh_known_hosts
 
       - name: Cache gems
         uses: actions/cache@v4

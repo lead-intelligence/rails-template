@@ -24,6 +24,11 @@ jobs:
       contents: read
       packages: write
 
+    # The read-only token of the private charco_mobile gem, for Bundler here
+    # and for the image build (config/deploy.yml).
+    env:
+      BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
+
     steps:
       # `workflow_run` checks out the default branch's HEAD unless told otherwise, which is not
       # necessarily the commit CI just went green on.
@@ -32,28 +37,23 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      # One key reaches the server for every app (PERONIX_DEPLOY_KEY); the other lets the image
-      # build read the charco_mobile gem.
-      - name: Load the keys
+      # One key reaches the server for every app.
+      - name: Load the server key
         uses: webfactory/ssh-agent@v0.10.0
         with:
-          ssh-private-key: |
-            ${{ secrets.PERONIX_DEPLOY_KEY }}
-            ${{ secrets.CHARCO_MOBILE_DEPLOY_KEY }}
+          ssh-private-key: ${{ secrets.PERONIX_DEPLOY_KEY }}
 
       # The server's own host keys, written down rather than scanned on every run: scanning
       # trusts whatever answers first. Check them against `ssh-keyscan 2.28.229.5 | ssh-keygen -lf -`
       # if the server is ever rebuilt.
-      - name: Trust the server and GitHub
+      - name: Trust the server
         run: |
           mkdir -p ~/.ssh
           cat >> ~/.ssh/known_hosts <<'KEYS'
           2.28.229.5 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKAM5FxrL/NsyrSR94W4y/v8e/w7UK2u65+iKis4dhkLmUgMbHSUsIS0zD4CPAqDmRRBHLZYT71ZpZFACBXEzmI=
           2.28.229.5 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIn/ePKyQSxis1Z9ZJQFJ/31XQvoy5ERD7/t6JUFrJ21
           KEYS
-          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
 
-      # After the keys: bundler-cache installs the gems here, and charco_mobile is a private git gem.
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
