@@ -402,6 +402,7 @@ es:
       sign_up: Registrarse
     notification_bell:
       aria_label: Notificaciones
+      aria_label_unread: Notificaciones, %{count} sin leer
       empty: Estás al día
       mark_all_read: Marcar todas como leídas
       see_all: Ver todas

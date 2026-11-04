@@ -7,13 +7,14 @@ class NotificationsTest < ApplicationSystemTestCase
     TestNotifier.deliver(users(:one))
     visit root_path
 
-    find("[aria-label='Notifications']").click
-    assert_selector ".indicator .badge-primary", text: "1"
+    find("summary[aria-label='Notifications, 1 unread']").click
+    assert_selector ".indicator .badge-primary[aria-hidden='true']", text: "1"
     assert_text "Test notification"
 
     click_button t("notifications.index.mark_all_read")
 
     assert_no_selector ".indicator .badge-primary"
+    assert_selector "summary[aria-label='Notifications']"
   end
 
   test "the dropdown stays open after the bell loses browser focus" do
@@ -22,7 +23,7 @@ class NotificationsTest < ApplicationSystemTestCase
     TestNotifier.deliver(users(:one))
     visit root_path
 
-    find("[aria-label='Notifications']").click
+    find("summary[aria-label^='Notifications']").click
     page.execute_script("document.activeElement.blur()")
 
     assert_text "Test notification"
@@ -34,7 +35,7 @@ class NotificationsTest < ApplicationSystemTestCase
     TestNotifier.deliver(users(:one))
     visit root_path
 
-    find("[aria-label='Notifications']").click
+    find("summary[aria-label^='Notifications']").click
     assert_text "Test notification"
 
     find("body").click
@@ -59,7 +60,7 @@ class NotificationsTest < ApplicationSystemTestCase
   test "shows a designed empty state when there are no notifications" do
     sign_in_via_browser(users(:one))
 
-    find("[aria-label='Notifications']").click
+    find("summary[aria-label^='Notifications']").click
 
     assert_text t("shared.notification_bell.empty")
   end
