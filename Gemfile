@@ -5,7 +5,7 @@ gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # Framework translations (dates, numbers, Active Record error messages) for every locale.
 gem "rails-i18n", "~> 8.0"
 # Native iOS and Android apps driven from the views [https://github.com/lead-intelligence/charco_mobile]
-gem "charco_mobile", git: "git@github.com:lead-intelligence/charco_mobile.git", branch: "main", glob: "gem/*.gemspec"
+gem "charco_mobile", github: "lead-intelligence/charco_mobile", branch: "main", glob: "gem/*.gemspec"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use sqlite3 as the database for Active Record

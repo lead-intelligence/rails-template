@@ -129,66 +129,14 @@ class Template::SpawnerTest < ActiveSupport::TestCase
   test "creates the GitHub repository when --github is passed" do
     in_template do |root|
       with_fake_gh do |calls|
-        with_deploy_key(nil) { Template::Spawner.new(root: root, name: "demo", github: true).run }
+        Template::Spawner.new(root: root, name: "demo", github: true).run
 
         assert_includes File.read(calls), "repo create demo --private --source=. --remote=origin --push"
       end
     end
   end
 
-  test "registers the mobile deploy key on the new repository so its first CI run can bundle" do
-    in_template do |root|
-      with_fake_gh do |calls|
-        key = Pathname.new(calls).dirname.join("deploy_key")
-        key.write("A PRIVATE KEY")
-
-        with_deploy_key(key) { Template::Spawner.new(root: root, name: "demo", github: true).run }
-
-        log = File.read(calls)
-        assert_includes log, "secret set CHARCO_MOBILE_DEPLOY_KEY"
-        assert_includes log, "A PRIVATE KEY"
-        assert_not_includes log.lines.first, "A PRIVATE KEY"
-      end
-    end
-  end
-
-  test "prints how to register the deploy key when no key is at hand" do
-    in_template do |root|
-      with_fake_gh do |calls|
-        output, = capture_io do
-          with_deploy_key(nil) { Template::Spawner.new(root: root, name: "demo", github: true).run }
-        end
-
-        assert_includes output, "gh secret set CHARCO_MOBILE_DEPLOY_KEY"
-        assert_not_includes File.read(calls), "secret set"
-      end
-    end
-  end
-
-  test "prints how to register the deploy key when the path no longer holds one" do
-    in_template do |root|
-      with_fake_gh do |calls|
-        missing = Pathname.new(calls).dirname.join("gone")
-
-        output, = capture_io do
-          with_deploy_key(missing) { Template::Spawner.new(root: root, name: "demo", github: true).run }
-        end
-
-        assert_includes output, "gh secret set CHARCO_MOBILE_DEPLOY_KEY"
-        assert_not_includes File.read(calls), "secret set"
-      end
-    end
-  end
-
   private
-
-  def with_deploy_key(path)
-    original = ENV["CHARCO_MOBILE_DEPLOY_KEY_PATH"]
-    ENV["CHARCO_MOBILE_DEPLOY_KEY_PATH"] = path&.to_s
-    yield
-  ensure
-    ENV["CHARCO_MOBILE_DEPLOY_KEY_PATH"] = original
-  end
 
   def in_template
     Dir.mktmpdir do |tmp|
