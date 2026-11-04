@@ -29,6 +29,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     super
     assert_turbo_ready
     assert_accessible
+    assert_fits_phone
   end
 
   def assert_turbo_ready

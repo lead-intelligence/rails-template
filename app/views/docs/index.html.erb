@@ -20,7 +20,7 @@
     <div class="mb-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       <% pages.each do |doc| %>
         <%= link_to doc_path(doc.slug), class: "card border border-base-300 bg-base-100 transition hover:border-primary hover:shadow-md" do %>
-          <div class="card-body gap-2">
+          <div class="card-body gap-2 wrap-anywhere">
             <h3 class="card-title items-start gap-2 text-base">
               <%= lucide_icon doc_icon(doc), class: "size-5 shrink-0 text-primary" %>
               <%= doc.title %>

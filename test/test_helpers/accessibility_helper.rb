@@ -4,6 +4,26 @@ module AccessibilityHelper
   AXE_TAGS = %w[wcag2a wcag2aa wcag21a wcag21aa].freeze
   AXE_MAX_TARGETS = 5
   AXE_COLOR_SCHEMES = %w[light dark].freeze
+  PHONE_WIDTH = 390
+
+  # The innermost elements that end past the right edge, when the page scrolls sideways.
+  WIDE_SCRIPT = <<~JS.freeze
+    (function () {
+      var root = document.documentElement;
+      if (root.scrollWidth <= root.clientWidth) return [];
+      var wide = Array.from(document.body.querySelectorAll("*")).filter(function (element) {
+        return element.getBoundingClientRect().right > root.clientWidth + 1;
+      });
+      return wide.filter(function (element) {
+        return !wide.some(function (other) { return other !== element && element.contains(other); });
+      }).slice(0, 5).map(function (element) {
+        var name = element.tagName.toLowerCase();
+        if (element.id) name += "#" + element.id;
+        if (element.className && element.className.baseVal === undefined) name += "." + element.className.trim().split(/\s+/).join(".");
+        return "  " + name + " (ends at " + Math.round(element.getBoundingClientRect().right) + "px)";
+      });
+    })()
+  JS
 
   AXE_SCRIPT = <<~JS.freeze
     var done = arguments[arguments.length - 1];
@@ -31,6 +51,17 @@ module AccessibilityHelper
     assert_empty violations, accessibility_failure_message(violations)
   ensure
     emulate_color_scheme(nil)
+  end
+
+  # A page must fit a phone: at 390px wide, nothing scrolls sideways.
+  def assert_fits_phone
+    window = page.current_window
+    size = window.size
+    window.resize_to(PHONE_WIDTH, size.last)
+    wide = page.evaluate_script(WIDE_SCRIPT)
+    assert_empty wide, "#{page.current_path} scrolls sideways on a #{PHONE_WIDTH}px phone. It sticks out:\n#{wide.join("\n")}"
+  ensure
+    window&.resize_to(*size) if size
   end
 
   private
