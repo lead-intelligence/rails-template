@@ -1,13 +1,13 @@
-<div id="message_<%= message.id %>" data-version="<%= message.broadcast_version %>" class="w-full sm:w-auto my-5 space-y-3 rounded-md px-3 py-2 bg-red-50 border border-red-200">
+<div id="message_<%= message.id %>" data-version="<%= message.broadcast_version %>" class="alert alert-error w-full sm:w-auto my-5 flex flex-col items-start">
   <div>
-    <span class="inline-block rounded px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700">
+    <span class="text-xs font-bold">
       <%= title.presence || t(".title") %>
     </span>
   </div>
 
-  <pre class="whitespace-pre-wrap text-red-900 text-sm overflow-x-auto"><%= error_message %></pre>
+  <pre class="whitespace-pre-wrap text-sm overflow-x-auto"><%= error_message %></pre>
 
   <div>
-    <span class="text-sm text-red-700"><%= l(message.created_at, format: :hour) if message.created_at %></span>
+    <span class="text-xs"><%= l(message.created_at, format: :hour) if message.created_at %></span>
   </div>
 </div>

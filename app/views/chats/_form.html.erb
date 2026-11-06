@@ -1,7 +1,7 @@
 <%= native_form_tag %>
 <%= form_with(model: chat, url: chats_path, class: "contents") do |form| %>
   <% if chat.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
+    <div id="error_explanation" class="alert alert-error mt-3 flex flex-col items-start">
       <h2><%= t(".errors", count: chat.errors.count) %></h2>
 
       <ul class="list-disc ml-6">
@@ -17,16 +17,16 @@
     <%= form.select :model,
         options_for_select(@chat_models.map { |model| [model.label, model.id] }.unshift([default_model_display_name, nil]), @selected_model),
         {},
-        class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": chat.errors[:model].none?, "border-red-400 focus:outline-red-600": chat.errors[:model].any?}] %>
+        class: ["select select-bordered mt-2 w-full", {"select-error": chat.errors[:model].any?}] %>
   </div>
 
   <div class="my-5">
     <%= form.label :prompt, t(".prompt_label") %>
     <%= form.text_area :prompt, rows: 4, placeholder: t(".prompt_placeholder"), autofocus: true, required: true, maxlength: Message::CONTENT_MAX_LENGTH,
-        class: ["block shadow-sm rounded-md border px-3 py-2 mt-2 w-full", {"border-gray-400 focus:outline-blue-600": chat.errors[:prompt].none?, "border-red-400 focus:outline-red-600": chat.errors[:prompt].any?}] %>
+        class: ["textarea textarea-bordered mt-2 w-full", {"textarea-error": chat.errors[:prompt].any?}] %>
   </div>
 
   <div class="inline">
-    <%= form.submit t(".submit"), class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <%= form.submit t(".submit"), class: "btn btn-primary w-full sm:w-auto" %>
   </div>
 <% end %>

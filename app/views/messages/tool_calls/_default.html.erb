@@ -1,13 +1,13 @@
-<div id="message_<%= tool_calls.id %>" data-version="<%= tool_calls.broadcast_version %>" class="w-full sm:w-auto my-5 space-y-3 rounded-md px-3 py-2 bg-gray-50 border border-gray-200">
+<div id="message_<%= tool_calls.id %>" data-version="<%= tool_calls.broadcast_version %>" class="w-full sm:w-auto my-5 space-y-3 rounded-box px-3 py-2 bg-base-200 border border-base-300">
   <div>
-    <span class="inline-block rounded px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-700">
+    <span class="badge badge-neutral badge-sm">
       <%= t(".label") %>
     </span>
   </div>
 
-  <pre class="whitespace-pre-wrap text-gray-700 text-sm overflow-x-auto"><%= tool_call.name %>(<%= tool_call.arguments.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") %>)</pre>
+  <pre class="whitespace-pre-wrap text-sm overflow-x-auto"><%= tool_call.name %>(<%= tool_call.arguments.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") %>)</pre>
 
   <div>
-    <span class="text-sm text-gray-600"><%= l(tool_calls.created_at, format: :hour) if tool_calls.created_at %></span>
+    <span class="text-xs opacity-70"><%= l(tool_calls.created_at, format: :hour) if tool_calls.created_at %></span>
   </div>
 </div>
