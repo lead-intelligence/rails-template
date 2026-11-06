@@ -1,6 +1,8 @@
 class CreateSupportTicketTool < RubyLLM::Tool
   description "Files a refined support ticket with the team once the person's problem or suggestion is understood."
 
+  LIMIT_REACHED = "This person already sent several tickets in the last hour. Tell them the team has their earlier reports and they can write again later; file nothing now.".freeze
+
   parameter :title, description: "A short, plain-language title for the ticket"
   parameter :summary, description: "A clear, plain-language summary of the problem or suggestion, written for the app's developer"
 
@@ -11,6 +13,8 @@ class CreateSupportTicketTool < RubyLLM::Tool
   end
 
   def execute(title:, summary:)
+    return LIMIT_REACHED if @user.feedbacks.within_the_last_hour.count >= Feedback::HOURLY_LIMIT
+
     message = "#{title}\n\n#{summary}".truncate(Feedback::MESSAGE_MAX_LENGTH)
     feedback = @user.feedbacks.create!(message:, context: @chat.ticket_context, chat: @chat)
     photo_count = transfer_pending_photos(feedback)
