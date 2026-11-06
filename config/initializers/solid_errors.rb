@@ -6,5 +6,4 @@ SolidErrors.destroy_after = 30.days
 
 Rails.error.add_middleware(->(error, **options) { ErrorRoute.call(error, **options) })
 
-# Each new error reaches Peronix (app/models/concerns/reported_to_peronix.rb).
-Rails.application.config.to_prepare { SolidErrors::Error.include(ReportedToPeronix) }
+ActiveSupport::Notifications.subscribe(/\Aerror_(created|reopened)\.solid_errors\z/) { |event| ErrorReportJob.report_later(event.payload[:occurrence]) }
