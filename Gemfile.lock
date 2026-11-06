@@ -508,12 +508,12 @@ GEM
       activejob (>= 7.2)
       activerecord (>= 7.2)
       railties (>= 7.2)
-    solid_errors (0.7.0)
-      actionpack (>= 7.0)
-      actionview (>= 7.0)
-      activerecord (>= 7.0)
-      activesupport (>= 7.0)
-      railties (>= 7.0)
+    solid_errors (0.9.1)
+      actionpack (>= 7.1)
+      actionview (>= 7.1)
+      activerecord (>= 7.1)
+      activesupport (>= 7.1)
+      railties (>= 7.1)
     solid_queue (1.7.0)
       activejob (>= 7.1)
       activerecord (>= 7.1)
@@ -631,7 +631,7 @@ DEPENDENCIES
   simplecov-console (~> 0.9)
   solid_cable
   solid_cache
-  solid_errors (~> 0.7.0)
+  solid_errors (~> 0.9.1)
   solid_queue
   sqlite-vec (~> 0.1.9)
   sqlite3 (>= 2.1)
@@ -814,7 +814,7 @@ CHECKSUMS
   simplecov-console (0.9.5) sha256=b1108bcfff5f210143e2b8301698c367b01586f20d25a73e95475a5df6fc6ff6
   solid_cable (4.0.2) sha256=084636a67679ad00d23088b33c84047e614bcf41ee559db24b414d83cdc42d03
   solid_cache (1.0.10) sha256=bc05a2fb3ac78a6f43cbb5946679cf9db67dd30d22939ededc385cb93e120d41
-  solid_errors (0.7.0) sha256=a1db96bd6b96cca4444bca4526ce63b1e79ebe114b4d3f4d78af38df3b9a1a9b
+  solid_errors (0.9.1) sha256=d557072980813befc9ddceba0c67e6fc058e533f06f1ca181c955a202a639de2
   solid_queue (1.7.0) sha256=6566b70b801d1c317c81bba7bcdd5677c019afac584a30374b4164002ca356d3
   sqlite-vec (0.1.9-arm64-darwin) sha256=f319ab08757741811c6f2f7d2b58c1b9009460e899e1b69d99fdab288286d9bf
   sqlite-vec (0.1.9-x86_64-linux) sha256=772389c3bf68e7976cfdd8e7c74e820245007e03294808b9b05cdbbf5b02f398
