@@ -56,11 +56,9 @@ class ChatTest < ActiveSupport::TestCase
     assert_operator models.count, :<, RubyLLM.models.chat_models.count
   end
 
-  test "offers only models that answer in text" do
-    ids = Chat.selectable_models.map(&:id)
-
-    assert_includes ids, "gpt-4o-mini"
-    assert_empty ids & %w[tts-1 whisper-1 gpt-4o-mini-transcribe omni-moderation-latest gpt-image-2 gpt-realtime]
+  test "offers only the models the app allows" do
+    assert_equal Rails.configuration.x.selectable_chat_models.sort, Chat.selectable_models.map(&:id).sort
+    assert_not_includes Chat.selectable_models.map(&:id), "o1"
   end
 
   test "destroying a conversation keeps the ticket it filed" do

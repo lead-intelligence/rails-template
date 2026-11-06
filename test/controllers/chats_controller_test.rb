@@ -218,6 +218,16 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#error_explanation", text: /#{I18n.t("activerecord.errors.models.chat.attributes.model.unknown")}/
   end
 
+  test "refuses a model of the provider the app does not allow" do
+    sign_in_as users(:one)
+
+    assert_no_difference("Chat.count") do
+      post chats_url, params: { chat: { model: "o1", prompt: "Hola" } }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   test "creates a chat on the default model when none is chosen" do
     sign_in_as users(:one)
 
