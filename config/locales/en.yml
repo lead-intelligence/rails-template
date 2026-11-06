@@ -44,6 +44,8 @@ en:
   blog:
     index:
       empty: No posts yet.
+      meta_description: News, guides and notes from the team.
+      meta_title: Blog
       title: Blog
     show:
       back: "← Back to the blog"
@@ -229,9 +231,12 @@ en:
     composer:
       exhausted: You reached the daily limit of %{count} messages. Come back tomorrow
         to keep the conversation going.
+      full: This chat reached its limit of %{count} messages. Start a new chat to
+        keep going.
       remaining:
         one: You have %{count} message left today.
         other: You have %{count} messages left today.
+    default_model: 'Default: %{model}'
     error:
       title: Error
     failure:
@@ -434,3 +439,6 @@ en:
     widget:
       close: close
       support: Support
+  time:
+    formats:
+      hour: "%I:%M %p"

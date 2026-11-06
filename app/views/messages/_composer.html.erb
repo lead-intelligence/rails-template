@@ -2,6 +2,8 @@
 <div id="composer_<%= chat.id %>" class="flex-1">
   <% if remaining.zero? %>
     <p class="text-sm opacity-70"><%= t(".exhausted", count: User::DAILY_MESSAGE_LIMIT) %></p>
+  <% elsif chat.full? %>
+    <p class="text-sm opacity-70"><%= t(".full", count: Chat::MAX_MESSAGES) %></p>
   <% elsif chat.support? %>
     <%= render "support_chats/composer", chat: chat, message: message %>
   <% else %>

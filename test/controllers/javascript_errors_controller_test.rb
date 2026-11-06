@@ -3,6 +3,8 @@ require "test_helper"
 class JavascriptErrorsControllerTest < ActionDispatch::IntegrationTest
   include SessionTestHelper
 
+  setup { sign_in_as users(:one) }
+
   test "a reported browser error reaches the error tracker" do
     assert_difference "SolidErrors::Error.count", 1 do
       post javascript_errors_url, params: { message: "Cannot read properties of null", stack: "at h (app.js:3:1)\nat g (app.js:9:2)", url: "http://example.com/documents" }
@@ -44,7 +46,6 @@ class JavascriptErrorsControllerTest < ActionDispatch::IntegrationTest
 
   test "a report from a signed in person carries their id in the error context" do
     user = users(:one)
-    sign_in_as(user)
 
     post javascript_errors_url, params: { message: "boom while signed in" }
 
@@ -52,10 +53,13 @@ class JavascriptErrorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal user.id, SolidErrors::Error.last.occurrences.last.context["user_id"]
   end
 
-  test "it needs no session" do
-    post javascript_errors_url, params: { message: "boom" }
+  test "an anonymous report goes to the log, not to the error tracker" do
+    delete session_url
+    logged = capture_log { post javascript_errors_url, params: { message: "boom from a visitor" } }
 
     assert_response :no_content
+    assert_equal 0, SolidErrors::Error.count
+    assert_includes logged, "boom from a visitor"
   end
 
   test "rate limits repeated error reports" do
@@ -64,5 +68,16 @@ class JavascriptErrorsControllerTest < ActionDispatch::IntegrationTest
     post javascript_errors_url, params: { message: "boom" }
 
     assert_response :too_many_requests
+  end
+
+  private
+
+  def capture_log
+    output = StringIO.new
+    Rails.logger.broadcast_to(logger = ActiveSupport::Logger.new(output))
+    yield
+    output.string
+  ensure
+    Rails.logger.stop_broadcasting_to(logger)
   end
 end

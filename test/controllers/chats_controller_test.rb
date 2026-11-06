@@ -10,6 +10,17 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_url
   end
 
+  test "shows each message's time in the person's locale" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    message = chat.messages.create!(role: :user, content: "Hola", created_at: Time.zone.parse("2026-11-06 15:05"))
+
+    get chat_url(chat)
+
+    assert_select "time", text: I18n.l(message.created_at, format: :hour, locale: :es)
+    assert_equal "15:05", I18n.l(message.created_at, format: :hour, locale: :es)
+  end
+
   test "does not show another user's chat" do
     sign_in_as users(:one)
     other_chat = users(:two).chats.create!(model: "gpt-4o-mini")
@@ -216,6 +227,16 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select "#error_explanation", text: /#{I18n.t("activerecord.errors.models.chat.attributes.model.unknown")}/
+  end
+
+  test "refuses a model of the provider the app does not allow" do
+    sign_in_as users(:one)
+
+    assert_no_difference("Chat.count") do
+      post chats_url, params: { chat: { model: "o1", prompt: "Hola" } }
+    end
+
+    assert_response :unprocessable_entity
   end
 
   test "creates a chat on the default model when none is chosen" do

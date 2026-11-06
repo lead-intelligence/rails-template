@@ -100,6 +100,12 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: /First Post/
   end
 
+  test "index sets its own page title" do
+    get blog_url
+
+    assert_select "title", "#{I18n.t('blog.index.meta_title')} | #{Rails.application.class.module_parent_name}"
+  end
+
   test "index filters by tag" do
     ruby = Railspress::Tag.create!(name: "ruby")
     Railspress::Post.create!(title: "About Ruby", status: :published, published_at: 1.day.ago, tags: [ ruby ])
@@ -110,6 +116,17 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h2", text: /About Ruby/
     assert_no_match(/About Go/, response.body)
+  end
+
+  test "index filtered by tag still shows every tag of each post" do
+    ruby = Railspress::Tag.create!(name: "ruby")
+    rails = Railspress::Tag.create!(name: "rails")
+    Railspress::Post.create!(title: "Ruby on Rails", status: :published, published_at: 1.day.ago, tags: [ ruby, rails ])
+
+    get blog_url(tag: ruby.slug)
+
+    assert_select "a.badge[href=?]", blog_path(tag: ruby.slug)
+    assert_select "a.badge[href=?]", blog_path(tag: rails.slug)
   end
 
   test "show renders a published post and uses its SEO fields" do

@@ -24,4 +24,8 @@ class RubyLlmConfigurationTest < ActiveSupport::TestCase
     assert_equal "gpt-4o-mini", RubyLLM.config.default_model
     assert_equal "text-embedding-3-small", RubyLLM.config.default_embedding_model
   end
+
+  test "allows only cheap chat models by default" do
+    assert_equal %w[gpt-4o-mini gpt-4.1-mini gpt-4.1-nano], Rails.configuration.x.selectable_chat_models
+  end
 end

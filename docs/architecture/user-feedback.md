@@ -4,6 +4,8 @@ A signed-in person leaves feedback, with optional screenshots, from the navbar d
 
 On top of that, each feedback can open a GitHub issue. `after_create_commit` enqueues `CreateFeedbackIssueJob`, which returns immediately unless `GithubIssues.configured?` — both `GITHUB_ISSUES_TOKEN` and `GITHUB_ISSUES_REPO` set — and otherwise posts a `feedback`-labeled issue through `GithubIssues` (`app/models/github_issues.rb`), a small wrapper over `Net::HTTP` with no extra gem, sending `X-GitHub-Api-Version: 2022-11-28` per GitHub's own versioning header. The issue body carries the reporter, the app and environment, any captured context and photo links above a separator, and the person's own words below it.
 
+`GITHUB_ISSUES_REPO` must be a private repository. The issue title and body carry the reporter's email address, and the photo links are signed ids that never expire and need no sign-in, so on a public repository both are public.
+
 The person's words go inside a code fence one backtick longer than the longest backtick run in them. Pasted as Markdown they would render, and an `@name` in them would notify that GitHub user; inside a fence they cannot close it early, and neither markup nor mentions take effect.
 
 `Feedback::MESSAGE_MAX_LENGTH` (10,000 characters) caps the message, enforced by the model and mirrored by the form's `maxlength` and its `feedbacks.new.message_hint`, which interpolates the constant. GitHub rejects an issue body over 65,536 characters, and with no retry an oversized one would fail forever; the cap leaves the metadata ample room under that ceiling.

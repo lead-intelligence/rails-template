@@ -4,3 +4,5 @@ RubyLLM.configure do |config|
   config.default_embedding_model = ENV.fetch("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
   config.openai_protocol = :chat_completions
 end
+
+Rails.application.config.x.selectable_chat_models = %w[gpt-4o-mini gpt-4.1-mini gpt-4.1-nano]

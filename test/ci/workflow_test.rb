@@ -8,6 +8,11 @@ class CiWorkflowTest < ActiveSupport::TestCase
       "without it a repository whose secret was just set can only be retried through an empty commit"
   end
 
+  test "the workflow token can only read the repository" do
+    assert_equal({ "contents" => "read" }, workflow["permissions"],
+      "the job runs pull request code; a changed organization default would hand it a write token")
+  end
+
   test "no step condition reads the secrets context, which GitHub does not expose there" do
     conditions = steps.filter_map { |step| step["if"] }
 

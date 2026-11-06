@@ -15,9 +15,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  # CI runs finish out of order, so a green run for an older commit can arrive after a newer
+  # one deployed. Only the commit at the tip of main deploys; a newer one brings its own run.
+  latest:
     # The template has no server key and a placeholder domain: only the apps born from it deploy.
-    if: github.event.workflow_run.conclusion == 'success' && github.repository != 'lead-intelligence/rails-template'
+    # A push to this repository's main only: the branches filter also matches a pull request's
+    # head branch, so a fork's branch named main would otherwise deploy with these secrets.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.repository != 'lead-intelligence/rails-template'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      current: ${{ steps.tip.outputs.current }}
+    steps:
+      - name: Compare with the tip of main
+        id: tip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          tip="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+          echo "current=$([ "$tip" = "$HEAD_SHA" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: latest
+    if: needs.latest.outputs.current == 'true'
     runs-on: ubuntu-latest
 
     permissions:
@@ -37,9 +63,15 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
+      # Before the server key: every gem's install code runs here.
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
       # One key reaches the server for every app.
       - name: Load the server key
-        uses: webfactory/ssh-agent@v0.10.0
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
         with:
           ssh-private-key: ${{ secrets.PERONIX_DEPLOY_KEY }}
 
@@ -53,11 +85,6 @@ jobs:
           2.28.229.5 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKAM5FxrL/NsyrSR94W4y/v8e/w7UK2u65+iKis4dhkLmUgMbHSUsIS0zD4CPAqDmRRBHLZYT71ZpZFACBXEzmI=
           2.28.229.5 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIn/ePKyQSxis1Z9ZJQFJ/31XQvoy5ERD7/t6JUFrJ21
           KEYS
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
 
       # The master key never enters the repository: it stays on the server, where Peronix made
       # it (bin/peronix-new-app), and .kamal/secrets reads it from config/master.key.

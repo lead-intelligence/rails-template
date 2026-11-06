@@ -31,3 +31,6 @@ production:
   finish_requested_deletions:
     command: "User.finish_requested_deletions"
     schedule: every hour at minute 42
+  purge_abandoned_uploads:
+    command: "DirectUpload.purge_abandoned"
+    schedule: every day at 3am

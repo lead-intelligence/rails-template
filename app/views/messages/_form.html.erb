@@ -1,6 +1,6 @@
 <%= form_with(model: message, url: [@chat, message], id: "new_message_#{chat.id}", class: "contents") do |form| %>
   <% if message.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3">
+    <div id="error_explanation" class="alert alert-error mt-3 flex flex-col items-start">
       <h2><%= t(".errors", count: message.errors.count) %></h2>
 
       <ul class="list-disc ml-6">
@@ -14,7 +14,7 @@
   <div class="my-5">
     <%= form.label :content, t(".content_label") %>
     <%= form.text_area :content, rows: 4, placeholder: t(".content_placeholder"), autofocus: true, required: true, maxlength: Message::CONTENT_MAX_LENGTH,
-        class: ["input input-bordered w-full", {"input-error": message.errors[:content].any?}] %>
+        class: ["textarea textarea-bordered w-full", {"textarea-error": message.errors[:content].any?}] %>
   </div>
 
   <div class="inline">

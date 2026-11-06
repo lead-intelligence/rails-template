@@ -3,7 +3,7 @@
 Rails starter template. This repo is both a working app and the template new apps are born from (`bin/rename <new_app_name>` after cloning).
 
 ## Stack
-- Ruby 4.0.6, Rails 8.1.3.1, SQLite everywhere (Solid Queue/Cache/Cable). Propshaft + Importmap, no Node.
+- Ruby 4.0.6, Rails 8.1.4.1, SQLite everywhere (Solid Queue/Cache/Cable). Propshaft + Importmap, no Node.
 - Tailwind v4 + DaisyUI 5 vendored in `app/assets/tailwind/`, Hotwire, Lexxy rich text, Herb renders every `.html.erb`, Lucide icons.
 - RubyLLM on OpenAI only, Schematist for structured output, Neighbor + sqlite-vec for vector search.
 - Native Rails auth, console1984, money-rails, pagy, noticed, pundit, ahoy. The last three are capability only: nothing uses them yet.

@@ -127,7 +127,7 @@ builder:
 # Set the destination in config/kamal-backup.yml and the RESTIC/AWS secrets in .kamal/secrets before deploying.
 accessories:
   backup:
-    image: ghcr.io/crmne/kamal-backup:latest
+    image: ghcr.io/crmne/kamal-backup:1.1.1
     host: 2.28.229.5
     files:
       - config/kamal-backup.yml:/app/config/kamal-backup.yml:ro

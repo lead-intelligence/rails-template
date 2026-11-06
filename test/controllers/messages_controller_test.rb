@@ -86,6 +86,28 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, chat.messages.count
   end
 
+  test "a chat at its message limit refuses new messages" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    seed_messages(chat, Chat::MAX_MESSAGES, role: "assistant")
+
+    assert_no_enqueued_jobs(only: ChatResponseJob) do
+      post chat_messages_url(chat), params: { message: { content: "Hola" } }
+    end
+
+    assert_response :forbidden
+  end
+
+  test "the message that fills a chat leaves the composer full" do
+    sign_in_as users(:one)
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    seed_messages(chat, Chat::MAX_MESSAGES - 1, role: "assistant")
+
+    post chat_messages_url(chat), params: { message: { content: "Hola" } }, as: :turbo_stream
+
+    assert_match I18n.t("messages.composer.full", count: Chat::MAX_MESSAGES), @response.body
+  end
+
   test "rate limits a burst of messages" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
@@ -118,7 +140,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
   test "the last message within the quota leaves the composer exhausted" do
     sign_in_as users(:one)
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
-    seed_messages(chat, User::DAILY_MESSAGE_LIMIT - 1)
+    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), User::DAILY_MESSAGE_LIMIT - 1)
 
     post chat_messages_url(chat), params: { message: { content: "The last one" } }, as: :turbo_stream
 

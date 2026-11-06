@@ -6,6 +6,8 @@ The palette is cool neutral with one accent: white and slate-blue grays for the 
 
 Depth is on (`--depth: 1`) for a soft lift on buttons and fields, and borders are a single pixel. Cards carry a `border-base-300` border as well as a small shadow, because a shadow does not show on the dark base.
 
+Views color through the DaisyUI tokens (`bg-base-200`, `alert-error`, `btn-primary`), never through Tailwind's fixed palette such as `bg-gray-50`. A fixed class keeps its light-theme color in the dark theme, so the dark theme showed light cards and blue buttons in the chat. `test/views/theme_palette_test.rb` fails on any fixed palette class under `app/views`.
+
 The theme switcher (`app/views/shared/_theme_switcher.html.erb`) is a dropdown of three DaisyUI `theme-controller` radios: light, system and dark. `theme_controller.js` stores the choice in a `theme` cookie, and `ThemeHelper#theme_preference` reads it so the server renders the matching radio already checked. The theme therefore applies on the first paint, with no flash of the other theme and no script in the head. `system` names no theme, so with it checked the page follows the browser's colour-scheme preference. It is the default.
 
 Icons are Lucide through the `lucide-rails` gem: `lucide_icon "house", class: "size-4"` renders inline SVG, with no icon font and no CDN. The first argument is the kebab-case name from the Lucide library; every keyword becomes an attribute of the `svg`, and the stroke follows `currentColor`, so `class:` sets size and colour. `LucideRails.default_options=` in an initializer would set global defaults; none is set.

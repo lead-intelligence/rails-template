@@ -11,3 +11,5 @@ The accessory block in `config/deploy.yml` is **active by default**, not a comme
 Being active, it fails to boot until the repository is set and those secrets are uncommented. That is intentional and matches the deny-by-default stance elsewhere: decide about backups before there is real data, not after.
 
 Restoring and inspecting go through the tool's own `backup`, `list` and `evidence` commands. Practise a restore into a scratch target before needing one.
+
+The backup image is pinned to a release in `config/deploy.yml`. The container holds the restic password and the storage keys and mounts every file, and Kamal pulls the image again on every accessory reboot, so `latest` would run whatever ships next. Dependabot does not read Kamal's config: raise the tag by hand.

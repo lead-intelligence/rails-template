@@ -1,5 +1,6 @@
 class Chat < ApplicationRecord
   INACTIVITY_WINDOW = 12.hours
+  MAX_MESSAGES = 50
   MAX_PENDING_PHOTOS = 5
   PROVIDER = :openai
 
@@ -24,7 +25,11 @@ class Chat < ApplicationRecord
   }
 
   def self.selectable_models
-    RubyLLM.models.chat_models.by_provider(PROVIDER).select { |model| model.modalities.output.include?("text") }
+    RubyLLM.models.chat_models.by_provider(PROVIDER).select { |model| Rails.configuration.x.selectable_chat_models.include?(model.id) }
+  end
+
+  def full?
+    messages.count >= MAX_MESSAGES
   end
 
   def self.close_inactive_support_conversations
