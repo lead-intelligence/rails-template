@@ -2,7 +2,7 @@ require "application_system_test_case"
 
 class JavascriptErrorReportingTest < ApplicationSystemTestCase
   test "an uncaught browser error reaches the error tracker" do
-    visit root_url
+    sign_in_via_browser users(:one)
 
     page.execute_script(<<~JS)
       window.dispatchEvent(new ErrorEvent("error", {
