@@ -30,6 +30,8 @@ A chat deleted before its jobs run discards them instead of failing them. `ChatR
 
 Daily volume is capped per person, not per chat. `User::DAILY_MESSAGE_LIMIT` is the number of user messages allowed in a calendar day, `User#messages_remaining_today` computes what is left from `User#messages_sent_today`, and `ApplicationController#ensure_within_quota` refuses `ChatsController#create` and `MessagesController#create` with `403` once it reaches zero. The composer partial reads the same method to show the remaining count and to replace the form with the exhausted notice, so the number the person reads and the number enforced are the same one. `MessagesController` additionally rate-limits bursts to 20 messages a minute per user.
 
+A chat holds at most `Chat::MAX_MESSAGES` messages. RubyLLM sends the whole history on every turn and has no setting to send only the last ones, so a long chat costs more on each reply and then passes the model's context window, after which every reply fails. Past the limit the composer asks the person to start a new chat and `MessagesController` refuses a post with `403`.
+
 The quota counts messages, not their size, so `Message::CONTENT_MAX_LENGTH` caps what a person writes; assistant replies have no cap. The three composers set it as `maxlength`. A request past it fails the model validation and gets `422`; `ChatsController#create` saves the chat and its first message in one transaction, so no empty chat remains.
 
 The quota count is served by the `messages` index on `chat_id, role, created_at`. The table has no index on `role` alone: SQLite has no statistics to weigh two candidate indexes and picks the `role` one, which scans every person's user messages; `test/models/user_test.rb` asserts the query plan.

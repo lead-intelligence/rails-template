@@ -229,6 +229,8 @@ en:
     composer:
       exhausted: You reached the daily limit of %{count} messages. Come back tomorrow
         to keep the conversation going.
+      full: This chat reached its limit of %{count} messages. Start a new chat to
+        keep going.
       remaining:
         one: You have %{count} message left today.
         other: You have %{count} messages left today.

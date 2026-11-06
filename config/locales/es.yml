@@ -233,6 +233,8 @@ es:
     composer:
       exhausted: Llegaste al límite de %{count} mensajes por hoy. Vuelve mañana para
         seguir la conversación.
+      full: Este chat llegó a su límite de %{count} mensajes. Empieza un chat nuevo
+        para seguir.
       remaining:
         one: Te queda %{count} mensaje por hoy.
         other: Te quedan %{count} mensajes por hoy.
