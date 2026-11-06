@@ -21,3 +21,9 @@ The route is the matched pattern, such as `GET /passwords/:token/edit(.:format)`
 Set a token to turn it on: `error_feed_token` in credentials, or `ERROR_FEED_TOKEN`. The watcher sends `Authorization: Bearer <token>`, compared in constant time. Without a token the endpoint answers `404`, a wrong or missing one gets `401`, and more than 60 requests a minute get `429`.
 
 It never exposes the occurrence context: no params, cookies, headers, URLs, user agents or user ids. Only what the error says about itself, plus the route pattern. Backtrace frames show `[PROJECT_ROOT]` in place of the server's paths.
+
+## Telling Peronix
+
+Peronix hears of each new error as it happens, and an agent investigates and fixes it. `ReportedToPeronix`, included into `SolidErrors::Error` from the initializer, queues `ErrorReportJob` when an error is created, or comes back after it was resolved; an error seen again while open is not sent again. The job posts `ErrorFeed.entry` of the error's latest occurrence, the same shape the feed serves, to `PERONIX_ERRORS_URL` with `Authorization: Bearer PERONIX_ERRORS_TOKEN` (`PeronixErrors`). Solid Errors saves the error before its occurrence, so a job that finds none yet runs again in 5 seconds; one Peronix does not take runs again later, up to 10 times.
+
+Unset, the app tells nobody. The deploy workflow passes `PERONIX_ERRORS_URL` from the organization's variable and `PERONIX_ERRORS_TOKEN` from the repository's secret: each app has its own, which Peronix prints (`peronix task error_token repository:OWNER/NAME`).
