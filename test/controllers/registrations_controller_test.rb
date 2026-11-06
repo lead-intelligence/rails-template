@@ -91,6 +91,19 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_profile_url
   end
 
+  test "destroy stops checking the password after repeated failures" do
+    sign_in_as users(:one)
+    phrase = I18n.t("registrations.destroy.confirmation_phrase")
+    5.times { delete registration_url, params: { confirmation: phrase, password: "wrong" } }
+
+    assert_no_difference("User.where(deletion_requested_at: nil).count") do
+      delete registration_url, params: { confirmation: phrase, password: "password" }
+    end
+
+    assert_redirected_to edit_profile_url
+    assert_equal I18n.t("registrations.rate_limit"), flash[:alert]
+  end
+
   test "destroy requires authentication" do
     assert_no_difference("User.count") do
       delete registration_url, params: { confirmation: I18n.t("registrations.destroy.confirmation_phrase"), password: "password" }
