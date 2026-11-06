@@ -19,7 +19,13 @@ jobs:
   # one deployed. Only the commit at the tip of main deploys; a newer one brings its own run.
   latest:
     # The template has no server key and a placeholder domain: only the apps born from it deploy.
-    if: github.event.workflow_run.conclusion == 'success' && github.repository != 'lead-intelligence/rails-template'
+    # A push to this repository's main only: the branches filter also matches a pull request's
+    # head branch, so a fork's branch named main would otherwise deploy with these secrets.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.repository != 'lead-intelligence/rails-template'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -65,7 +71,7 @@ jobs:
 
       # One key reaches the server for every app.
       - name: Load the server key
-        uses: webfactory/ssh-agent@v0.10.0
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
         with:
           ssh-private-key: ${{ secrets.PERONIX_DEPLOY_KEY }}
 

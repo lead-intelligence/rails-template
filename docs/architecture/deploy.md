@@ -15,3 +15,5 @@ The runtime image installs the `file` command. Every photo upload (avatar, feedb
 `.github/workflows/deploy.yml` deploys main once CI is green on it. CI runs finish out of order, so its `latest` job first compares the commit with the tip of main and the deploy job runs only when they match: otherwise a green run for an older commit, arriving after a newer one deployed, would roll production back. The newer commit brings its own run.
 
 The deploy job installs the gems before it loads the server key. Every gem's install code runs during `bundle install`, and with the key loaded it would run with root access to the server every app shares.
+
+Only a push to the repository's own main deploys. The `workflow_run` branches filter matches the head branch of a pull request too, so without the event and head-repository checks a fork's branch named `main` would run its own code with the deploy secrets. The action that loads the server key is pinned to a commit SHA, because a tag can be moved; Dependabot's `github-actions` ecosystem keeps the pin current.

@@ -21,6 +21,17 @@ class DeployWorkflowTest < ActiveSupport::TestCase
       "every gem's install code would otherwise run with root access to the server"
   end
 
+  test "only a push to this repository's main deploys" do
+    assert_includes jobs.dig("latest", "if"), "github.event.workflow_run.event == 'push'",
+      "the branches filter matches a pull request's head branch, so a fork's branch named main would deploy"
+    assert_includes jobs.dig("latest", "if"), "github.event.workflow_run.head_repository.full_name == github.repository"
+  end
+
+  test "the action that receives the server key is pinned to a commit" do
+    assert_match(/\Awebfactory\/ssh-agent@\h{40}\z/, jobs.dig("deploy", "steps").find { |step| step["uses"].to_s.start_with?("webfactory/ssh-agent") }["uses"],
+      "a tag can be moved to other code, and this action holds root access to the server")
+  end
+
   private
 
   def jobs
