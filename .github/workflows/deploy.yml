@@ -52,12 +52,8 @@ jobs:
 
     # The read-only token of the private charco_mobile gem, for Bundler here
     # and for the image build (config/deploy.yml).
-    # Where the app tells Peronix of its new errors, and its own token for it
-    # (app/models/peronix_errors.rb). Unset, it tells nobody.
     env:
       BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
-      PERONIX_ERRORS_URL: ${{ vars.PERONIX_ERRORS_URL }}
-      PERONIX_ERRORS_TOKEN: ${{ secrets.PERONIX_ERRORS_TOKEN }}
 
     steps:
       # `workflow_run` checks out the default branch's HEAD unless told otherwise, which is not
