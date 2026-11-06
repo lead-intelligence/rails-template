@@ -42,7 +42,7 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 2.0"
+gem "image_processing", "~> 2.2"
 gem "ruby-vips", "~> 2.3"
 
 group :development, :test do
@@ -76,7 +76,7 @@ group :test do
   gem "axe-core-api"
 end
 
-gem "meta-tags", "~> 2.23"
+gem "meta-tags", "~> 2.24"
 
 gem "active_storage_validations", "~> 4.1"
 
@@ -84,7 +84,7 @@ gem "ruby_llm", "~> 2.1"
 
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
 
-gem "webmock", "~> 3.26", group: :test
+gem "webmock", "~> 3.34", group: :test
 
 gem "schematist", "~> 1.1"
 
@@ -96,7 +96,7 @@ gem "sqlite-vec", "~> 0.1.9"
 
 gem "console1984", "~> 0.2.4"
 
-gem "simplecov", "~> 1.1", group: :test, require: false
+gem "simplecov", "~> 1.3", group: :test, require: false
 gem "simplecov-console", "~> 0.9", group: :test, require: false
 
 gem "money-rails", "~> 3.0"
@@ -107,21 +107,21 @@ gem "lucide-rails", "~> 0.7.4"
 
 gem "letter_opener_web", "~> 3.0", group: :development
 
-gem "noticed", "~> 3.0"
+gem "noticed", "~> 3.1"
 
-gem "bullet", "~> 8.1", groups: [ :development, :test ]
+gem "bullet", "~> 8.3", groups: [ :development, :test ]
 
-gem "onlylogs", "~> 0.7"
+gem "onlylogs", "~> 0.13"
 
 gem "pundit", "~> 2.5"
 
 gem "madmin", "~> 2.0"
 
-gem "mission_control-jobs", "~> 1.1"
+gem "mission_control-jobs", "~> 1.3"
 
 gem "railspress-engine", "~> 1.4"
 
-gem "rubyzip", "~> 3.0"
+gem "rubyzip", "~> 3.7"
 
 # Markdown rendering for the /docs site (already in the bundle through railspress-engine)
 gem "redcarpet", "~> 3.6"
@@ -137,4 +137,4 @@ gem "reactionview", "~> 0.6.0"
 gem "herb", "~> 0.11"
 
 # Pagination for the unbounded lists, with its own es and en locales [https://ddnexus.github.io/pagy]
-gem "pagy", "~> 43.7"
+gem "pagy", "~> 43.8"
