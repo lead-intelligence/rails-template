@@ -78,6 +78,8 @@ Rails.application.configure do
     enable_starttls_auto: true
   }
 
+  config.x.peronix = Rails.application.credentials.peronix
+
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
