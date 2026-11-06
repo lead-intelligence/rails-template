@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  post "rails/active_storage/direct_uploads", to: "direct_uploads#create"
   mount Railspress::Engine => "/railspress"
   draw :madmin
   get "docs", to: "docs#index", as: :docs
