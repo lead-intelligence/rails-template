@@ -112,6 +112,17 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_no_match(/About Go/, response.body)
   end
 
+  test "index filtered by tag still shows every tag of each post" do
+    ruby = Railspress::Tag.create!(name: "ruby")
+    rails = Railspress::Tag.create!(name: "rails")
+    Railspress::Post.create!(title: "Ruby on Rails", status: :published, published_at: 1.day.ago, tags: [ ruby, rails ])
+
+    get blog_url(tag: ruby.slug)
+
+    assert_select "a.badge[href=?]", blog_path(tag: ruby.slug)
+    assert_select "a.badge[href=?]", blog_path(tag: rails.slug)
+  end
+
   test "show renders a published post and uses its SEO fields" do
     post = Railspress::Post.create!(
       title: "My Post", status: :published, published_at: 1.day.ago,
