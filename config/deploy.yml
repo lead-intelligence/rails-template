@@ -38,6 +38,9 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    # Where new errors go, and the app's token for Peronix (app/models/peronix_errors.rb).
+    - PERONIX_ERRORS_URL
+    - PERONIX_ERRORS_TOKEN
   clear:
     # The domain mailer links, feedback photo links and Active Storage URLs point at — keep this
     # in sync with proxy.host above. Without it those links fall back to example.com.

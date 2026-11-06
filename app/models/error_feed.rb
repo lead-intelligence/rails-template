@@ -3,6 +3,12 @@ class ErrorFeed
   MESSAGE_LENGTH = 500
   BACKTRACE_FRAMES = 5
 
+  # One occurrence as the page shows it, for a watcher told of it (ErrorReportJob).
+  def self.entry(occurrence)
+    feed = new(since: occurrence.id - 1)
+    feed.entry(occurrence, feed.stats_for([ occurrence.error_id ]).fetch(occurrence.error_id))
+  end
+
   def initialize(since:)
     @since = since
   end
@@ -19,8 +25,6 @@ class ErrorFeed
       more: more
     }
   end
-
-  private
 
   def stats_for(error_ids)
     scope = SolidErrors::Occurrence.where(error_id: error_ids).group(:error_id)
@@ -47,6 +51,8 @@ class ErrorFeed
       route: occurrence.context.to_h["route"]
     }
   end
+
+  private
 
   def app_frames(occurrence)
     SolidErrors::Backtrace.parse(occurrence.backtrace.to_s.split("\n")).application_lines.first(BACKTRACE_FRAMES).map(&:to_s)
