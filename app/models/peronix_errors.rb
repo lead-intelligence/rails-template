@@ -1,7 +1,9 @@
 require "net/http"
 
 # Tells Peronix of a new error, so an agent investigates and fixes it
-# (docs/architecture/error-tracking.md). Unset, the app tells nobody.
+# (docs/architecture/error-tracking.md). Peronix writes the address and the
+# app's token into its credentials when it makes the app. Unset, the app
+# tells nobody.
 class PeronixErrors
   Error = Class.new(StandardError)
 
@@ -26,11 +28,11 @@ class PeronixErrors
     private
 
     def url
-      ENV["PERONIX_ERRORS_URL"]
+      Rails.application.credentials.dig(:peronix, :errors_url) || ENV["PERONIX_ERRORS_URL"]
     end
 
     def token
-      ENV["PERONIX_ERRORS_TOKEN"]
+      Rails.application.credentials.dig(:peronix, :errors_token) || ENV["PERONIX_ERRORS_TOKEN"]
     end
   end
 end
