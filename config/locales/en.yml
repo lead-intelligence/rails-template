@@ -44,6 +44,8 @@ en:
   blog:
     index:
       empty: No posts yet.
+      meta_description: News, guides and notes from the team.
+      meta_title: Blog
       title: Blog
     show:
       back: "← Back to the blog"
@@ -234,6 +236,7 @@ en:
       remaining:
         one: You have %{count} message left today.
         other: You have %{count} messages left today.
+    default_model: 'Default: %{model}'
     error:
       title: Error
     failure:
@@ -436,3 +439,6 @@ en:
     widget:
       close: close
       support: Support
+  time:
+    formats:
+      hour: "%I:%M %p"

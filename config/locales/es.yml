@@ -44,6 +44,8 @@ es:
   blog:
     index:
       empty: Todavía no hay publicaciones.
+      meta_description: Novedades, guías y notas del equipo.
+      meta_title: Blog
       title: Blog
     show:
       back: "← Volver al blog"
@@ -238,6 +240,7 @@ es:
       remaining:
         one: Te queda %{count} mensaje por hoy.
         other: Te quedan %{count} mensajes por hoy.
+    default_model: 'Por defecto: %{model}'
     error:
       title: Error
     failure:
@@ -442,3 +445,6 @@ es:
     widget:
       close: cerrar
       support: Soporte
+  time:
+    formats:
+      hour: "%H:%M"

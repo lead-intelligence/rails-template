@@ -15,7 +15,7 @@
     <pre class="whitespace-pre-wrap text-gray-700 text-sm overflow-x-auto"><%= tool.content.presence || t(".no_output") %></pre>
 
     <div>
-      <span class="text-sm text-gray-600"><%= tool.created_at&.strftime("%I:%M %p") %></span>
+      <span class="text-sm text-gray-600"><%= l(tool.created_at, format: :hour) if tool.created_at %></span>
     </div>
   </div>
 <% end %>

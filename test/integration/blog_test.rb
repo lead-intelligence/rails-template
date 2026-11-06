@@ -100,6 +100,12 @@ class BlogTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: /First Post/
   end
 
+  test "index sets its own page title" do
+    get blog_url
+
+    assert_select "title", "#{I18n.t('blog.index.meta_title')} | #{Rails.application.class.module_parent_name}"
+  end
+
   test "index filters by tag" do
     ruby = Railspress::Tag.create!(name: "ruby")
     Railspress::Post.create!(title: "About Ruby", status: :published, published_at: 1.day.ago, tags: [ ruby ])
