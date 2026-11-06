@@ -45,4 +45,14 @@ class GenerateDocumentEmbeddingJobTest < ActiveJob::TestCase
 
     assert_no_enqueued_jobs only: GenerateDocumentEmbeddingJob
   end
+
+  test "retries later when the provider is rate limited" do
+    doc = users(:one).documents.create!(title: "Kamal", content: "Deploy")
+    clear_enqueued_jobs
+    stub_request(:post, "https://api.openai.com/v1/embeddings").to_return(status: 429, headers: { "Content-Type" => "application/json" }, body: { error: { message: "Rate limit" } }.to_json)
+
+    GenerateDocumentEmbeddingJob.perform_now(doc)
+
+    assert_enqueued_with job: GenerateDocumentEmbeddingJob, args: [ doc ]
+  end
 end

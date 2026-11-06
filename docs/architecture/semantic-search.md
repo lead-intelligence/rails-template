@@ -18,4 +18,6 @@ A chat created against an empty table makes the gem write the whole registry int
 
 Each embedding writes one row to RubyLLM's usage ledger, `ruby_llm_usages`, with its tokens and cost. Such a row belongs to no chat, so its owner is what ties it to a person: `GenerateDocumentEmbeddingJob` passes the document's user as the `owner:` of `RubyLLM.embed`, and `DocumentsController` runs the search inside `RubyLLM.with_usage_owner(Current.user)`. `User#ruby_llm_usages` reads those rows back, and its `dependent: :destroy` erases them with the account and puts them in the data export. An embedding called without an owner writes a row no account deletion ever reaches.
 
+`GenerateDocumentEmbeddingJob` retries a rate limit or a provider server error up to five times with a growing wait. Without it a document whose embedding failed once stays out of search until the person edits it again, and nothing tells them. The retry is safe because the job overwrites the embedding.
+
 `Document::EMBEDDING_DIMENSIONS` is tied to the embedding model. Changing `OPENAI_EMBEDDING_MODEL` to one with a different output size means a migration, which is why the variable is documented in `.env.example` and nowhere else.
