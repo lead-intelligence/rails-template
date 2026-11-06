@@ -1,12 +1,12 @@
 GIT
   remote: https://github.com/lead-intelligence/charco_mobile.git
-  revision: ddd56170c0b00690fba5b0593d21a1beac2701e1
+  revision: da34df8ba0f4620428437d299881ef978fe2c726
   branch: main
   glob: gem/*.gemspec
   specs:
     charco_mobile (0.4.0)
-      herb (~> 0.11)
-      rails (>= 8.0, < 9)
+      herb (~> 0.11.0)
+      rails (>= 8.1, < 9)
       rqrcode (~> 3.0)
       thor (~> 1.5)
 
