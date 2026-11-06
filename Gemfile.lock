@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/lead-intelligence/charco_mobile.git
-  revision: da34df8ba0f4620428437d299881ef978fe2c726
+  revision: 28becacdf022ad7a4397cc0fa5632ce95bc93288
   branch: main
   glob: gem/*.gemspec
   specs:
