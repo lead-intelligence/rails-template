@@ -32,6 +32,19 @@ class DeployWorkflowTest < ActiveSupport::TestCase
       "a tag can be moved to other code, and this action holds root access to the server")
   end
 
+  test "every job runs on the production server's runner" do
+    assert_equal({ "latest" => "deploy", "deploy" => "deploy" }, jobs.transform_values { |job| job["runs-on"] },
+      "GitHub's runners spend the organization's minutes; the deploy runner group takes only this workflow from main")
+  end
+
+  test "the credentials key leaves the runner after every deploy, failed or not" do
+    last = jobs.dig("deploy", "steps").last
+
+    assert_equal "always()", last["if"]
+    assert_equal "rm -f config/master.key", last["run"],
+      "the server's runner keeps its workspace after the job, unlike GitHub's"
+  end
+
   private
 
   def jobs

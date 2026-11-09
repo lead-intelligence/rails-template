@@ -26,7 +26,10 @@ jobs:
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.repository != 'lead-intelligence/rails-template'
-    runs-on: ubuntu-latest
+    # The production server's own runner, which takes only this workflow from each app's main
+    # (the organization's deploy runner group, where bin/peronix-new-app adds it): no GitHub
+    # minutes.
+    runs-on: deploy
     permissions:
       contents: read
     outputs:
@@ -35,16 +38,18 @@ jobs:
       - name: Compare with the tip of main
         id: tip
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        # The server has no gh: this media type answers with the bare SHA.
         run: |
-          tip="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+          tip="$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.sha" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/main")"
           echo "current=$([ "$tip" = "$HEAD_SHA" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: latest
     if: needs.latest.outputs.current == 'true'
-    runs-on: ubuntu-latest
+    runs-on: deploy
 
     permissions:
       contents: read
@@ -99,3 +104,8 @@ jobs:
         env:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: bin/kamal deploy
+
+      # The server's runner keeps its workspace after the job, unlike GitHub's.
+      - name: Forget the credentials key
+        if: always()
+        run: rm -f config/master.key

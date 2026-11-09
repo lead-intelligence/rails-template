@@ -4,14 +4,23 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  # The fallback when no ci-amd64 runner is up: run it by hand on GitHub's
+  # own runners, which spend the organization's minutes.
   workflow_dispatch:
+    inputs:
+      runner:
+        description: Where it runs
+        type: choice
+        options: [ ci-amd64, ubuntu-latest ]
+        default: ci-amd64
 
 permissions:
   contents: read
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # Our own VMs (Peronix's bin/peronix-ci-runner): no GitHub minutes.
+    runs-on: ${{ inputs.runner || 'ci-amd64' }}
     # The Debian and libvips that production runs (Dockerfile), so a test
     # passes here only where it passes in production: the runner's own
     # packages change without notice. Keep the Ruby version as .ruby-version.
