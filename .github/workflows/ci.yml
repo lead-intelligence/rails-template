@@ -19,8 +19,10 @@ permissions:
 
 jobs:
   ci:
-    # Our own VMs (Peronix's bin/peronix-ci-runner): no GitHub minutes.
-    runs-on: ${{ inputs.runner || 'ci-amd64' }}
+    # A private app runs on our own VMs (Peronix's bin/peronix-ci-runner): no
+    # GitHub minutes. A public repository, such as this template, runs on
+    # GitHub's, free for it: our runners never take a stranger's pull request.
+    runs-on: ${{ inputs.runner || (github.event.repository.private && 'ci-amd64' || 'ubuntu-latest') }}
     # The Debian and libvips that production runs (Dockerfile), so a test
     # passes here only where it passes in production: the runner's own
     # packages change without notice. Keep the Ruby version as .ruby-version.

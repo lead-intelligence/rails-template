@@ -20,9 +20,9 @@ class CiWorkflowTest < ActiveSupport::TestCase
       "a condition on secrets.* is always false, so the step it guards never runs"
   end
 
-  test "the job runs on our own runners, and GitHub's only when started by hand" do
-    assert_equal "${{ inputs.runner || 'ci-amd64' }}", job["runs-on"],
-      "GitHub's runners spend the organization's minutes on every push"
+  test "a private app runs on our own runners, a public repository and a run by hand on GitHub's" do
+    assert_equal "${{ inputs.runner || (github.event.repository.private && 'ci-amd64' || 'ubuntu-latest') }}", job["runs-on"],
+      "GitHub's runners spend a private repository's minutes; ours would run a stranger's pull request to a public one"
     assert_equal %w[ci-amd64 ubuntu-latest], triggers.dig("workflow_dispatch", "inputs", "runner", "options"),
       "with no ci-amd64 runner up, a run started by hand on GitHub's runners is the fallback"
   end
