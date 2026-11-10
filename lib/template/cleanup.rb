@@ -12,8 +12,8 @@ module Template
     CLAUDE_INTRO = /^Rails starter template\.[^\n]*\n/
     CLAUDE_COMMANDS = /^- `bin\/(?:rename|smoke-rename|spawn|children)(?![\w-])[^\n]*\n(?:[ \t]+[^\n]*\n)*/
     CLAUDE_CI_CLAUSE = ", `bin/smoke-rename`"
-    CLAUDE_STEP_COUNT = "nine steps"
-    CHILD_STEP_COUNT = "eight steps"
+    CLAUDE_STEP_COUNT = "ten steps"
+    CHILD_STEP_COUNT = "nine steps"
     CLAUDE_CI_BULLET_LINE = /^.*#{Regexp.escape(CLAUDE_STEP_COUNT)}.*\n/
     TEMPLATE_URL = "https://github.com/bruno-costanzo/rails-template"
     TEMPLATE_SLUG = "rails-template"

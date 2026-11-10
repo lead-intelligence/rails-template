@@ -135,7 +135,7 @@ The views drive native iOS and Android shells through `config/charco_mobile.yml`
 
 ## Testing
 
-Run `bin/ci` before every commit. It is exactly what CI runs, configured in `config/ci.rb`: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `bin/rails test`, `bin/rails test:system`, and a `bin/smoke-rename` step.
+Run `bin/ci` before every commit. It is exactly what CI runs, configured in `config/ci.rb`: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `archspec check`, `bin/rails test`, `bin/rails test:system`, and a `bin/smoke-rename` step.
 
 Tests never hit the network. Coverage must stay at 100% lines and branches; N+1 queries and accessibility violations fail the build. While running a subset, set `SKIP_COVERAGE=1`. See [testing](docs/architecture/testing.md).
 

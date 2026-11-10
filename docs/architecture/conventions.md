@@ -32,6 +32,14 @@ Tests never reach the network. An LLM call in a test goes through `stub_openai_c
 
 Background work goes to Solid Queue jobs, with `GenerateDocumentEmbeddingJob` as the reference. Solid Queue performs no automatic retry, so a job that has to retry declares `retry_on`; without it a failure waits in the failed-executions table (see background-jobs.md).
 
+## Architecture rules
+
+`Archspec.rb` states the architecture as rules that `archspec check` enforces in `bin/ci`, statically and in under a second. It starts from the Rails preset: models and helpers never depend on controllers, and never call `render`, `redirect_to`, `params`, `session`, `cookies` or `flash`. On top of it, a job never reads `Current`, because a job runs outside the request that set it; the job receives the record instead.
+
+Logic lives in the model that owns it. The services, forms, decorators, presenters and components folders under app must stay empty, so a new behaviour goes on a model, a concern or a job, never in a parallel layer.
+
+A violation is fixed in the code. A todo file or an `archspec:disable` comment silences the rule for every change after it, so neither is used. `archspec explain <file>` shows how a file was classified when a result is surprising.
+
 ## Quality gates
 
 N+1 queries fail tests, in every kind of test. A real one is fixed with `includes`, `preload` or a counter cache; a safelist entry is for a verified false positive only, as narrow as one class and one association.

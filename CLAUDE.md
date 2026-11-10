@@ -18,7 +18,7 @@ Run Ruby commands as `mise exec ruby@4.0.6 -- <command>` in shells without mise 
 - `bin/dev` — app, Tailwind watcher and `herb dev`, which reloads the page when a template changes. The job supervisor runs inside Puma, so there is no jobs process.
 - `bin/rails test test/models/user_test.rb:42` — one file or one case. Prefix `SKIP_COVERAGE=1`: the 100% gate fails any subset.
 - `bin/rails test:system` — cuprite + axe. `bin/rails test` does not include it.
-- `bin/ci` — the pre-commit gate, exactly what CI runs (`config/ci.rb`, nine steps: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `bin/rails test`, `bin/rails test:system`, `bin/smoke-rename`).
+- `bin/ci` — the pre-commit gate, exactly what CI runs (`config/ci.rb`, ten steps: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `archspec check`, `bin/rails test`, `bin/rails test:system`, `bin/smoke-rename`).
 - `bin/rename <name>` — turn the template into an app: rewrite the name in tracked files, then delete the template-only tooling and rewrite this file and the README.
   Without that deletion the app is born with a red `bin/ci`; `test/lib/template/cleanup_test.rb` guards it.
 - `bin/smoke-rename` — export the tracked tree, rename it, boot it, run its unit suite, serve its public pages.
@@ -35,6 +35,7 @@ Reasons and examples: `docs/architecture/conventions.md`.
 - Copy is never hardcoded: `t(...)`, with the key in `config/locales/es.yml` AND `config/locales/en.yml`.
 - Controllers scope data through `Current.user`.
 - Tests never hit the network; stub LLM calls with `test/test_helpers/openai_stubs.rb`.
+- `Archspec.rb` is the architecture: rich models, no service layer, jobs never read `Current`. Fix a violation; never silence it.
 - Background work is a Solid Queue job. Nothing retries unless the job declares `retry_on`.
 - N+1 queries and accessibility violations fail tests. Fix them; never widen a safelist or a ruleset.
 - A business rule the person reads is a constant on the model that enforces it, interpolated into the copy, never restated.
