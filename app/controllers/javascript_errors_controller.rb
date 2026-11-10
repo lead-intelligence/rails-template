@@ -40,7 +40,7 @@ class JavascriptErrorsController < ApplicationController
     {
       url: params[:url].to_s.truncate(MAX_MESSAGE_LENGTH),
       user_agent: request.user_agent,
-      user_id: Current.user&.id
+      user_id: Current.user.id
     }
   end
 end
