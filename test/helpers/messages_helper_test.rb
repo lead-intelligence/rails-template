@@ -4,7 +4,7 @@ class MessagesHelperTest < ActionView::TestCase
   test "default_model_display_name shows the configured default model's label" do
     default_model = RubyLLM.models.find(RubyLLM.config.default_model)
 
-    assert_equal "Default: #{default_model.label}", default_model_display_name
+    assert_equal I18n.t("messages.default_model", model: default_model.label), default_model_display_name
   end
 
   test "tool_result_partial falls back to default when the object has no parent_tool_call" do

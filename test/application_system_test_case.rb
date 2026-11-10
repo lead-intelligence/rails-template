@@ -29,6 +29,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     super
     assert_turbo_ready
     assert_accessible
+    assert_fits_phone
   end
 
   def assert_turbo_ready
@@ -43,6 +44,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.current_session.server&.wait_for_pending_requests
     Capybara.current_session.raise_server_error!
     Capybara.raise_server_errors = previous
+  end
+
+  def choose_theme(theme)
+    find("summary[title='#{t("shared.theme_switcher.label")}']").click
+    find("label", text: t("shared.theme_switcher.#{theme}")).click
   end
 
   def sign_in_via_browser(user)

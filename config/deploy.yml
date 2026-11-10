@@ -2,12 +2,12 @@
 service: charco_template
 
 # Name of the container image (use your-user/app-name on external registries).
-image: YOUR_REGISTRY_USER/charco_template
+image: lead-intelligence/charco_template
 
 # Deploy to these servers.
 servers:
   web:
-    - YOUR_SERVER_IP
+    - 2.28.229.5
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -27,7 +27,8 @@ proxy:
 # Where you keep your container images.
 registry:
   # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
-  username: YOUR_REGISTRY_USER
+  server: ghcr.io
+  username: lead-intelligence
 
   # Always use an access token rather than real password when possible.
   password:
@@ -37,12 +38,6 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
-    - OPENAI_API_KEY
-    - SUPERADMIN_USER
-    - SUPERADMIN_PASSWORD
-    - ERROR_FEED_TOKEN
-    - SMTP_USER_NAME
-    - SMTP_PASSWORD
   clear:
     # The domain mailer links, feedback photo links and Active Storage URLs point at — keep this
     # in sync with proxy.host above. Without it those links fall back to example.com.
@@ -86,7 +81,9 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: amd64
-  ssh: default=$SSH_AUTH_SOCK
+  # The read-only token of the private charco_mobile gem (Dockerfile).
+  secrets:
+    - BUNDLE_GITHUB__COM
 
   # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
   # remote: ssh://docker@docker-builder-server
@@ -130,8 +127,8 @@ builder:
 # Set the destination in config/kamal-backup.yml and the RESTIC/AWS secrets in .kamal/secrets before deploying.
 accessories:
   backup:
-    image: ghcr.io/crmne/kamal-backup:latest
-    host: app.YOUR_DOMAIN.com
+    image: ghcr.io/crmne/kamal-backup:1.1.1
+    host: 2.28.229.5
     files:
       - config/kamal-backup.yml:/app/config/kamal-backup.yml:ro
     env:

@@ -1,8 +1,10 @@
 class Document < ApplicationRecord
+  TITLE_MAX_LENGTH = 200
+
   belongs_to :user
   has_rich_text :content
 
-  validates :title, presence: true
+  validates :title, presence: true, length: { maximum: TITLE_MAX_LENGTH }
 
   EMBEDDING_DIMENSIONS = 1536
   EMBEDDING_SOURCE_BYTES = 8_191

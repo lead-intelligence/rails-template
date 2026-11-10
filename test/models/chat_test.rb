@@ -27,6 +27,14 @@ class ChatTest < ActiveSupport::TestCase
     assert chat.valid?
   end
 
+  test "rejects a text file sent as a png pending photo" do
+    chat = users(:one).chats.create!(support: true)
+    chat.pending_photos.attach(io: StringIO.new("plain text"), filename: "avatar.png", content_type: "image/png")
+
+    assert_not chat.valid?
+    assert chat.errors.of_kind?(:pending_photos, :content_type_spoofed)
+  end
+
   test "rejects a non-image pending photo" do
     chat = users(:one).chats.create!(support: true)
     chat.pending_photos.attach(io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain")
@@ -35,8 +43,9 @@ class ChatTest < ActiveSupport::TestCase
 
   test "rejects an oversize pending photo" do
     chat = users(:one).chats.create!(support: true)
-    chat.pending_photos.attach(io: StringIO.new("x" * 6.megabytes), filename: "big.png", content_type: "image/png")
+    chat.pending_photos.attach(io: StringIO.new(file_fixture("avatar.png").binread + ("\0" * 6.megabytes)), filename: "big.png", content_type: "image/png")
     assert_not chat.valid?
+    assert chat.errors.of_kind?(:pending_photos, :file_size_not_less_than)
   end
 
   test "offers only the chat models of the configured provider" do
@@ -47,11 +56,9 @@ class ChatTest < ActiveSupport::TestCase
     assert_operator models.count, :<, RubyLLM.models.chat_models.count
   end
 
-  test "offers only models that answer in text" do
-    ids = Chat.selectable_models.map(&:id)
-
-    assert_includes ids, "gpt-4o-mini"
-    assert_empty ids & %w[tts-1 whisper-1 gpt-4o-mini-transcribe omni-moderation-latest gpt-image-2 gpt-realtime]
+  test "offers only the models the app allows" do
+    assert_equal Rails.configuration.x.selectable_chat_models.sort, Chat.selectable_models.map(&:id).sort
+    assert_not_includes Chat.selectable_models.map(&:id), "o1"
   end
 
   test "destroying a conversation keeps the ticket it filed" do

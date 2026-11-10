@@ -16,6 +16,7 @@ Rails.application.configure do
     policy.script_src       :self, "'sha256-#{Digest::SHA256.base64digest('import "railspress"')}'"
     policy.style_src        :self, :unsafe_inline
     policy.connect_src      :self
+    policy.connect_src      :self, "ws://localhost:*" if Rails.env.development?
   end
 
   config.content_security_policy_nonce_generator = ->(request) { SecureRandom.base64(16) }

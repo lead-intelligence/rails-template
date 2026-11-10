@@ -2,7 +2,7 @@
 <div id="message_<%= assistant.id %>" data-version="<%= assistant.broadcast_version %>" class="chat chat-start">
   <div class="chat-header">
     <span class="sr-only"><%= t(".role") %></span>
-    <time class="text-xs opacity-70"><%= assistant.created_at&.strftime("%I:%M %p") %></time>
+    <time class="text-xs opacity-70"><%= l(assistant.created_at, format: :hour) if assistant.created_at %></time>
   </div>
   <div id="message_<%= assistant.id %>_content" class="chat-bubble whitespace-pre-wrap"><%= assistant.content %></div>
 </div>

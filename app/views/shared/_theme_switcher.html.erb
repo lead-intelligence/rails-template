@@ -1,0 +1,17 @@
+<details class="dropdown dropdown-end" data-controller="dropdown theme">
+  <summary class="btn btn-ghost btn-circle" title="<%= t("shared.theme_switcher.label") %>">
+    <%= lucide_icon "sun-moon", class: "size-5", "aria-hidden": true %>
+    <span class="sr-only"><%= t("shared.theme_switcher.label") %></span>
+  </summary>
+  <ul class="menu dropdown-content z-40 mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-1.5 shadow-lg">
+    <% ThemeHelper::THEMES.each do |theme, icon| %>
+      <li>
+        <label class="has-checked:bg-base-200 has-checked:font-semibold has-focus-visible:outline-2">
+          <%= tag.input type: "radio", name: "theme", value: theme, class: "theme-controller sr-only", checked: theme_preference == theme, data: { action: "theme#remember" } %>
+          <%= lucide_icon icon, class: "size-4", "aria-hidden": true %>
+          <%= t("shared.theme_switcher.#{theme}") %>
+        </label>
+      </li>
+    <% end %>
+  </ul>
+</details>

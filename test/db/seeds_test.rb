@@ -29,4 +29,16 @@ class SeedsTest < ActiveSupport::TestCase
 
     assert_equal [ document ], Document.semantic_search("deploy")
   end
+
+  test "the seeds of every feature load twice for an owner, and create nothing the second time" do
+    ENV["SEED_OWNER"] = users(:one).email_address
+    Rails.application.load_seed
+
+    counts = ActiveRecord::Base.descendants.reject(&:abstract_class?).select(&:table_exists?).to_h { [ it.name, it.count ] }
+    Rails.application.load_seed
+
+    assert_equal counts, ActiveRecord::Base.descendants.reject(&:abstract_class?).select(&:table_exists?).to_h { [ it.name, it.count ] }
+  ensure
+    ENV.delete("SEED_OWNER")
+  end
 end

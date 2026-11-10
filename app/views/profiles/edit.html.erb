@@ -5,13 +5,13 @@
     <div class="alert alert-error w-full max-w-md"><%= @user.errors.full_messages.to_sentence %></div>
   <% end %>
 
-  <div class="card bg-base-100 shadow w-full max-w-md">
+  <div class="card border border-base-300 bg-base-100 shadow-sm w-full max-w-md">
     <div class="card-body">
       <%= render "users/avatar", user: Current.user %>
       <h1 class="card-title"><%= t(".title") %></h1>
       <%= form_with model: @user, url: profile_path, method: :patch do |form| %>
         <%= form.label :name, class: "label" %>
-        <%= form.text_field :name, class: "input input-bordered w-full", required: true %>
+        <%= form.text_field :name, class: "input input-bordered w-full", required: true, maxlength: User::NAME_MAX_LENGTH %>
         <%= form.label :avatar, class: "label" %>
         <%= form.file_field :avatar, class: "file-input file-input-bordered w-full" %>
         <%= form.submit t(".save"), class: "btn btn-primary w-full mt-4" %>
@@ -19,7 +19,7 @@
     </div>
   </div>
 
-  <div class="card bg-base-100 shadow w-full max-w-md">
+  <div class="card border border-base-300 bg-base-100 shadow-sm w-full max-w-md">
     <div class="card-body">
       <h2 class="card-title"><%= t(".security_title") %></h2>
       <p class="text-sm text-base-content/70"><%= t(".current_email", email: @user.email_address) %></p>
@@ -41,7 +41,7 @@
     </div>
   </div>
 
-  <div class="card bg-base-100 shadow w-full max-w-md">
+  <div class="card border border-base-300 bg-base-100 shadow-sm w-full max-w-md">
     <div class="card-body">
       <h2 class="card-title"><%= t(".export_title") %></h2>
       <p class="text-sm text-base-content/70"><%= t(".export_hint") %></p>

@@ -44,6 +44,8 @@ en:
   blog:
     index:
       empty: No posts yet.
+      meta_description: News, guides and notes from the team.
+      meta_title: Blog
       title: Blog
     show:
       back: "← Back to the blog"
@@ -105,6 +107,8 @@ en:
     new:
       back: Back to chats
       title: New chat
+    older_messages:
+      load: Load earlier messages
     show:
       back: Back to chats
       heading: 'Showing chat #%{id}'
@@ -219,18 +223,20 @@ en:
       search: Search
       search_label: Search the documentation
       search_placeholder: Search for a page or a section
-      theme_dark: Dark theme
-      theme_light: Light theme
       title: Documentation
+  locale_name: English
   messages:
     assistant:
       role: Assistant
     composer:
       exhausted: You reached the daily limit of %{count} messages. Come back tomorrow
         to keep the conversation going.
+      full: This chat reached its limit of %{count} messages. Start a new chat to
+        keep going.
       remaining:
         one: You have %{count} message left today.
         other: You have %{count} messages left today.
+    default_model: 'Default: %{model}'
     error:
       title: Error
     failure:
@@ -285,6 +291,7 @@ en:
       title: Notifications
   pages:
     home:
+      eyebrow: Rails template
       features:
       - body: Sessions, registration and profiles out of the box.
         title: Authentication
@@ -295,6 +302,7 @@ en:
       headline: Build your next idea faster
       meta_description: A Rails starter template with AI batteries included
       meta_title: Home
+      sign_in: I have an account
       start: Get started
       subheadline: Rails, SQLite, Hotwire, DaisyUI and an AI toolkit ready on day
         one.
@@ -379,6 +387,8 @@ en:
       confirm: Confirm
     flash:
       dismiss: Dismiss
+    locale_switcher:
+      label: Language
     navbar:
       chats: Chats
       documents: Documents
@@ -391,10 +401,16 @@ en:
       sign_up: Sign up
     notification_bell:
       aria_label: Notifications
+      aria_label_unread: Notifications, %{count} unread
       empty: You're all caught up
       mark_all_read: Mark all read
       see_all: See all
       title: Notifications
+    theme_switcher:
+      dark: Dark
+      label: Theme
+      light: Light
+      system: System
   support_chat_photos:
     create:
       too_many: You can attach up to %{count} photos to a conversation.
@@ -423,3 +439,6 @@ en:
     widget:
       close: close
       support: Support
+  time:
+    formats:
+      hour: "%I:%M %p"

@@ -5,7 +5,7 @@ gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # Framework translations (dates, numbers, Active Record error messages) for every locale.
 gem "rails-i18n", "~> 8.0"
 # Native iOS and Android apps driven from the views [https://github.com/lead-intelligence/charco_mobile]
-gem "charco_mobile", git: "git@github.com:lead-intelligence/charco_mobile.git", branch: "main", glob: "gem/*.gemspec"
+gem "charco_mobile", github: "lead-intelligence/charco_mobile", branch: "main", glob: "gem/*.gemspec"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use sqlite3 as the database for Active Record
@@ -91,7 +91,7 @@ gem "webmock", "~> 3.26", group: :test
 
 gem "schematist", "~> 1.1"
 
-gem "lexxy", "~> 0.9.31"
+gem "lexxy", "~> 1.0.3"
 
 gem "neighbor", "~> 1.2"
 
@@ -104,7 +104,7 @@ gem "simplecov-console", "~> 0.9", group: :test, require: false
 
 gem "money-rails", "~> 3.0"
 
-gem "solid_errors", "~> 0.7.0"
+gem "solid_errors", "~> 0.9.1"
 
 gem "lucide-rails", "~> 0.7.4"
 

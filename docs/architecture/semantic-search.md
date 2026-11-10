@@ -1,6 +1,6 @@
 # Semantic search
 
-`Document` (`app/models/document.rb`) carries an Action Text `content` and a `embedding` vector of `Document::EMBEDDING_DIMENSIONS` floats, declared to Neighbor with `has_neighbors`. `Document.semantic_search` embeds the query through RubyLLM and returns the nearest neighbours by cosine distance. `config/initializers/neighbor.rb` calls `Neighbor::SQLite.initialize!`, which loads the sqlite-vec extension; without it the column is just a blob.
+`Document` (`app/models/document.rb`) carries an Action Text `content` and a `embedding` vector of `Document::EMBEDDING_DIMENSIONS` floats, declared to Neighbor with `has_neighbors`. `Document.semantic_search` embeds the query through RubyLLM and returns the nearest neighbours by cosine distance. `config/initializers/neighbor.rb` calls `Neighbor::SQLite.initialize!`, which loads the sqlite-vec extension; without it the column is just a blob. A title is at most `Document::TITLE_MAX_LENGTH` characters, set as `maxlength` on the form.
 
 Re-embedding is driven by an `after_save_commit` callback guarded by `embedding_source_changed?`, which asks whether the title or the rich-text body changed. Guarding on the source rather than firing on every save is what stops the loop: the job writes the embedding back with `update!`, which commits again, and an unguarded callback would enqueue itself forever.
 
@@ -17,5 +17,7 @@ RubyLLM resolves the embedding model against its model registry. In a Rails app 
 A chat created against an empty table makes the gem write the whole registry into it first, nearly two thousand rows one at a time. Rails never seeds a test database and truncates every parallel worker's database on each run, so without rows every test that creates a chat would pay that write. `test/fixtures/ruby_llm_models.yml` renders the bundled JSON through the gem's own `RubyLLM::ActiveRecord::Model.from_llm`, so each test database starts with the same full registry the seed writes, in one insert.
 
 Each embedding writes one row to RubyLLM's usage ledger, `ruby_llm_usages`, with its tokens and cost. Such a row belongs to no chat, so its owner is what ties it to a person: `GenerateDocumentEmbeddingJob` passes the document's user as the `owner:` of `RubyLLM.embed`, and `DocumentsController` runs the search inside `RubyLLM.with_usage_owner(Current.user)`. `User#ruby_llm_usages` reads those rows back, and its `dependent: :destroy` erases them with the account and puts them in the data export. An embedding called without an owner writes a row no account deletion ever reaches.
+
+`GenerateDocumentEmbeddingJob` retries a rate limit or a provider server error up to five times with a growing wait. Without it a document whose embedding failed once stays out of search until the person edits it again, and nothing tells them. The retry is safe because the job overwrites the embedding.
 
 `Document::EMBEDDING_DIMENSIONS` is tied to the embedding model. Changing `OPENAI_EMBEDDING_MODEL` to one with a different output size means a migration, which is why the variable is documented in `.env.example` and nowhere else.

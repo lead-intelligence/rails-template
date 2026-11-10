@@ -29,6 +29,14 @@ class UserTest < ActiveSupport::TestCase
     assert user.valid?
   end
 
+  test "rejects a text file sent as a png avatar" do
+    user = users(:one)
+    user.avatar.attach(io: StringIO.new("plain text"), filename: "avatar.png", content_type: "image/png")
+
+    assert_not user.valid?
+    assert user.errors.of_kind?(:avatar, :content_type_spoofed)
+  end
+
   test "rejects a non-image avatar" do
     user = users(:one)
     user.avatar.attach(io: StringIO.new("plain text"), filename: "notes.txt", content_type: "text/plain")
@@ -262,6 +270,16 @@ class UserTest < ActiveSupport::TestCase
     plan = query_plan_of_first_select_from("users") { User.finish_requested_deletions }
 
     assert plan.any? { |step| step.include?("index_users_deletion_requested") }, plan.inspect
+  end
+
+
+  test "a name is at most the name limit" do
+    user = users(:one)
+
+    user.name = "a" * User::NAME_MAX_LENGTH
+    assert user.valid?
+    user.name = "a" * (User::NAME_MAX_LENGTH + 1)
+    assert_not user.valid?
   end
 
   private

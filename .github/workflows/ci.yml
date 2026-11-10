@@ -4,33 +4,57 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  # The fallback when no ci-amd64 runner is up: run it by hand on GitHub's
+  # own runners, which spend the organization's minutes.
   workflow_dispatch:
+    inputs:
+      runner:
+        description: Where it runs
+        type: choice
+        options: [ ci-amd64, ubuntu-latest ]
+        default: ci-amd64
+
+permissions:
+  contents: read
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # A private app runs on our own VMs (Peronix's bin/peronix-ci-runner): no
+    # GitHub minutes. A public repository, such as this template, runs on
+    # GitHub's, free for it: our runners never take a stranger's pull request.
+    runs-on: ${{ inputs.runner || (github.event.repository.private && 'ci-amd64' || 'ubuntu-latest') }}
+    # The Debian and libvips that production runs (Dockerfile), so a test
+    # passes here only where it passes in production: the runner's own
+    # packages change without notice. Keep the Ruby version as .ruby-version.
+    container: ruby:4.0.6-slim
+    env:
+      BUNDLE_PATH: vendor/bundle
+      # The read-only token of the private charco_mobile gem: bin/ci installs
+      # the gems again in its rename smoke, so the whole job needs it.
+      BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+        run: |
+          apt-get update -qq
+          apt-get install --no-install-recommends -y build-essential chromium curl file fonts-liberation git libvips libyaml-dev pkg-config
 
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Look for the charco_mobile deploy key
-        id: mobile_deploy_key
-        run: echo "present=${{ secrets.CHARCO_MOBILE_DEPLOY_KEY != '' }}" >> $GITHUB_OUTPUT
+      # The checkout belongs to another user than the container's root: git
+      # refuses it, and the tests that list the tracked files find none.
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Let Bundler read the charco_mobile repository
-        if: steps.mobile_deploy_key.outputs.present == 'true'
-        uses: webfactory/ssh-agent@v0.10.0
+      - name: Cache gems
+        uses: actions/cache@v6
         with:
-          ssh-private-key: ${{ secrets.CHARCO_MOBILE_DEPLOY_KEY }}
+          path: vendor/bundle
+          key: gems-${{ hashFiles('Gemfile.lock', '.ruby-version') }}
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
+      - name: Install gems
+        run: bundle install --jobs 4
 
       - name: Run quality gate
         env:

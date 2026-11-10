@@ -1,6 +1,6 @@
 module MessagesHelper
   def default_model_display_name
-    "Default: #{RubyLLM.models.find(RubyLLM.config.default_model).label}"
+    t("messages.default_model", model: RubyLLM.models.find(RubyLLM.config.default_model).label)
   end
 
   def tool_result_partial(message)

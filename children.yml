@@ -15,3 +15,15 @@ meal4two:
   path: "../meal4two"
   born_from: 4fd0228c6b1ed93433e66801b38f97ce0fac7c77
   synced_to: 4fd0228c6b1ed93433e66801b38f97ce0fac7c77
+milprep:
+  path: "../milprep"
+  born_from: b9af23db61b3cdb8dc259fa112c46981cdcb5869
+  synced_to: b9af23db61b3cdb8dc259fa112c46981cdcb5869
+social_hub:
+  path: "../social_hub"
+  born_from: b9af23db61b3cdb8dc259fa112c46981cdcb5869
+  synced_to: b9af23db61b3cdb8dc259fa112c46981cdcb5869
+colegio:
+  path: "../colegio"
+  born_from: '059c8daf1032053bde9b2f3c3629863f459f9ad7'
+  synced_to: '059c8daf1032053bde9b2f3c3629863f459f9ad7'

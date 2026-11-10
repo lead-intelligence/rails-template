@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  post "rails/active_storage/direct_uploads", to: "direct_uploads#create"
   mount Railspress::Engine => "/railspress"
   draw :madmin
   get "docs", to: "docs#index", as: :docs
@@ -31,6 +32,7 @@ Rails.application.routes.draw do
   resource :registration, only: %i[new create destroy]
   resource :data_export, only: %i[create show]
   resource :profile, only: %i[edit update]
+  resource :locale, only: :update
   resources :passwords, param: :token
   resources :email_confirmations, only: [ :new, :create, :show ], param: :token
   resources :email_changes, only: [ :show ], param: :token

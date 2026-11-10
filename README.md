@@ -12,7 +12,7 @@ CharcoTemplate is a Rails 8.1.3.1 starter template. It is a fully working app on
 - A blog: RailsPress back-office at `/railspress/admin`, public pages at `/blog`
 - Solid Queue, Solid Cache and Solid Cable on SQLite — no Redis
 - Developer panels behind one password: records, jobs, errors, logs, tickets, docs
-- Spanish and English UI, chosen from the browser's language
+- Spanish and English UI, light and dark themes; the person picks both in the navbar
 - Native iOS and Android apps driven from the views (`charco_mobile`)
 - Tailwind v4 + DaisyUI 5 and Hotwire, with no Node
 - Kamal deploy with encrypted backups
@@ -55,7 +55,7 @@ Copy the three printed keys into an `active_record_encryption:` block with `bin/
 bin/dev
 ```
 
-`bin/dev` runs the Rails server and the Tailwind watcher (`Procfile.dev`). The job supervisor runs inside Puma and logs to `log/development.log`, not to your terminal.
+`bin/dev` runs the Rails server, the Tailwind watcher and the Herb dev server (`Procfile.dev`). The Herb dev server reloads the page in the browser when you save a template. The job supervisor runs inside Puma and logs to `log/development.log`, not to your terminal.
 
 A fresh clone signs in with `dev@example.com` / `password`. `db:prepare` seeds only when it creates the database, so on an existing checkout run `bin/rails db:seed`; the same seed loads the AI model registry that chat and search need.
 
@@ -65,7 +65,7 @@ The order to do things in, and the things nobody else can do for you.
 
 **Before you write code**
 
-1. From this template's own directory: `bin/spawn my_app [--github]`. It clones the template into `../my_app`, runs `bin/rename` there, removes the clone's `origin` remote (the new app must never push into the template), commits the rename, and registers the app in `children.yml` for later cherry-picks. It refuses any name `bin/rename` refuses, and a failure before registration removes `../my_app`, so you can fix the cause and re-run. `--github` also creates and pushes a private repo and sets its `CHARCO_MOBILE_DEPLOY_KEY` secret from the key file at `CHARCO_MOBILE_DEPLOY_KEY_PATH` (or prints the command when that is unset); without the flag it prints the `gh repo create` command for later. Then, inside `../my_app`: `bin/setup`, and regenerate the credentials and encryption keys as in [Quickstart](#quickstart).
+1. From this template's own directory: `bin/spawn my_app [--github]`. It clones the template into `../my_app`, runs `bin/rename` there, removes the clone's `origin` remote (the new app must never push into the template), commits the rename, and registers the app in `children.yml` for later cherry-picks. It refuses any name `bin/rename` refuses, and a failure before registration removes `../my_app`, so you can fix the cause and re-run. `--github` also creates and pushes a private repo; without the flag it prints the `gh repo create` command for later. Then, inside `../my_app`: `bin/setup`, and regenerate the credentials and encryption keys as in [Quickstart](#quickstart).
 2. **If you skipped `--github`, give the app its own repository now.** Commits pile up fast, and a clean `git log` looks the same whether or not it exists anywhere but your disk. To port a template improvement later you do not need a permanent remote:
 
    ```bash
@@ -110,7 +110,7 @@ cp .env.example .env
 | `SOLID_ERRORS_EMAIL_TO` | Email on each new error (credentials: `solid_errors/email_to`) | No error email |
 | `GITHUB_ISSUES_TOKEN`, `GITHUB_ISSUES_REPO` | Mirror feedback to GitHub Issues | Feedback is saved locally only |
 | `RESTIC_PASSWORD`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Backups (Kamal secrets, not app ENV) | The backup accessory does not boot |
-| `CHARCO_MOBILE_DEPLOY_KEY` | GitHub Actions secret to fetch the private `charco_mobile` gem | CI fails at `bundle install` |
+| `CHARCO_MOBILE_TOKEN` | Organization secret (Actions and Dependabot): a read-only token of the private `charco_mobile` repository, which Bundler gets as `BUNDLE_GITHUB__COM` | CI and the image build fail at `bundle install` |
 
 ## Developer panels
 

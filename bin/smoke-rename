@@ -42,8 +42,13 @@ run_quietly() {
 }
 
 echo "→ Exporting working tree"
-ref="$(git -C "$root" stash create || true)"
-git -C "$root" archive "${ref:-HEAD}" | tar -x -C "$tmp"
+# A throwaway index: the tree as it is, new files too, less what .gitignore
+# leaves out. It needs no repository, as in the sandbox Atelier checks it in.
+index="$(mktemp -d)"
+git --git-dir="$index" init -q
+tree="$(git --git-dir="$index" --work-tree="$root" add -A && git --git-dir="$index" write-tree)"
+git --git-dir="$index" archive "$tree" | tar -x -C "$tmp"
+rm -rf "$index"
 
 # master.key is gitignored, so it is absent from the archive; provide it for boot.
 if [ -f "$root/config/master.key" ]; then
@@ -62,6 +67,11 @@ if [ -n "$residual" ]; then
   exit 1
 fi
 echo "✓ No residual references"
+
+# db:prepare and zeitwerk:check below would both create tmp/local_secret.txt, and Rails writes it
+# non-atomically: the slower process can read it empty and abort on secret_key_base.
+mkdir -p "$tmp/tmp"
+ruby -rsecurerandom -e 'print SecureRandom.hex(64)' >"$tmp/tmp/local_secret.txt"
 
 echo "→ Preparing the database (db:prepare) in the background"
 ( cd "$tmp" && exec bin/rails db:prepare ) >"$tmp/db_prepare.log" 2>&1 &

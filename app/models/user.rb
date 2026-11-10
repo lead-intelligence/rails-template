@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   DAILY_MESSAGE_LIMIT = 100
+  NAME_MAX_LENGTH = 100
   EMAIL_CONFIRMATION_EXPIRES_IN = 1.day
   UNCONFIRMED_RETENTION = 7.days
   DELETION_SWEEP_DELAY = 1.hour
@@ -34,13 +35,13 @@ class User < ApplicationRecord
 
   has_one_attached :data_export
 
-  validates :name, presence: true
+  validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :unconfirmed_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_nil: true
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :password_challenge, presence: true, on: :profile, if: :changing_credentials?
   validate :unconfirmed_email_not_taken, on: :profile, if: :unconfirmed_email?
-  validates :avatar, content_type: %w[image/png image/jpeg image/webp], size: { less_than: 5.megabytes }
+  validates :avatar, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }
 
   def initials
     name.to_s.split.first(2).filter_map { |part| part[0] }.join.upcase

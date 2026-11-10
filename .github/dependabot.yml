@@ -1,7 +1,20 @@
 version: 2
+# charco_mobile is a private gem; a public repository gets no organization
+# grant, so Dependabot reads it with the organization's read-only token.
+registries:
+  charco-mobile:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{secrets.CHARCO_MOBILE_TOKEN}}
 updates:
 - package-ecosystem: bundler
   directory: "/"
+  registries:
+  - charco-mobile
+  # Bundler evaluates the Gemfile and the gemspecs, our own code; the token
+  # they could read only reads charco_mobile.
+  insecure-external-code-execution: allow
   schedule:
     interval: weekly
   open-pull-requests-limit: 10

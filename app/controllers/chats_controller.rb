@@ -1,11 +1,12 @@
 class ChatsController < ApplicationController
   PER_PAGE = 25
+  MESSAGES_PER_PAGE = 50
 
   before_action :set_chat, only: [ :show, :destroy ]
   before_action :ensure_within_quota, only: :create
 
   def index
-    @pagy, @chats = pagy(listed_chats, limit: PER_PAGE)
+    @pagy, @chats = pagy(listed_chats, limit: PER_PAGE, raise_range_error: true)
   end
 
   def new
@@ -17,12 +18,16 @@ class ChatsController < ApplicationController
   def create
     prompt = chat_params[:prompt]
     if prompt.present?
-      @chat = Current.user.chats.create!(model: chosen_model)
-      @chat.add_message(role: :user, content: prompt)
+      Chat.transaction do
+        @chat = Current.user.chats.create!(model: chosen_model)
+        @chat.add_message(role: :user, content: prompt)
+      end
       ChatResponseJob.perform_later(@chat.id)
 
       redirect_to @chat, notice: t("chats.create.notice")
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   rescue RubyLLM::ModelNotFoundError
     @chat = Chat.new
     @chat.errors.add(:model, :unknown)
@@ -32,8 +37,12 @@ class ChatsController < ApplicationController
   end
 
   def show
+    @pagy, newest_first = pagy(:keyset, @chat.messages.includes(:ruby_llm_tool_calls, :ruby_llm_parent_tool_call).reorder(id: :desc),
+      limit: MESSAGES_PER_PAGE)
+    @messages = newest_first.reverse
+    return render :older_messages if turbo_frame_request?
+
     @message = @chat.messages.build
-    @messages = @chat.messages.where.not(id: nil).includes(:ruby_llm_tool_calls, :ruby_llm_parent_tool_call)
   end
 
   def destroy

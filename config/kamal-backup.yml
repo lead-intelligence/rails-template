@@ -1,23 +1,23 @@
 # kamal-backup — https://github.com/crmne/kamal-backup
-# The four SQLite databases are backed up consistently; Active Storage files under /rails/storage
-# are captured in the file snapshot (kamal-backup auto-excludes the raw db/WAL/shm files listed here).
+# The primary and queue databases are backed up consistently; cache and cable are disposable and
+# db:prepare recreates them on boot. Active Storage files under /rails/storage are captured in the file
+# snapshot, without any raw SQLite file and without the logs.
 
 databases:
   - name: primary
     adapter: sqlite
     path: /rails/storage/production.sqlite3
-  - name: cache
-    adapter: sqlite
-    path: /rails/storage/production_cache.sqlite3
   - name: queue
     adapter: sqlite
     path: /rails/storage/production_queue.sqlite3
-  - name: cable
-    adapter: sqlite
-    path: /rails/storage/production_cable.sqlite3
 
 paths:
-  - /rails/storage
+  - path: /rails/storage
+    exclude:
+      - /rails/storage/*.sqlite3
+      - /rails/storage/*.sqlite3-wal
+      - /rails/storage/*.sqlite3-shm
+      - /rails/storage/logs
 
 restic:
   # Any restic/rclone remote: s3:https://..., b2:..., sftp:..., etc.

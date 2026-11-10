@@ -1,10 +1,11 @@
+<% set_meta_tags title: t(".meta_title"), description: t(".meta_description") %>
 <div class="p-6 max-w-4xl mx-auto w-full">
   <h1 class="font-bold text-4xl mb-6"><%= t(".title") %></h1>
 
   <% if @posts.any? %>
     <div class="grid gap-6">
       <% @posts.each do |post| %>
-        <article class="card bg-base-100 shadow-sm">
+        <article class="card border border-base-300 bg-base-100 shadow-sm">
           <% if post.header_image.attached? %>
             <figure><%= image_tag post.header_image, class: "w-full h-48 object-cover" %></figure>
           <% end %>

@@ -115,4 +115,17 @@ class MessageTest < ActiveSupport::TestCase
 
     assert_equal "messages/assistant", message.to_partial_path
   end
+
+  test "a person's message is at most the content limit" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+
+    assert chat.messages.build(role: :user, content: "a" * Message::CONTENT_MAX_LENGTH).valid?
+    assert_not chat.messages.build(role: :user, content: "a" * (Message::CONTENT_MAX_LENGTH + 1)).valid?
+  end
+
+  test "an assistant reply may exceed the content limit" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+
+    assert chat.messages.build(role: :assistant, content: "a" * (Message::CONTENT_MAX_LENGTH + 1)).valid?
+  end
 end

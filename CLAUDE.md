@@ -3,19 +3,19 @@
 Rails starter template. This repo is both a working app and the template new apps are born from (`bin/rename <new_app_name>` after cloning).
 
 ## Stack
-- Ruby 4.0.6, Rails 8.1.3.1, SQLite everywhere (Solid Queue/Cache/Cable). Propshaft + Importmap, no Node.
+- Ruby 4.0.6, Rails 8.1.4.1, SQLite everywhere (Solid Queue/Cache/Cable). Propshaft + Importmap, no Node.
 - Tailwind v4 + DaisyUI 5 vendored in `app/assets/tailwind/`, Hotwire, Lexxy rich text, Herb renders every `.html.erb`, Lucide icons.
 - RubyLLM on OpenAI only, Schematist for structured output, Neighbor + sqlite-vec for vector search.
 - Native Rails auth, console1984, money-rails, pagy, noticed, pundit, ahoy. The last three are capability only: nothing uses them yet.
 - Developer panels behind one shared basic auth. RailsPress is the blog back-office; the public `/blog` is ours.
-- Spanish default, English fallback, locale from `Accept-Language`. `charco_mobile` drives native iOS and Android apps.
+- Spanish default, English fallback. Locale from a cookie the navbar switcher sets, else `Accept-Language`. `charco_mobile` drives native iOS and Android apps.
 - Minitest + fixtures + WebMock, cuprite system tests, axe-core, bullet, SimpleCov at 100%. Kamal deploys.
 
 ## Commands
 Run Ruby commands as `mise exec ruby@4.0.6 -- <command>` in shells without mise shims.
 
 - `bin/setup` — install and prepare. Seeds only on first creation (`db/seeds.rb`: the model registry, plus `dev@example.com` / `password` in development); an existing checkout runs `bin/rails db:seed`.
-- `bin/dev` — app + Tailwind watcher. The job supervisor runs inside Puma, so there is no jobs process.
+- `bin/dev` — app, Tailwind watcher and `herb dev`, which reloads the page when a template changes. The job supervisor runs inside Puma, so there is no jobs process.
 - `bin/rails test test/models/user_test.rb:42` — one file or one case. Prefix `SKIP_COVERAGE=1`: the 100% gate fails any subset.
 - `bin/rails test:system` — cuprite + axe. `bin/rails test` does not include it.
 - `bin/ci` — the pre-commit gate, exactly what CI runs (`config/ci.rb`, ten steps: rubocop, brakeman, `bin/bundler-audit`, `i18n-tasks health`, `charco_mobile check`, `herb analyze`, `archspec check`, `bin/rails test`, `bin/rails test:system`, `bin/smoke-rename`).

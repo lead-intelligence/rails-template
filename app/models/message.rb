@@ -1,14 +1,17 @@
 class Message < ApplicationRecord
+  CONTENT_MAX_LENGTH = 10_000
+
   acts_as_message
   has_many_attached :attachments
+
+  validates :content, length: { maximum: CONTENT_MAX_LENGTH }, if: -> { role == "user" }
 
   scope :visible_to_person, -> {
     where(chat: Chat.where(support: false))
       .or(where.not(role: %w[system tool]).where.not(id: RubyLLM::ActiveRecord::ToolCall.where(message_type: name).select(:message_id)))
   }
 
-  after_create_commit :broadcast_new_message
-  after_update_commit :broadcast_updated_message
+  after_commit :broadcast_message, on: %i[ create update ]
   after_destroy_commit :broadcast_removed_message, unless: :destroyed_by_association
 
   def broadcast_append_chunk(content)
@@ -29,11 +32,7 @@ class Message < ApplicationRecord
 
   private
 
-  def broadcast_new_message
-    broadcast_append_to "chat_#{chat_id}", target: "chat_#{chat_id}_messages"
-  end
-
-  def broadcast_updated_message
+  def broadcast_message
     broadcast_append_to "chat_#{chat_id}", target: "chat_#{chat_id}_messages"
   end
 

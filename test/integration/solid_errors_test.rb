@@ -17,6 +17,10 @@ class SolidErrorsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "resolved errors are destroyed after 30 days" do
+    assert_equal 30.days, SolidErrors.destroy_after
+  end
+
   test "dashboard requires basic auth credentials" do
     ENV["SUPERADMIN_USER"] = "superadmin"
     ENV["SUPERADMIN_PASSWORD"] = "secret"

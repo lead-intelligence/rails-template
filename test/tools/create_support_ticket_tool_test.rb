@@ -109,4 +109,24 @@ class CreateSupportTicketToolTest < ActiveSupport::TestCase
     assert chat.pending_photos.attached?
     assert_equal "Got it - I've passed this along to the team. Thank you!", result
   end
+
+  test "files no ticket once the person reached the hourly feedback limit" do
+    user = users(:one)
+    Feedback::HOURLY_LIMIT.times { user.feedbacks.create!(message: "Earlier report") }
+    tool = CreateSupportTicketTool.new(user.chats.create!(support: true))
+
+    assert_no_difference("Feedback.count") do
+      assert_equal CreateSupportTicketTool::LIMIT_REACHED, tool.execute(title: "Another one", summary: "More")
+    end
+  end
+
+  test "counts only the feedback of the last hour toward the limit" do
+    user = users(:one)
+    Feedback::HOURLY_LIMIT.times { user.feedbacks.create!(message: "Old report", created_at: 2.hours.ago) }
+    tool = CreateSupportTicketTool.new(user.chats.create!(support: true))
+
+    assert_difference("Feedback.count", 1) do
+      tool.execute(title: "New one", summary: "Fresh")
+    end
+  end
 end

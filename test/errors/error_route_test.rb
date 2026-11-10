@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ErrorRouteTest < ActionDispatch::IntegrationTest
+  include SessionTestHelper
+
   test "an unhandled request error records its route pattern, never the raw path" do
     context = route_for(controller_for("/passwords/:token/edit(.:format)"), source: "application.action_dispatch")
 
@@ -38,6 +40,7 @@ class ErrorRouteTest < ActionDispatch::IntegrationTest
   end
 
   test "a browser error is not stored under the route that received the report" do
+    sign_in_as users(:one)
     post javascript_errors_url, params: { message: "Cannot read properties of null" }
 
     assert_response :no_content

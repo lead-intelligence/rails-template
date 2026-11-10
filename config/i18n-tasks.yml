@@ -10,6 +10,7 @@ search:
     - app/
 
 ignore_unused:
+  - 'time.formats.*'
   - 'activerecord.attributes.*'
   - 'activerecord.errors.models.*'
   - 'charco_mobile.*'

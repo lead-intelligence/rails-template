@@ -20,7 +20,7 @@ The search index is embedded as a `<script type="application/json">` data island
 
 `Doc.root` is the directory everything is read from. It is `Rails.root`; the model test points it at a temporary tree to prove that an edited and an added page invalidate both memos, because adding a real page under the architecture directory would break the documentation test running in a parallel worker.
 
-The light/dark control is DaisyUI's `theme-controller` input, and `docs_theme_controller.js` only restores a stored choice by checking the matching radio — it never writes a theme onto the root element. With neither radio checked the page follows the browser's colour-scheme preference, which is exactly what the accessibility gate emulates when it audits every page in both schemes.
+The topbar renders the shared theme and language switchers, described in design.md and i18n.md.
 
 Prose styling is about a hundred lines of `@layer components` in `app/assets/tailwind/application.css`, keyed on `.docs` and written against DaisyUI tokens, because no typography plugin is vendored. Links there are underlined in the primary colour rather than coloured with it: the primary token does not reach the required contrast ratio against the page background in the dark theme, and every accessibility audit of a page full of links fails on it.
 
