@@ -146,14 +146,14 @@ class ErrorFeedsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "nothing from the request context leaks into the feed" do
-    context = { "user_id" => 4242, "user_agent" => "SecretAgent/1.0", "url" => "https://app.test/passwords/reset-me?token=hunter2",
+    context = { "user_id" => 987654321, "user_agent" => "SecretAgent/1.0", "url" => "https://app.test/passwords/reset-me?token=hunter2",
       "params" => { "password" => "hunter2" }, "cookies" => "session=abc", "controller" => "#<PagesController>" }
     record_occurrence(create_error, context: context)
 
     feed
 
     body = response.body
-    [ "4242", "SecretAgent", "reset-me", "hunter2", "session=abc", "PagesController" ].each do |secret|
+    [ "987654321", "SecretAgent", "reset-me", "hunter2", "session=abc", "PagesController" ].each do |secret|
       assert_not_includes body, secret
     end
   end
