@@ -53,7 +53,7 @@ group :development, :test do
   gem "bundler-audit", require: false
 
   # Finds missing/unused translations and keeps locale files in sync [https://github.com/glebm/i18n-tasks]
-  gem "i18n-tasks", "~> 1.0", require: false
+  gem "i18n-tasks", "~> 1.2", require: false
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
@@ -83,7 +83,7 @@ gem "meta-tags", "~> 2.24"
 
 gem "active_storage_validations", "~> 4.1"
 
-gem "ruby_llm", "~> 2.1"
+gem "ruby_llm", "~> 2.2"
 
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
 
@@ -97,7 +97,7 @@ gem "neighbor", "~> 1.2"
 
 gem "sqlite-vec", "~> 0.1.9"
 
-gem "console1984", "~> 0.2.4"
+gem "console1984", "~> 0.2.5"
 
 gem "simplecov", "~> 1.3", group: :test, require: false
 gem "simplecov-console", "~> 0.9", group: :test, require: false
@@ -114,7 +114,7 @@ gem "noticed", "~> 3.1"
 
 gem "bullet", "~> 8.3", groups: [ :development, :test ]
 
-gem "onlylogs", "~> 0.13"
+gem "onlylogs", "~> 0.15"
 
 gem "pundit", "~> 2.5"
 
@@ -134,7 +134,7 @@ gem "ahoy_matey", "~> 5.4"
 
 gem "action_push_native", "~> 0.3"
 
-gem "reactionview", "~> 0.6.0"
+gem "reactionview", "~> 0.6.1"
 
 # HTML-aware ERB parser and engine; `bin/herb analyze` checks every template in bin/ci [https://herb-tools.dev]
 gem "herb", "~> 0.11"
