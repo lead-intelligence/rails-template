@@ -239,6 +239,17 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "rate limits a burst of new chats" do
+    sign_in_as users(:one)
+
+    10.times { |i| post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "Prompt #{i}" } } }
+
+    assert_no_difference("users(:one).chats.count") do
+      post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "One too many" } }
+    end
+    assert_response :too_many_requests
+  end
+
   test "creates a chat on the default model when none is chosen" do
     sign_in_as users(:one)
 

@@ -11,6 +11,7 @@ class Message < ApplicationRecord
       .or(where.not(role: %w[system tool]).where.not(id: RubyLLM::ActiveRecord::ToolCall.where(message_type: name).select(:message_id)))
   }
 
+  after_create :count_toward_daily_quota, if: -> { role.to_s == "user" }
   after_commit :broadcast_message, on: %i[ create update ]
   after_destroy_commit :broadcast_removed_message, unless: :destroyed_by_association
 
@@ -31,6 +32,10 @@ class Message < ApplicationRecord
   end
 
   private
+
+  def count_toward_daily_quota
+    chat.user.count_sent_messages
+  end
 
   def broadcast_message
     broadcast_append_to "chat_#{chat_id}", target: "chat_#{chat_id}_messages"
