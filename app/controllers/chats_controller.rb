@@ -2,6 +2,7 @@ class ChatsController < ApplicationController
   PER_PAGE = 25
   MESSAGES_PER_PAGE = 50
 
+  rate_limit to: 10, within: 1.minute, only: :create, by: -> { Current.user.id }, with: -> { head :too_many_requests }
   before_action :set_chat, only: [ :show, :destroy ]
   before_action :ensure_within_quota, only: :create
 

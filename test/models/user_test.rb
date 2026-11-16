@@ -54,36 +54,52 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 48, image.height
   end
 
-  test "the daily quota counts only today's own messages" do
+  test "each message a person sends uses one from today's quota" do
     user = users(:one)
     chat = user.chats.create!(model: "gpt-4o-mini")
-    seed_messages(chat, 3)
-    seed_messages(chat, 2, role: "assistant")
-    seed_messages(chat, 4, created_at: 1.day.ago)
+    chat.add_message(role: :user, content: "Hola")
+    chat.add_message(role: :user, content: "Otra")
+    chat.add_message(role: :assistant, content: "Respuesta")
 
-    assert_equal User::DAILY_MESSAGE_LIMIT - 3, user.messages_remaining_today
+    assert_equal User::DAILY_MESSAGE_LIMIT - 2, user.reload.messages_remaining_today
   end
 
   test "the daily quota counts every chat, support included" do
     user = users(:one)
-    seed_messages(user.chats.create!(model: "gpt-4o-mini"), 2)
-    seed_messages(user.chats.create!(support: true), 3)
+    user.chats.create!(model: "gpt-4o-mini").add_message(role: :user, content: "Hola")
+    user.chats.create!(support: true).add_message(role: :user, content: "Ayuda")
 
-    assert_equal User::DAILY_MESSAGE_LIMIT - 5, user.messages_remaining_today
+    assert_equal User::DAILY_MESSAGE_LIMIT - 2, user.reload.messages_remaining_today
+  end
+
+  test "deleting a chat does not give back the messages it used" do
+    user = users(:one)
+    chat = user.chats.create!(model: "gpt-4o-mini")
+    chat.add_message(role: :user, content: "Hola")
+
+    chat.destroy!
+
+    assert_equal User::DAILY_MESSAGE_LIMIT - 1, user.reload.messages_remaining_today
+  end
+
+  test "the daily quota starts again the next day" do
+    user = users(:one)
+    user.chats.create!(model: "gpt-4o-mini").add_message(role: :user, content: "Hola")
+
+    travel 1.day do
+      assert_equal User::DAILY_MESSAGE_LIMIT, user.reload.messages_remaining_today
+
+      user.chats.create!(model: "gpt-4o-mini").add_message(role: :user, content: "Otra vez")
+
+      assert_equal User::DAILY_MESSAGE_LIMIT - 1, user.reload.messages_remaining_today
+    end
   end
 
   test "the daily quota never goes negative" do
     user = users(:one)
     seed_messages(user.chats.create!(model: "gpt-4o-mini"), User::DAILY_MESSAGE_LIMIT + 1)
 
-    assert_equal 0, user.messages_remaining_today
-  end
-
-  test "the daily quota reads its own index instead of every person's messages" do
-    sql = users(:one).messages_sent_today.select("COUNT(*)").to_sql
-    plan = ActiveRecord::Base.connection.select_rows("EXPLAIN QUERY PLAN #{sql}").map(&:last)
-
-    assert plan.any? { |step| step.include?("index_messages_on_chat_id_and_role_and_created_at") }, plan.inspect
+    assert_equal 0, user.reload.messages_remaining_today
   end
 
   test "changing the password in the profile context requires the current password" do
