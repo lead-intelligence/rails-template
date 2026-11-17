@@ -2,7 +2,7 @@ require "test_helper"
 
 class SupportAgentTest < ActiveSupport::TestCase
   test "configures itself on the Chat persistence model" do
-    assert_equal "Chat", SupportAgent.chat_model
+    assert_equal Chat, SupportAgent.chat_class
   end
 
   test "finding a support chat applies the binding rule and support context as instructions" do

@@ -16,3 +16,4 @@ AllCops:
     - "db/migrate/20261010233517_backfill_ruby_llm_v2_data.rb"
     - "db/migrate/20261010233518_finish_ruby_llm_v2_upgrade.rb"
     - "db/migrate/20261010233534_upgrade_ruby_llm_to_2_1.rb"
+    - "db/migrate/20261117061939_upgrade_ruby_llm_to_2_2.rb"

@@ -4,7 +4,7 @@ class Chat < ApplicationRecord
   MAX_PENDING_PHOTOS = 5
   PROVIDER = :openai
 
-  acts_as_chat
+  acts_as_chat owner: :user
   belongs_to :user
   has_many :feedbacks, dependent: :nullify
 
@@ -35,8 +35,6 @@ class Chat < ApplicationRecord
   def self.close_inactive_support_conversations
     support.open.inactive.find_each(&:close!)
   end
-
-  def as_json(options = nil) = serializable_hash(options)
 
   def closed?
     closed_at.present?
