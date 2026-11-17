@@ -6,6 +6,7 @@ data:
     - config/locales/%{locale}.yml
 
 search:
+  strict: false
   paths:
     - app/
 
