@@ -76,8 +76,8 @@ class DataExportTest < ActiveSupport::TestCase
 
     data = JSON.parse(zip_entries(export(users(:one)))["data.json"])
 
-    assert_equal [ visible_usage.id, unlinked_usage.id ].sort, data["chats/ruby_llm_usages"].map { |record| record["id"] }.sort
-    assert_not_includes data["chats/ruby_llm_usages"].map { |record| record["id"] }, hidden_usage.id
+    assert_equal [ visible_usage.id, unlinked_usage.id ].sort, data["ruby_llm_usages"].map { |record| record["id"] }.sort
+    assert_not_includes data["ruby_llm_usages"].map { |record| record["id"] }, hidden_usage.id
   end
 
   test "includes the usage the person owns outside any chat" do
@@ -200,7 +200,7 @@ class DataExportTest < ActiveSupport::TestCase
   private
 
   def record_usage(chat, message)
-    chat.ruby_llm_usages.create!(message: message, operation: "chat", provider: "openai", model: "gpt-4o-mini", status: "succeeded")
+    chat.ruby_llm_usages.create!(owner: chat.user, message: message, operation: "chat", provider: "openai", model: "gpt-4o-mini", status: "succeeded")
   end
 
   def export(user)

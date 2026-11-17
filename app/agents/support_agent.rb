@@ -1,6 +1,4 @@
-class SupportAgent < RubyLLM::Agent
-  chat_model "Chat"
-
+class SupportAgent < ApplicationAgent
   instructions { SupportContext.instructions }
 
   tools { [ CreateSupportTicketTool.new(chat) ] }

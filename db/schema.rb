@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_062000) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -107,6 +107,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.string "claim_token"
+    t.datetime "claimed_until"
+    t.index ["claimed_until"], name: "index_chats_on_claimed_until", where: "claim_token IS NOT NULL"
     t.index ["ruby_llm_model_id"], name: "index_chats_on_ruby_llm_model_id"
     t.index ["user_id"], name: "index_chats_on_user_id"
   end
@@ -190,6 +193,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
     t.integer "thinking_tokens"
     t.integer "tool_call_id"
     t.datetime "updated_at", null: false
+    t.string "phase"
+    t.text "continuation"
     t.index ["chat_id", "role", "created_at"], name: "index_messages_on_chat_id_and_role_and_created_at"
     t.index ["chat_id"], name: "index_messages_on_chat_id"
     t.index ["model_id"], name: "index_messages_on_model_id"
@@ -438,6 +443,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
     t.index ["status"], name: "index_ruby_llm_batches_on_status"
   end
 
+  create_table "ruby_llm_chat_files", force: :cascade do |t|
+    t.string "chat_type", null: false
+    t.bigint "chat_id", null: false
+    t.string "owner_type"
+    t.bigint "owner_id"
+    t.string "path", null: false
+    t.string "content_type"
+    t.bigint "byte_size"
+    t.string "digest"
+    t.text "text"
+    t.string "read_digest"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_type", "chat_id", "path"], name: "index_ruby_llm_chat_files_on_chat_type_and_chat_id_and_path"
+    t.index ["owner_type", "owner_id"], name: "index_ruby_llm_chat_files_on_owner_type_and_owner_id"
+  end
+
   create_table "ruby_llm_mcp_credentials", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "data"
@@ -481,6 +503,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
     t.index ["blob_key", "provider", "account"], name: "index_ruby_llm_provider_files_uniqueness", unique: true
   end
 
+  create_table "ruby_llm_queued_messages", force: :cascade do |t|
+    t.string "chat_type", null: false
+    t.bigint "chat_id", null: false
+    t.string "sender_type"
+    t.bigint "sender_id"
+    t.text "content"
+    t.boolean "steer", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_type", "chat_id"], name: "index_ruby_llm_queued_messages_on_chat_type_and_chat_id"
+    t.index ["sender_type", "sender_id"], name: "index_ruby_llm_queued_messages_on_sender_type_and_sender_id"
+  end
+
   create_table "ruby_llm_tool_calls", force: :cascade do |t|
     t.string "approval"
     t.json "arguments", default: {}
@@ -496,6 +531,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
     t.text "thought_signature"
     t.string "tool_call_id", null: false
     t.datetime "updated_at", null: false
+    t.string "provider_call_id"
+    t.string "namespace"
+    t.datetime "claimed_until"
     t.index ["message_type", "message_id"], name: "index_ruby_llm_tool_calls_on_message_type_and_message_id"
     t.index ["name"], name: "index_ruby_llm_tool_calls_on_name"
     t.index ["result_type", "result_id"], name: "index_ruby_llm_tool_calls_on_result_type_and_result_id"
@@ -527,11 +565,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
     t.integer "thinking_tokens"
     t.decimal "total_cost", precision: 16, scale: 10
     t.datetime "updated_at", null: false
+    t.string "workflow_id"
+    t.string "workflow_name"
+    t.string "workflow_step_id"
+    t.string "workflow_step_name"
+    t.integer "characters"
+    t.decimal "audio_seconds", precision: 16, scale: 6
+    t.integer "search_units"
+    t.decimal "characters_cost", precision: 16, scale: 10
+    t.decimal "audio_seconds_cost", precision: 16, scale: 10
+    t.decimal "search_units_cost", precision: 16, scale: 10
     t.index ["chat_type", "chat_id"], name: "index_ruby_llm_usages_on_chat_type_and_chat_id"
     t.index ["message_type", "message_id"], name: "index_ruby_llm_usages_on_message_type_and_message_id"
     t.index ["owner_type", "owner_id"], name: "index_ruby_llm_usages_on_owner"
     t.index ["status"], name: "index_ruby_llm_usages_on_status"
-    t.check_constraint "operation IN ('chat', 'embedding', 'moderation', 'image', 'speech', 'transcription', 'ocr', 'rerank', 'judgment', 'video', 'research')"
+    t.index ["workflow_id"], name: "index_ruby_llm_usages_on_workflow_id"
+    t.check_constraint "operation IN ('chat', 'embedding', 'moderation', 'image', 'speech', 'transcription', 'ocr', 'rerank', 'judgment', 'video', 'research', 'code_execution')"
     t.check_constraint "status IN ('pending', 'succeeded', 'failed', 'cancelled')"
   end
 

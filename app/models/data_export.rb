@@ -98,7 +98,7 @@ class DataExport
   end
 
   def serialize(record)
-    json = record.as_json(except: EXCLUDED_COLUMNS[record.class.name])
+    json = record.attributes.except(*EXCLUDED_COLUMNS[record.class.name]).as_json
     rich_text_reflections(record.class).each do |reflection|
       json[reflection.name.to_s.delete_prefix("rich_text_")] = record.public_send(reflection.name)&.to_plain_text
     end

@@ -6,7 +6,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
 
   test "enqueues chat titling after the response is persisted" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
-    stub_openai_chat(content: "Sure, here is how.")
+    stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
     assert_enqueued_with(job: GenerateChatTitleJob, args: [ chat ]) do
       chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
@@ -44,7 +44,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
 
   test "a normal chat has no support instructions or tool attached" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
-    stub_openai_chat(content: "Sure, here is how.")
+    stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
       ChatResponseJob.perform_now(chat.id)
@@ -54,7 +54,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
 
   test "a support chat's system instructions include the binding rule and the support context" do
     chat = users(:one).chats.create!(support: true)
-    stub_openai_chat(content: "Sure, tell me more about what happened.")
+    stub_openai_chat_stream(chunks: [ "Sure, tell me more about what happened." ])
 
     chat.messages.create!(role: :user, content: "The chat page is slow for me")
       ChatResponseJob.perform_now(chat.id)
@@ -70,7 +70,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   test "a support chat with a pre-existing persisted system message does not duplicate instructions" do
     chat = users(:one).chats.create!(support: true)
     chat.messages.create!(role: "system", content: "Stale instructions from before this refactor")
-    stub_openai_chat(content: "Sure, tell me more about what happened.")
+    stub_openai_chat_stream(chunks: [ "Sure, tell me more about what happened." ])
 
     chat.messages.create!(role: :user, content: "The chat page is slow for me")
       ChatResponseJob.perform_now(chat.id)
@@ -82,7 +82,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
 
   test "does not enqueue chat titling for a support chat" do
     chat = users(:one).chats.create!(support: true)
-    stub_openai_chat(content: "Sure, tell me more about what happened.")
+    stub_openai_chat_stream(chunks: [ "Sure, tell me more about what happened." ])
 
     assert_no_enqueued_jobs(only: GenerateChatTitleJob) do
       chat.messages.create!(role: :user, content: "The chat page is slow for me")
@@ -111,6 +111,16 @@ class ChatResponseJobTest < ActiveJob::TestCase
     assert_no_match "Internal server error", failure_broadcast
 
     assert_nil chat.messages.reload.find_by(role: :assistant)
+  end
+
+  test "bills the reply to the chat's user" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
+    stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
+
+    ChatResponseJob.perform_now(chat.id)
+
+    assert_equal chat.messages.where(role: "assistant").ids, users(:one).ruby_llm_usages.where(chat: chat).pluck(:message_id)
   end
 
   test "shows no failure when the reply succeeds" do
@@ -188,7 +198,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
         content: "Seeded", created_at: now - (history - index).minutes, updated_at: now }
     end)
     chat.messages.create!(role: :user, content: "And now?")
-    stub_openai_chat(content: "Sure.")
+    stub_openai_chat_stream(chunks: [ "Sure." ])
 
     queries_to { ChatResponseJob.perform_now(chat.id) }
   end

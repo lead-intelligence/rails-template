@@ -636,7 +636,7 @@ DEPENDENCIES
   redcarpet (~> 3.6)
   rubocop-rails-omakase
   ruby-vips (~> 2.3)
-  ruby_llm (~> 2.2)
+  ruby_llm (~> 2.2.0)
   rubyzip (~> 3.7)
   schematist (~> 1.1)
   simplecov (~> 1.3)
