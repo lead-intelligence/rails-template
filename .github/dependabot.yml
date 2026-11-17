@@ -23,6 +23,10 @@ updates:
       update-types:
       - minor
       - patch
+      # A ruby_llm release changes the database and the chat code, so it gets
+      # its own pull request and never holds back the other updates.
+      exclude-patterns:
+      - ruby_llm
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
