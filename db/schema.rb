@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_104857) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_16_091204) do
   create_table "action_push_native_devices", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -580,6 +580,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_104857) do
     t.datetime "created_at", null: false
     t.datetime "deletion_requested_at"
     t.string "email_address", null: false
+    t.integer "messages_sent_count", default: 0, null: false
+    t.date "messages_sent_on"
     t.string "name"
     t.string "password_digest", null: false
     t.string "unconfirmed_email"

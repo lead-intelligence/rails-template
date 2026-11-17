@@ -48,11 +48,15 @@ class User < ApplicationRecord
   end
 
   def messages_remaining_today
-    [ DAILY_MESSAGE_LIMIT - messages_sent_today.count, 0 ].max
+    [ DAILY_MESSAGE_LIMIT - messages_sent_today, 0 ].max
   end
 
   def messages_sent_today
-    messages.where(role: "user", created_at: Time.current.all_day)
+    messages_sent_on == Date.current ? messages_sent_count : 0
+  end
+
+  def count_sent_messages(count = 1)
+    with_lock { update_columns(messages_sent_on: Date.current, messages_sent_count: messages_sent_today + count) }
   end
 
   def confirmed?
