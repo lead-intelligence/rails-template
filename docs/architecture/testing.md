@@ -38,6 +38,8 @@ Every `visit` in a system test audits the page with axe-core against WCAG 2.1 A 
 
 Every page is audited twice. The helper forces `prefers-color-scheme` to light and then dark through the CDP `Emulation.setEmulatedMedia` command and resets it afterwards, and the failure names the scheme. Headless Chrome's default scheme differs per machine — dark on one laptop, light on the GitHub runner — so a single-scheme audit passed on one and failed on the other. The two passes cost about 5 seconds over the suite; axe itself costs about 1.2 seconds, because it is injected once per page load and Turbo keeps it alive across in-page navigations.
 
+`visit` also checks that the page fits a 390px phone (`assert_fits_phone`). Both checks wait for every custom element on the page to be defined. Lexxy loads on demand after the page, so without that wait the checks sometimes saw no editor, and sometimes caught its toolbar in the one frame between insertion and its overflow menu: at 390px the buttons stuck out and the test failed at random.
+
 The Content Security Policy does not block the audit: axe is injected over the DevTools protocol, which the page's `script-src` does not govern.
 
 `axe-core-api` is installed only for its vendored `axe.min.js`. Its own runner is Selenium-specific — it calls `manage.timeouts` and `switch_to.window` and rescues Selenium errors — and its legacy path calls `execute_async_script`, which cuprite does not implement. The helper injects the gem's script and drives `axe.run` through Capybara's `evaluate_async_script`. `axe-core-capybara` is absent because its only entry point forces the Selenium driver.

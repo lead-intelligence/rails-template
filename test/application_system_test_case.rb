@@ -28,12 +28,17 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   def visit(...)
     super
     assert_turbo_ready
+    assert_custom_elements_defined
     assert_accessible
     assert_fits_phone
   end
 
   def assert_turbo_ready
     assert_selector "body[data-turbo-ready]"
+  end
+
+  def assert_custom_elements_defined
+    assert_no_selector ":not(:defined)"
   end
 
   def without_raising_server_errors

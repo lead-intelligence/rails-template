@@ -7,6 +7,15 @@ class DocumentsTest < ApplicationSystemTestCase
     assert_selector "lexxy-editor [contenteditable=true]"
   end
 
+  test "visit audits the editor only once Lexxy has loaded" do
+    sign_in_via_browser(users(:one))
+    delay_lexxy_script(seconds: 1)
+
+    visit new_document_url
+
+    assert page.has_selector?("lexxy-editor[connected]", wait: 0)
+  end
+
   test "the Lexxy editor loads after a Turbo navigation from a page without one" do
     sign_in_via_browser(users(:one))
     visit documents_url
@@ -29,5 +38,18 @@ class DocumentsTest < ApplicationSystemTestCase
 
     assert_current_path documents_path(page: 2)
     assert_selector "li.list-row", count: users(:one).documents.count - DocumentsController::PER_PAGE
+  end
+
+  private
+
+  def delay_lexxy_script(seconds:)
+    browser = page.driver.browser
+    browser.network.intercept
+    browser.on(:request) do |request|
+      Thread.new do
+        sleep seconds if request.url.match?(%r{/lexxy-\h+\.js\z})
+        request.continue
+      end
+    end
   end
 end
