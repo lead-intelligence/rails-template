@@ -16,6 +16,14 @@ class BrandTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a name with an apostrophe is escaped once in the title" do
+    with_app_name("Ana's") do
+      get root_path
+
+      assert_select "title", text: /\| Ana's\z/
+    end
+  end
+
   test "the navbar draws the logo partial" do
     original = ApplicationController.view_paths
     ApplicationController.prepend_view_path(ActionView::FixtureResolver.new("shared/_logo.html.erb" => "<b id=\"logo-probe\"></b>"))
