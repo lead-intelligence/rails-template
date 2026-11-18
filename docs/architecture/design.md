@@ -14,6 +14,18 @@ Icons are Lucide through the `lucide-rails` gem: `lucide_icon "house", class: "s
 
 A new app's own theme comes from a design tool fed with the design substrate and the brand brief under `docs/`. What comes back is a DaisyUI theme block for `app/assets/tailwind/application.css`, and the accessibility gate decides whether it ships.
 
+## Brand
+
+Each brand element lives in one place, so a rebrand is one edit per element and touches no other view.
+
+The name is the `app_name` key in `config/locales/es.yml` and `config/locales/en.yml`. The navbar, the suffix of every page title, the `application-name` meta tag and the PWA manifest all read it. A business name that differs per language gets a different value in each file.
+
+The logo is `app/views/shared/_logo.html.erb`, which the navbar renders beside the name. By default it draws a Lucide icon on a `primary` square of `size-8`; a brand logo replaces the content of that partial, as an inline SVG or an `image_tag` of a file in `app/assets/images/`, and keeps the same size. The favicon, the Apple touch icon and the PWA icon are `public/icon.svg` and `public/icon.png` (512 by 512), outside the asset pipeline because the browser asks for them by a fixed path.
+
+The font is `--font-sans` in the `@theme` block of `app/assets/tailwind/application.css`. Its default is Tailwind's own system stack, so the page renders in the operating system's font. A brand font is self-hosted: its `.woff2` files go in `app/assets/fonts/`, an `@font-face` rule above the `@theme` block names the family with `src: url("file.woff2") format("woff2")` and `font-display: swap`, and the family goes first in `--font-sans`, ahead of the system stack as the fallback. The Content Security Policy allows fonts from the app's own origin only, so a font CDN such as Google Fonts is blocked; download the files instead.
+
+The theme is the two `daisyui-theme` blocks in the same file, `light` and `dark`: the colours, the radii (`--radius-box`, `--radius-field`, `--radius-selector`), the border and the depth. A brand colour goes into both blocks at a lightness that holds contrast on each ground, and the accessibility gate below decides whether it ships.
+
 ## Gotchas
 
 The accessibility gate decides the palette. `ApplicationSystemTestCase#visit` audits axe-core against WCAG 2.1 A/AA in both color schemes on every visit, so a color that reads well but falls under 4.5:1 turns the whole system suite red rather than producing a subtle regression.
@@ -27,3 +39,5 @@ Tailwind generates CSS only for class names it finds under `app/`: `application.
 A theme change touches no view, which is what makes it safe to revert in one commit; a change that also edits markup no longer has that property.
 
 The navbar is sticky at `z-30` and its dropdowns open at `z-40`, so anything that floats over the top of the page needs a higher layer. The flash toast sits at `z-50`; below the navbar its dismiss button cannot be clicked.
+
+The `url()` of a font is the bare file name, with no folder and no leading slash. Propshaft gives each directory under `app/assets/` its own root, so a file in `app/assets/fonts/` is known by its name alone, and Propshaft rewrites that name to the digested path when it serves the built stylesheet. A URL it cannot match it leaves untouched, and the font fails with a 404 that shows no error, only the fallback font.

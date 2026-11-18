@@ -39,6 +39,7 @@ es:
         title: Tickets de comentarios
       resolve:
         notice: Ticket resuelto.
+  app_name: CharcoTemplate
   atelier:
     people:
       owner: Dueño

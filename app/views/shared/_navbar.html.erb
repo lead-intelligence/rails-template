@@ -1,10 +1,8 @@
 <div class="navbar sticky top-0 z-30 gap-1 border-b border-base-300/70 bg-base-100/80 px-3 backdrop-blur-md sm:px-6">
   <div class="flex-1">
     <%= link_to root_path, class: "flex w-fit items-center gap-2.5 rounded-field p-1" do %>
-      <span class="grid size-8 place-items-center rounded-field bg-primary text-primary-content">
-        <%= lucide_icon "droplet", class: "size-4", "aria-hidden": true %>
-      </span>
-      <span class="sr-only text-lg font-semibold tracking-tight sm:not-sr-only">CharcoTemplate</span>
+      <%= render "shared/logo" %>
+      <span class="sr-only text-lg font-semibold tracking-tight sm:not-sr-only"><%= t("app_name") %></span>
     <% end %>
   </div>
   <div class="flex flex-none items-center gap-1">

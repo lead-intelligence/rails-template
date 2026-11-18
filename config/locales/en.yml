@@ -39,6 +39,7 @@ en:
         title: Feedback tickets
       resolve:
         notice: Ticket resolved.
+  app_name: CharcoTemplate
   atelier:
     people:
       owner: Owner
