@@ -4,6 +4,7 @@ class User < ApplicationRecord
   EMAIL_CONFIRMATION_EXPIRES_IN = 1.day
   UNCONFIRMED_RETENTION = 7.days
   DELETION_SWEEP_DELAY = 1.hour
+  DEMO_DOMAIN = "demo.test"
 
   has_secure_password
   has_many :sessions, dependent: :destroy
@@ -35,6 +36,10 @@ class User < ApplicationRecord
 
   has_one_attached :data_export
 
+  scope :able_to_sign_in, -> { where.not(confirmed_at: nil).where(deletion_requested_at: nil) }
+  scope :demo, -> { where(arel_table[:email_address].matches("%@#{DEMO_DOMAIN}")) }
+  scope :not_demo, -> { where(arel_table[:email_address].does_not_match("%@#{DEMO_DOMAIN}")) }
+
   validates :name, presence: true, length: { maximum: NAME_MAX_LENGTH }
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :unconfirmed_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_nil: true
@@ -42,6 +47,37 @@ class User < ApplicationRecord
   validates :password_challenge, presence: true, on: :profile, if: :changing_credentials?
   validate :unconfirmed_email_not_taken, on: :profile, if: :unconfirmed_email?
   validates :avatar, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }
+
+  def self.demo_account!(role, name:)
+    find_or_create_by!(email_address: "#{role}@#{DEMO_DOMAIN}") do |user|
+      user.name = name
+      user.password = SecureRandom.base58(24)
+      user.confirmed_at = Time.current
+    end
+  end
+
+  def self.atelier_people
+    people = able_to_sign_in.order(:id)
+    [ people.not_demo.first, *people.demo ].compact
+  end
+
+  def self.from_atelier_token(token, key:)
+    payload, signature = token.to_s.split(".", 2)
+    return unless ActiveSupport::SecurityUtils.secure_compare(OpenSSL::HMAC.hexdigest("SHA256", key, payload.to_s), signature.to_s)
+    return unless JSON.parse(Base64.urlsafe_decode64(payload), symbolize_names: true) in { email: String => email, exp: Integer => exp }
+
+    able_to_sign_in.find_by(email_address: email.strip.downcase) if exp >= Time.current.to_i
+  rescue ArgumentError, JSON::ParserError
+    nil
+  end
+
+  def atelier_label
+    if email_address.end_with?("@#{DEMO_DOMAIN}")
+      I18n.t("atelier.people.#{email_address.delete_suffix("@#{DEMO_DOMAIN}")}", default: name)
+    else
+      I18n.t("atelier.people.owner")
+    end
+  end
 
   def initials
     name.to_s.split.first(2).filter_map { |part| part[0] }.join.upcase

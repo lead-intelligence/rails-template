@@ -51,6 +51,7 @@ Reasons and examples: `docs/architecture/conventions.md`.
 - **Conventions** — the reasons behind each rule above, and the business-rule pattern. → `conventions.md`
 - **Testing** — `bin/bundler-audit` and `bin/brakeman` reach the network; a hanging system run is a crashed worker. → `testing.md`
 - **Auth** — sign-in blocks until the email is confirmed; email or password changes need the current password. → `auth.md`
+- **Atelier** — the tasks the platform runs; the sign-in link route exists only while `ATELIER_ENTER_KEY` is set. → `atelier.md`
 - **Data export** — every `dependent: :destroy` on `User` lands in the ZIP; an `encrypts`'d column comes out in PLAINTEXT. → `data-export.md`
 - **Email** — without `APP_HOST` every mailer link points at `example.com`. → `email.md`
 - **AI chat** — `@messages` needs its `includes` or Bullet fails; the update broadcast is an APPEND on purpose. → `ai-chat.md`

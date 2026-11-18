@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     end
   end
   resource :session
+  get "atelier/enter", to: "atelier_entries#show", as: :atelier_enter, constraints: ->(_request) { ENV["ATELIER_ENTER_KEY"].present? }
   resources :active_sessions, only: %i[index destroy] do
     collection do
       delete :revoke_others

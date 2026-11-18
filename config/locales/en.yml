@@ -39,6 +39,12 @@ en:
         title: Feedback tickets
       resolve:
         notice: Ticket resolved.
+  atelier:
+    people:
+      owner: Owner
+  atelier_entries:
+    show:
+      alert: That sign-in link is not valid or has expired.
   authorization:
     not_authorized: You are not authorized to perform this action.
   blog:
