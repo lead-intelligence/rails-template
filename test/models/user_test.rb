@@ -305,4 +305,12 @@ class UserTest < ActiveSupport::TestCase
     user.update_column(:created_at, created_at)
     user
   end
+
+  test "a demo account is made once, confirmed, under the demo domain" do
+    user = User.demo_account!("seller", name: "Sam")
+
+    assert_equal "seller@#{User::DEMO_DOMAIN}", user.email_address
+    assert user.confirmed?
+    assert_no_difference("User.count") { assert_equal user, User.demo_account!("seller", name: "Other") }
+  end
 end

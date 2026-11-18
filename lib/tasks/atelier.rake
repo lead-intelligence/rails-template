@@ -11,4 +11,12 @@ namespace :atelier do
     exit 3 unless user.new_record?
     user.update!(name: "Owner", password: ENV.fetch("PASSWORD"), confirmed_at: Time.current)
   end
+
+  # Who a tester can sign in as on staging: one "email<TAB>label" line per
+  # account, the owner first (the oldest account outside the demo domain),
+  # then the demo accounts the seeds make with User.demo_account!.
+  desc "List the accounts a tester can sign in as, owner first (Atelier runs it)"
+  task people: :environment do
+    User.atelier_people.each { |user| puts "#{user.email_address}\t#{user.atelier_label}" }
+  end
 end

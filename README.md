@@ -107,6 +107,7 @@ cp .env.example .env
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USER_NAME`, `SMTP_PASSWORD` | Production email, any provider (credentials: `smtp/user_name`, `smtp/password`) | No email is sent |
 | `SUPERADMIN_USER`, `SUPERADMIN_PASSWORD` | One login for every developer panel (credentials: `superadmin/username`, `superadmin/password`) | Every panel answers `401` |
 | `ERROR_FEED_TOKEN` | Bearer token for `/error_feed` (credentials: `error_feed_token`) | `/error_feed` answers `404` |
+| `ATELIER_ENTER_KEY` | Staging only: the key of Atelier's sign-in links at `/atelier/enter` ([atelier](docs/architecture/atelier.md)). Never set it in production | `/atelier/enter` answers `404` |
 | `SOLID_ERRORS_EMAIL_TO` | Email on each new error (credentials: `solid_errors/email_to`) | No error email |
 | `GITHUB_ISSUES_TOKEN`, `GITHUB_ISSUES_REPO` | Mirror feedback to GitHub Issues | Feedback is saved locally only |
 | `RESTIC_PASSWORD`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Backups (Kamal secrets, not app ENV) | The backup accessory does not boot |
@@ -154,7 +155,7 @@ One page each in `docs/architecture/`:
 - Capabilities shipped unused: [notifications](docs/architecture/notifications.md), [authorization](docs/architecture/authorization.md), [analytics](docs/architecture/analytics.md), [money](docs/architecture/money.md)
 - Operations: [superadmin panels](docs/architecture/superadmin-panels.md), [background jobs](docs/architecture/background-jobs.md), [health checks](docs/architecture/health-checks.md), [error tracking](docs/architecture/error-tracking.md), [browser errors](docs/architecture/browser-errors.md), [log viewer](docs/architecture/log-viewer.md), [console auditing](docs/architecture/console-auditing.md)
 - Front end: [design and icons](docs/architecture/design.md), [templates](docs/architecture/templates.md), [security headers](docs/architecture/security-headers.md), [mobile](docs/architecture/mobile.md)
-- Shipping: [deploy](docs/architecture/deploy.md), [backups](docs/architecture/backups.md), [testing](docs/architecture/testing.md), [conventions](docs/architecture/conventions.md)
+- Shipping: [atelier](docs/architecture/atelier.md) (owner account, test accounts, staging sign-in link), [deploy](docs/architecture/deploy.md), [backups](docs/architecture/backups.md), [testing](docs/architecture/testing.md), [conventions](docs/architecture/conventions.md)
 
 ## Deployment
 

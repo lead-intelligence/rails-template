@@ -39,6 +39,12 @@ es:
         title: Tickets de comentarios
       resolve:
         notice: Ticket resuelto.
+  atelier:
+    people:
+      owner: Dueño
+  atelier_entries:
+    show:
+      alert: El enlace para entrar no es válido o ya venció.
   authorization:
     not_authorized: No estás autorizado para realizar esta acción.
   blog:
