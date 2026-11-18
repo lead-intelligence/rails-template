@@ -2,6 +2,8 @@
 
 Production ships an active, provider-agnostic SMTP scaffold in `config/environments/production.rb`: `delivery_method = :smtp`, with `smtp_settings` reading the username and password from `Rails.application.credentials` under `smtp` first and falling back to `SMTP_USER_NAME`/`SMTP_PASSWORD`, the server from `SMTP_ADDRESS`, the port from `SMTP_PORT` defaulting to 587, plain authentication and STARTTLS. The wiring is done; each app fills in only the secrets, which `.env.example` documents. Credentials are the preferred home for the username and password, ENV the fallback. It works with any provider — SendGrid, Postmark, Mailgun, SES, Resend — because nothing provider-specific is baked in.
 
+Every mail is sent from `ApplicationMailer`'s default sender, with the app's `app_name` locale key as its display name, so the inbox shows the app's name rather than a bare address. Change the address there before the first deploy.
+
 `APP_HOST` is the one setting that fails quietly. `config.action_mailer.default_url_options` derives its host from it and falls back to `example.com`, so an app deployed without it sends password resets, confirmation links, data-export links and feedback photo links that all point at `example.com`. Set it before the first deploy, alongside the placeholders in `config/deploy.yml`.
 
 `deliver_later` mail runs in `ActionMailer::MailDeliveryJob`, which does not inherit `ApplicationJob` and so not its `discard_on ActiveJob::DeserializationError`. The job hands its errors to the mailer's own `rescue_from`, and `ApplicationMailer` drops that one: a mail whose record is gone before it is sent, such as the data-export notice of an account deleted in the meantime, is not delivered and does not sit in the failed jobs.

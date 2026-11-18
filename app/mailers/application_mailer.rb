@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "from@example.com"
+  default from: -> { email_address_with_name("from@example.com", I18n.t("app_name")) }
   layout "mailer"
 
   rescue_from ActiveJob::DeserializationError, with: -> { }
