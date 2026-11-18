@@ -36,7 +36,7 @@ class ConfirmDialogTest < ApplicationSystemTestCase
   test "the confirm dialog stays ready after a Turbo Drive navigation" do
     visit chats_url
 
-    click_link "CharcoTemplate"
+    click_link t("app_name")
     assert_current_path root_path
     assert_turbo_ready
   end
