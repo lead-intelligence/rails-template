@@ -3,7 +3,7 @@
 Rails starter template. This repo is both a working app and the template new apps are born from (`bin/rename <new_app_name>` after cloning).
 
 ## Stack
-- Ruby 4.0.6, Rails 8.1.4.1, SQLite everywhere (Solid Queue/Cache/Cable). Propshaft + Importmap, no Node.
+- The Ruby in `.ruby-version`, Rails 8.1.4.1, SQLite everywhere (Solid Queue/Cache/Cable). Propshaft + Importmap, no Node.
 - Tailwind v4 + DaisyUI 5 vendored in `app/assets/tailwind/`, Hotwire, Lexxy rich text, Herb renders every `.html.erb`, Lucide icons.
 - RubyLLM on OpenAI only, Schematist for structured output, Neighbor + sqlite-vec for vector search.
 - Native Rails auth, console1984, money-rails, pagy, noticed, pundit, ahoy. The last three are capability only: nothing uses them yet.
@@ -12,7 +12,7 @@ Rails starter template. This repo is both a working app and the template new app
 - Minitest + fixtures + WebMock, cuprite system tests, axe-core, bullet, SimpleCov at 100%. Kamal deploys.
 
 ## Commands
-Run Ruby commands as `mise exec ruby@4.0.6 -- <command>` in shells without mise shims.
+Run Ruby commands as `mise exec -- <command>` in shells without mise shims: mise reads `.ruby-version`.
 
 - `bin/setup` — install and prepare. Seeds only on first creation (`db/seeds.rb`: the model registry, plus `dev@example.com` / `password` in development); an existing checkout runs `bin/rails db:seed`.
 - `bin/dev` — app, Tailwind watcher and `herb dev`, which reloads the page when a template changes. The job supervisor runs inside Puma, so there is no jobs process.

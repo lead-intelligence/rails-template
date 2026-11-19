@@ -21,11 +21,11 @@ The detail of every subsystem lives in [`docs/architecture/`](docs/architecture/
 
 ## Requirements
 
-- [mise](https://mise.jdx.dev), or another way to install Ruby 4.0.6 (`.ruby-version`)
+- [mise](https://mise.jdx.dev), or another way to install the Ruby in `.ruby-version`
 - libvips, for avatar variants
 - An OpenAI API key, for the AI chat, semantic search and support assistant
 
-In a shell without mise shims, run every Ruby command as `mise exec ruby@4.0.6 -- <command>`. The examples below show bare commands.
+In a shell without mise shims, run every Ruby command as `mise exec -- <command>`: mise reads `.ruby-version` when its `idiomatic_version_file_enable_tools` setting lists `ruby`. The examples below show bare commands.
 
 ## Quickstart
 

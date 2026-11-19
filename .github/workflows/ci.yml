@@ -25,8 +25,8 @@ jobs:
     runs-on: ${{ inputs.runner || (github.event.repository.private && 'ci-amd64' || 'ubuntu-latest') }}
     # The Debian and libvips that production runs (Dockerfile), so a test
     # passes here only where it passes in production: the runner's own
-    # packages change without notice. Keep the Ruby version as .ruby-version.
-    container: ruby:4.0.6-slim
+    # packages change without notice. test/ci/ruby_version_test.rb keeps the Ruby as .ruby-version.
+    container: ruby:4.0.10-slim
     env:
       BUNDLE_PATH: vendor/bundle
       # The read-only token of the private charco_mobile gem: bin/ci installs
