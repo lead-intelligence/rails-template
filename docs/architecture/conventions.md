@@ -2,7 +2,7 @@
 
 The rules every change follows, with the reason behind each. CLAUDE.md lists them in one line each; this page is where the reasons live.
 
-Every Ruby and Rails command runs as `mise exec ruby@4.0.6 -- <command>` in a shell without mise shims, so the Ruby that answers is the one `.ruby-version` names.
+Every Ruby and Rails command runs as `mise exec -- <command>` in a shell without mise shims, so the Ruby that answers is the one `.ruby-version` names. That file is the only place a person changes the Ruby: the Dockerfile's `RUBY_VERSION` and the CI container repeat it, because neither can read a file, and `test/ci/ruby_version_test.rb` fails when either drifts.
 
 ## Tests first
 
