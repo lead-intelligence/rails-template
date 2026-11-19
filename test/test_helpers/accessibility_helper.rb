@@ -8,7 +8,9 @@ module AccessibilityHelper
 
   # The innermost elements that end past the right edge, when the page scrolls sideways.
   WIDE_SCRIPT = <<~JS.freeze
-    (function () {
+    var done = arguments[arguments.length - 1];
+    var frames = 3;
+    function measure() {
       var root = document.documentElement;
       if (root.scrollWidth <= root.clientWidth) return [];
       var wide = Array.from(document.body.querySelectorAll("*")).filter(function (element) {
@@ -22,7 +24,11 @@ module AccessibilityHelper
         if (element.className && element.className.baseVal === undefined) name += "." + element.className.trim().split(/\s+/).join(".");
         return "  " + name + " (ends at " + Math.round(element.getBoundingClientRect().right) + "px)";
       });
-    })()
+    }
+    (function wait() {
+      if (frames-- === 0) return done(measure());
+      requestAnimationFrame(wait);
+    })();
   JS
 
   AXE_SCRIPT = <<~JS.freeze
@@ -58,7 +64,7 @@ module AccessibilityHelper
     window = page.current_window
     size = window.size
     window.resize_to(PHONE_WIDTH, size.last)
-    wide = page.evaluate_script(WIDE_SCRIPT)
+    wide = page.evaluate_async_script(WIDE_SCRIPT)
     assert_empty wide, "#{page.current_path} scrolls sideways on a #{PHONE_WIDTH}px phone. It sticks out:\n#{wide.join("\n")}"
   ensure
     window&.resize_to(*size) if size
