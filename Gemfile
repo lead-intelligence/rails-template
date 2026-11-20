@@ -83,7 +83,7 @@ gem "meta-tags", "~> 2.24"
 
 gem "active_storage_validations", "~> 4.1"
 
-gem "ruby_llm", "~> 2.2.0"
+gem "ruby_llm", "~> 2.2.2"
 
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
 
