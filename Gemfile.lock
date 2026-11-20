@@ -490,7 +490,7 @@ GEM
     ruby-vips (2.3.0)
       ffi (~> 1.12)
       logger
-    ruby_llm (2.2.0)
+    ruby_llm (2.2.2)
       base64
       faraday (>= 1.10.0, != 2.0.0)
       faraday-multipart (>= 1)
@@ -649,7 +649,7 @@ DEPENDENCIES
   redcarpet (~> 3.6)
   rubocop-rails-omakase
   ruby-vips (~> 2.3)
-  ruby_llm (~> 2.2.0)
+  ruby_llm (~> 2.2.2)
   rubyzip (~> 3.7)
   schematist (~> 1.1)
   simplecov (~> 1.3)
@@ -837,7 +837,7 @@ CHECKSUMS
   rubocop-rails-omakase (1.1.0) sha256=2af73ac8ee5852de2919abbd2618af9c15c19b512c4cfc1f9a5d3b6ef009109d
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby-vips (2.3.0) sha256=e685ec02c13969912debbd98019e50492e12989282da5f37d05f5471442f5374
-  ruby_llm (2.2.0) sha256=ed5163c3aba02c514687e1e2c6b1dfe4e8f4402201ce6d53487cf29c2f3e1a05
+  ruby_llm (2.2.2) sha256=e08da09150bc11e15b294a7628b8295e0813d7f611ca97f74dcb1286ba7cdc79
   rubydex (0.4.4) sha256=f506bcc9f4ef4c55ac1312392410f95392ce919a4c0b0c36a18f243969bdd2ba
   rubydex (0.4.4-arm64-darwin) sha256=e593b7a2b820e3d91ba3d6b7371916efe7c742b75d44f6eaa39cd04546211c09
   rubydex (0.4.4-x86_64-linux) sha256=6c9144ac21ec4455850bc3b087f0bdce350af9358429675610c9d61fb8bfccfd
