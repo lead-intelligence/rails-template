@@ -1,5 +1,3 @@
-require "axe/configuration"
-
 module AccessibilityHelper
   AXE_TAGS = %w[wcag2a wcag2aa wcag21a wcag21aa].freeze
   AXE_MAX_TARGETS = 5
@@ -47,8 +45,6 @@ module AccessibilityHelper
   JS
 
   def assert_accessible
-    inject_axe
-
     violations = AXE_COLOR_SCHEMES.flat_map do |scheme|
       emulate_color_scheme(scheme)
       audit_page.each { |violation| violation["scheme"] = scheme }
@@ -79,12 +75,6 @@ module AccessibilityHelper
   def emulate_color_scheme(scheme)
     features = scheme ? [ { name: "prefers-color-scheme", value: scheme } ] : []
     page.driver.browser.page.command("Emulation.setEmulatedMedia", features: features)
-  end
-
-  def inject_axe
-    return if page.evaluate_script("typeof window.axe === 'object'")
-
-    page.execute_script(Axe::Configuration.instance.jslib)
   end
 
   def accessibility_failure_message(violations)
