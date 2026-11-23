@@ -23,6 +23,7 @@ jobs:
     # GitHub minutes. A public repository, such as this template, runs on
     # GitHub's, free for it: our runners never take a stranger's pull request.
     runs-on: ${{ inputs.runner || (github.event.repository.private && 'ci-amd64' || 'ubuntu-latest') }}
+    timeout-minutes: 45
     # The Debian and libvips that production runs (Dockerfile), so a test
     # passes here only where it passes in production: the runner's own
     # packages change without notice. test/ci/ruby_version_test.rb keeps the Ruby as .ruby-version.
