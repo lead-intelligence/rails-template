@@ -9,9 +9,10 @@ class RubyVersionTest < ActiveSupport::TestCase
   end
 
   test "CI runs on the Ruby in .ruby-version" do
-    container = YAML.safe_load(Rails.root.join(".github/workflows/ci.yml").read).dig("jobs", "ci", "container")
+    container = YAML.safe_load(Rails.root.join(".github/workflows/ci.yml").read).dig("jobs", "ci", "container", "image")
 
-    assert_equal "ruby:#{RUBY}-slim", container,
-      "CI would pass on another Ruby than the one development and production run"
+    assert_equal "ghcr.io/lead-intelligence/rails-ci:#{RUBY}", container,
+      "CI would pass on another Ruby than the one development and production run; " \
+      ".github/workflows/ci-image.yml tags the image with the Ruby in .ruby-version"
   end
 end

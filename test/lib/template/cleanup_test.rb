@@ -161,7 +161,9 @@ class Template::CleanupTest < ActiveSupport::TestCase
     Dir.mktmpdir do |tmp|
       dir = File.join(tmp, name)
       FileUtils.mkdir(dir)
-      %w[bin lib/template test/lib/template docs/superpowers config].each { |path| FileUtils.mkdir_p(File.join(dir, path)) }
+      %w[bin lib/template test/lib/template docs/superpowers config .github/ci .github/workflows].each { |path| FileUtils.mkdir_p(File.join(dir, path)) }
+      FileUtils.touch(File.join(dir, ".github", "ci", "Dockerfile"))
+      FileUtils.touch(File.join(dir, ".github", "workflows", "ci-image.yml"))
       FileUtils.touch(File.join(dir, "bin", "rename"))
       FileUtils.touch(File.join(dir, "bin", "smoke-rename"))
       FileUtils.touch(File.join(dir, "bin", "spawn"))
