@@ -33,9 +33,12 @@ jobs:
     # its app changed. test/ci/ruby_version_test.rb keeps the Ruby as .ruby-version.
     container:
       image: ghcr.io/lead-intelligence/rails-ci:4.0.10
+      # The image is private. An app reads it with the organization's
+      # read:packages token (GHCR_READ, also a Dependabot secret); the
+      # template, the package's own repository, with its job token.
       credentials:
         username: ${{ github.actor }}
-        password: ${{ github.token }}
+        password: ${{ secrets.GHCR_READ || github.token }}
     env:
       # The read-only token of the private charco_mobile gem: bin/ci installs
       # the gems again in its rename smoke, so the whole job needs it.
