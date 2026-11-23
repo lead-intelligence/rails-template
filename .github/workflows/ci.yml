@@ -16,6 +16,8 @@ on:
 
 permissions:
   contents: read
+  # Pulls the CI image while its package is private.
+  packages: read
 
 jobs:
   ci:
@@ -26,33 +28,22 @@ jobs:
     timeout-minutes: 45
     # The Debian and libvips that production runs (Dockerfile), so a test
     # passes here only where it passes in production: the runner's own
-    # packages change without notice. test/ci/ruby_version_test.rb keeps the Ruby as .ruby-version.
-    container: ruby:4.0.10-slim
+    # packages change without notice. The image (.github/ci/Dockerfile) has
+    # the packages and the template's gems built, so a run starts at the gems
+    # its app changed. test/ci/ruby_version_test.rb keeps the Ruby as .ruby-version.
+    container:
+      image: ghcr.io/lead-intelligence/rails-ci:4.0.10
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
     env:
-      BUNDLE_PATH: vendor/bundle
       # The read-only token of the private charco_mobile gem: bin/ci installs
       # the gems again in its rename smoke, so the whole job needs it.
       BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
 
     steps:
-      - name: Install packages
-        run: |
-          apt-get update -qq
-          apt-get install --no-install-recommends -y build-essential chromium curl file fonts-liberation git libvips libyaml-dev pkg-config
-
       - name: Checkout code
         uses: actions/checkout@v7
-
-      # The checkout belongs to another user than the container's root: git
-      # refuses it, and the tests that list the tracked files find none.
-      - name: Trust the checkout
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Cache gems
-        uses: actions/cache@v6
-        with:
-          path: vendor/bundle
-          key: gems-${{ hashFiles('Gemfile.lock', '.ruby-version') }}
 
       - name: Install gems
         run: bundle install --jobs 4

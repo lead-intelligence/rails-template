@@ -9,7 +9,7 @@ class CiWorkflowTest < ActiveSupport::TestCase
   end
 
   test "the workflow token can only read the repository" do
-    assert_equal({ "contents" => "read" }, workflow["permissions"],
+    assert_equal({ "contents" => "read", "packages" => "read" }, workflow["permissions"],
       "the job runs pull request code; a changed organization default would hand it a write token")
   end
 
