@@ -24,6 +24,10 @@ The system suite drives headless Chrome through cuprite, Ferrum over the DevTool
 
 The suite runs in parallel, one browser and one Puma server per worker, through `parallelize(threshold: 10)`; Rails' default threshold of 50 would keep it in one process. A single file stays serial. A worker that crashes leaves the run hanging instead of failing, so a system step that never finishes means a crashed worker: its output holds a `[BUG]` line.
 
+A click returns before the page reacts. After a click that navigates, submits or streams, assert what it changes on the page before the next click or a database check; Capybara waits for that assertion. Clicking again at once finds the old element while Turbo replaces it, and a database check at once runs before the server has handled the request.
+
+`visit` fails with `Ferrum::PendingConnectionsError` when a request the page started is still open after the driver's 15-second timeout. The error names the slow URL; make that response fast or lazy-load it rather than raise the timeout.
+
 ## N+1 detection
 
 Bullet fails a test on an N+1 or on an eager load that is never used. `config/environments/test.rb` sets `Bullet.enable` and `Bullet.raise`; `config/environments/development.rb` only logs, to `log/bullet.log` and the browser console.
@@ -36,12 +40,14 @@ Bullet fails a test on an N+1 or on an eager load that is never used. `config/en
 
 Every `visit` in a system test audits the page with axe-core against WCAG 2.1 A and AA, and a violation fails the test. `assert_accessible` in `test/test_helpers/accessibility_helper.rb` runs right after `assert_turbo_ready` in `ApplicationSystemTestCase#visit`, so nobody has to remember to call it. A failure names the rule, its impact, the Deque help URL and the offending selectors.
 
-Every page is audited twice. The helper forces `prefers-color-scheme` to light and then dark through the CDP `Emulation.setEmulatedMedia` command and resets it afterwards, and the failure names the scheme. Headless Chrome's default scheme differs per machine — dark on one laptop, light on the GitHub runner — so a single-scheme audit passed on one and failed on the other. The two passes cost about 5 seconds over the suite; axe itself costs about 1.2 seconds, because it is injected once per page load and Turbo keeps it alive across in-page navigations.
+`sign_in_via_browser` opens the sign-in page with `page.visit`, which skips these checks: almost every test signs in, and the authentication tests already audit that page.
+
+Every page is audited twice. The helper forces `prefers-color-scheme` to light and then dark through the CDP `Emulation.setEmulatedMedia` command and resets it afterwards, and the failure names the scheme. Headless Chrome's default scheme differs per machine — dark on one laptop, light on the GitHub runner — so a single-scheme audit passed on one and failed on the other. One audit pass costs about 20 milliseconds.
 
 `visit` also checks that the page fits a 390px phone (`assert_fits_phone`). Both checks wait for every custom element on the page to be defined. Lexxy loads on demand after the page, so without that wait the checks sometimes saw no editor, and sometimes caught its toolbar in the one frame between insertion and its overflow menu: at 390px the buttons stuck out and the test failed at random. Lexxy also moves toolbar buttons into that menu from a resize observer, one animation frame after the resize, so the phone check measures three frames after it resizes the window.
 
-The Content Security Policy does not block the audit: axe is injected over the DevTools protocol, which the page's `script-src` does not govern.
+The driver loads axe into every document before the page's own scripts, through Ferrum's `extensions` option, so no audit sends it again. Sending its 600 KB on each page load cost about 0.2 seconds a visit, more than the audits themselves. The Content Security Policy does not block it: the DevTools protocol adds it, and the page's `script-src` does not govern that.
 
-`axe-core-api` is installed only for its vendored `axe.min.js`. Its own runner is Selenium-specific — it calls `manage.timeouts` and `switch_to.window` and rescues Selenium errors — and its legacy path calls `execute_async_script`, which cuprite does not implement. The helper injects the gem's script and drives `axe.run` through Capybara's `evaluate_async_script`. `axe-core-capybara` is absent because its only entry point forces the Selenium driver.
+`axe-core-api` is installed only for its vendored `axe.min.js`. Its own runner is Selenium-specific — it calls `manage.timeouts` and `switch_to.window` and rescues Selenium errors — and its legacy path calls `execute_async_script`, which cuprite does not implement. The driver loads the gem's script and the helper drives `axe.run` through Capybara's `evaluate_async_script`. `axe-core-capybara` is absent because its only entry point forces the Selenium driver.
 
 The engine panels — madmin, Mission Control, Solid Errors, onlylogs — are not system-tested, so their markup is never audited; the RailsPress admin test opts out of the audit for the engine's own markup (see blog.md). A new system test that visits an engine panel gets the same narrow opt-out rather than a weaker rule for the whole app.
