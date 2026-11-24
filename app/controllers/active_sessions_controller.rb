@@ -17,7 +17,7 @@ class ActiveSessionsController < ApplicationController
   end
 
   def revoke_others
-    Current.user.sessions.where.not(id: Current.session.id).delete_all
+    Current.user.end_other_sessions(Current.session)
     redirect_to active_sessions_path, notice: t(".notice"), status: :see_other
   end
 end
