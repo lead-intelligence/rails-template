@@ -146,6 +146,18 @@ class DataExportTest < ActiveSupport::TestCase
     assert fresh_user.reload.data_export.attached?
   end
 
+  test "an export is expired exactly when the sweep would purge it" do
+    users(:one).data_export.attach(io: StringIO.new("old"), filename: "old.zip", content_type: "application/zip")
+    old = users(:one).data_export.attachment
+    old.update_column(:created_at, (DataExport::RETENTION + 1.hour).ago)
+    users(:two).data_export.attach(io: StringIO.new("fresh"), filename: "fresh.zip", content_type: "application/zip")
+    fresh = users(:two).data_export.attachment
+
+    assert DataExport.expired?(old)
+    assert_not DataExport.expired?(fresh)
+    assert_equal [ old ], DataExport.expired.to_a
+  end
+
   test "purge_expired finds expired exports through an index instead of scanning every attachment" do
     plan = ActiveRecord::Base.connection.select_rows("EXPLAIN QUERY PLAN #{DataExport.expired.to_sql}").map(&:last)
 
