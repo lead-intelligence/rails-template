@@ -251,9 +251,6 @@ en:
     form:
       content_label: Message
       content_placeholder: Message...
-      errors:
-        one: "%{count} error prohibited this message from being saved:"
-        other: "%{count} errors prohibited this message from being saved:"
       submit: Send message
     system:
       label: System
