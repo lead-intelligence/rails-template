@@ -17,7 +17,7 @@ class ChatResponseJob < ApplicationJob
       raise
     end
 
-    GenerateChatTitleJob.perform_later(chat) unless chat.support?
+    GenerateChatTitleJob.perform_later(chat) unless chat.support? || chat.title.present?
   end
 
   private
