@@ -112,7 +112,12 @@ class User < ApplicationRecord
   end
 
   def self.finish_requested_deletions
-    where(deletion_requested_at: ...DELETION_SWEEP_DELAY.ago).find_each(&:destroy)
+    where(deletion_requested_at: ...DELETION_SWEEP_DELAY.ago).find_each(&:erase!)
+  end
+
+  def erase!
+    chats.find_each(&:destroy!)
+    destroy!
   end
 
   def request_deletion!
