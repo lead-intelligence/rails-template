@@ -38,6 +38,10 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    # The app's own environment, which Atelier sets (.github/workflows/deploy.yml).
+<% ENV.fetch("ATELIER_ENV", "").split.each do |name| %>
+    - <%= name %>
+<% end %>
   clear:
     # The domain mailer links, feedback photo links and Active Storage URLs point at — keep this
     # in sync with proxy.host above. Without it those links fall back to example.com.
