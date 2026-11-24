@@ -1,6 +1,4 @@
 class CreateFeedbackIssueJob < ApplicationJob
-  queue_as :default
-
   CONTEXT_LABELS = { "page_url" => "Page", "user_agent" => "Browser", "viewport" => "Viewport" }.freeze
 
   def perform(feedback)

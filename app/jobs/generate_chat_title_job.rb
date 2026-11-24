@@ -1,6 +1,4 @@
 class GenerateChatTitleJob < ApplicationJob
-  queue_as :default
-
   def perform(chat)
     return if chat.title.present?
     first_question = chat.messages.where(role: "user").order(:created_at).first
