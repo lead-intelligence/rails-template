@@ -313,4 +313,18 @@ class UserTest < ActiveSupport::TestCase
     assert user.confirmed?
     assert_no_difference("User.count") { assert_equal user, User.demo_account!("seller", name: "Other") }
   end
+
+  test "zone falls back to the app default until the browser reports one" do
+    assert_equal Time.zone_default, users(:one).zone
+  end
+
+  test "remember_time_zone stores the zone and leaves an unchanged one alone" do
+    user = users(:one)
+    zone = ActiveSupport::TimeZone["America/Argentina/Buenos_Aires"]
+
+    user.remember_time_zone(zone)
+    assert_equal zone, user.reload.zone
+
+    assert_no_queries_match(/UPDATE/) { user.remember_time_zone(zone) }
+  end
 end

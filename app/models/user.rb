@@ -83,6 +83,14 @@ class User < ApplicationRecord
     name.to_s.split.first(2).filter_map { |part| part[0] }.join.upcase
   end
 
+  def zone
+    ActiveSupport::TimeZone[time_zone.to_s] || Time.zone_default
+  end
+
+  def remember_time_zone(zone)
+    update_column(:time_zone, zone.tzinfo.name) unless time_zone == zone.tzinfo.name
+  end
+
   def messages_remaining_today
     [ DAILY_MESSAGE_LIMIT - messages_sent_today, 0 ].max
   end
