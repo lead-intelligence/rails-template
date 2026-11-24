@@ -16,8 +16,10 @@ class CreateSupportTicketTool < RubyLLM::Tool
     return LIMIT_REACHED if @user.feedbacks.within_the_last_hour.count >= Feedback::HOURLY_LIMIT
 
     message = "#{title}\n\n#{summary}".truncate(Feedback::MESSAGE_MAX_LENGTH)
-    feedback = @user.feedbacks.create!(message:, context: @chat.ticket_context, chat: @chat)
-    photo_count = transfer_pending_photos(feedback)
+    photo_count = Feedback.transaction do
+      feedback = @user.feedbacks.create!(message:, context: @chat.ticket_context, chat: @chat)
+      transfer_pending_photos(feedback)
+    end
 
     confirmation(photo_count)
   end
