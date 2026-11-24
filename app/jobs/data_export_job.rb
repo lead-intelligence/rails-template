@@ -1,6 +1,4 @@
 class DataExportJob < ApplicationJob
-  queue_as :default
-
   def perform(user)
     Tempfile.create([ "data-export", ".zip" ], binmode: true) do |file|
       DataExport.new(user).write(file)
