@@ -215,6 +215,7 @@ en:
       heading: Send feedback
       message_hint: Up to %{count} characters.
       message_label: What's on your mind?
+      photos_hint: Up to %{count} images.
       photos_label: Attach screenshots (optional)
       submit: Send feedback
       title: Feedback

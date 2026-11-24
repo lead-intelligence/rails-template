@@ -1,6 +1,6 @@
 # User feedback
 
-A signed-in person leaves feedback, with optional screenshots, from the navbar dropdown at `/feedback`. Every submission is saved locally as a `Feedback` (`belongs_to :user`, `has_many_attached :photos`, validated for content type and size like the avatar). That part always works and needs no configuration.
+A signed-in person leaves feedback, with optional screenshots, from the navbar dropdown at `/feedback`. Every submission is saved locally as a `Feedback` (`belongs_to :user`, `has_many_attached :photos`, validated for content type and size like the avatar, and capped at `Feedback::MAX_PHOTOS`, the same number a support conversation can hold, which the form states through `feedbacks.new.photos_hint`). That part always works and needs no configuration.
 
 On top of that, each feedback can open a GitHub issue. `after_create_commit` enqueues `CreateFeedbackIssueJob`, which returns immediately unless `GithubIssues.configured?` — both `GITHUB_ISSUES_TOKEN` and `GITHUB_ISSUES_REPO` set — and otherwise posts a `feedback`-labeled issue through `GithubIssues` (`app/models/github_issues.rb`), a small wrapper over `Net::HTTP` with no extra gem, sending `X-GitHub-Api-Version: 2022-11-28` per GitHub's own versioning header. The issue body carries the reporter, the app and environment, any captured context and photo links above a separator, and the person's own words below it.
 

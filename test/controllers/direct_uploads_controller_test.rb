@@ -61,6 +61,17 @@ class DirectUploadsControllerTest < ActionDispatch::IntegrationTest
     assert_response :too_many_requests
   end
 
+  test "limits how many uploads one person starts per hour, whatever their address" do
+    sign_in_as users(:one)
+
+    DirectUploadsController::HOURLY_LIMIT.times do |attempt|
+      post rails_direct_uploads_url, params: blob_params, as: :json, env: { "REMOTE_ADDR" => "10.0.#{attempt / 250}.#{attempt % 250}" }
+    end
+    post rails_direct_uploads_url, params: blob_params, as: :json, env: { "REMOTE_ADDR" => "10.1.0.1" }
+
+    assert_response :too_many_requests
+  end
+
   private
 
   def blob_params(byte_size: 5)
