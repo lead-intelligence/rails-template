@@ -13,7 +13,7 @@
         <%= form.label :name, class: "label" %>
         <%= form.text_field :name, class: "input input-bordered w-full", required: true, maxlength: User::NAME_MAX_LENGTH %>
         <%= form.label :avatar, class: "label" %>
-        <%= form.file_field :avatar, class: "file-input file-input-bordered w-full" %>
+        <%= form.file_field :avatar, accept: Photo::CONTENT_TYPES.join(","), class: "file-input file-input-bordered w-full" %>
         <%= form.submit t(".save"), class: "btn btn-primary w-full mt-4" %>
       <% end %>
     </div>

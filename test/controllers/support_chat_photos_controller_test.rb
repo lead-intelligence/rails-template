@@ -49,7 +49,8 @@ class SupportChatPhotosControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_not chat.reload.pending_photos.attached?
-    assert_includes @response.body, I18n.t("support_chat_photos.create.upload_error")
+    assert_includes @response.body, I18n.t("support_chat_photos.create.upload_error", formats: Photo.formats, size: Photo.max_size_in_words)
+    assert_select "input[type=file][accept=?]", Photo::CONTENT_TYPES.join(",")
   end
 
   test "answers 422 to a photo whose signed id does not verify" do

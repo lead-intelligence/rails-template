@@ -46,7 +46,7 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :password_challenge, presence: true, on: :profile, if: :changing_credentials?
   validate :unconfirmed_email_not_taken, on: :profile, if: :unconfirmed_email?
-  validates :avatar, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }
+  validates :avatar, **Photo::VALIDATION
 
   def self.demo_account!(role, name:)
     find_or_create_by!(email_address: "#{role}@#{DEMO_DOMAIN}") do |user|
