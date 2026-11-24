@@ -23,7 +23,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="time-zone">
     <%= native_identity_tag Current.user&.id %>
     <%= native_tabs_tag if authenticated? %>
     <%= native_badge_tag unread_notifications_count if authenticated? %>

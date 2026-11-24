@@ -15,6 +15,7 @@ class ApplicationController < ActionController::Base
   rescue_from Pagy::RangeError, with: ->(error) { redirect_to error.pagy.page_url(:last) }
 
   around_action :switch_locale
+  around_action :switch_time_zone
 
   private
 
@@ -32,6 +33,12 @@ class ApplicationController < ActionController::Base
       .sort_by.with_index { |(_range, quality), position| [ -quality, position ] }
       .map { |range, _quality| range.split("-", 2).first.to_s.downcase.to_sym }
       .find { |locale| I18n.available_locales.include?(locale) }
+  end
+
+  def switch_time_zone(&action)
+    zone = ActiveSupport::TimeZone[cookies[:time_zone].to_s]
+    Current.user&.remember_time_zone(zone) if zone
+    Time.use_zone(zone || Current.user&.zone || Time.zone_default, &action)
   end
 
   def pundit_user
