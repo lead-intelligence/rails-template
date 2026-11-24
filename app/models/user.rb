@@ -140,6 +140,10 @@ class User < ApplicationRecord
     deletion_requested_at.present?
   end
 
+  def end_other_sessions(current)
+    sessions.where.not(id: current.id).delete_all
+  end
+
   private
 
   def unconfirmed_email_not_taken

@@ -26,7 +26,7 @@ The pending address is cancellable by submitting a blank one and resendable by s
 
 One consequence of the `:profile` context: a future validation declared `on: :update` will not run on this path, since `save(context: :profile)` only runs validations scoped to `:profile` (plus the context-less ones).
 
-A successful password change signs out every other device — `ProfilesController#update` deletes the user's other sessions when `saved_change_to_password_digest?`. The person can also do that deliberately from `/active_sessions`, which lists every `Session` row with its user agent, IP and creation time and offers "revoke this one", "revoke the others" and revoking the current session. Every one of those redirects with `status: :see_other`: without it Turbo re-issues the `DELETE` against the redirect target.
+A successful password change signs out every other device — `ProfilesController#update` calls `User#end_other_sessions` when `saved_change_to_password_digest?`, the same method behind "revoke the others". The person can also do that deliberately from `/active_sessions`, which lists every `Session` row with its user agent, IP and creation time and offers "revoke this one", "revoke the others" and revoking the current session. Every one of those redirects with `status: :see_other`: without it Turbo re-issues the `DELETE` against the redirect target.
 
 Every sign-in adds a `Session` row, so `/active_sessions` is paginated `ActiveSessionsController::PER_PAGE` at a time (see pagination.md), newest first. The current device can sit on any page. "Revoke the others" shows whenever the user has more than one session in total, read from the paginator's count, because it acts on every page and not only on the one shown.
 

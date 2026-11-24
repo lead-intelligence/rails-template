@@ -13,7 +13,7 @@ class ProfilesController < ApplicationController
 
     if @user.save(context: :profile)
       EmailConfirmationsMailer.change(@user).deliver_later if @user.unconfirmed_email.present? && profile_params[:unconfirmed_email].present?
-      @user.sessions.where.not(id: Current.session.id).delete_all if @user.saved_change_to_password_digest?
+      @user.end_other_sessions(Current.session) if @user.saved_change_to_password_digest?
       redirect_to edit_profile_url, notice: t("profiles.update.notice")
     else
       render :edit, status: :unprocessable_entity

@@ -8,6 +8,19 @@ class UserTest < ActiveSupport::TestCase
     assert_equal(BCrypt::Engine::MIN_COST, BCrypt::Password.new(users(:one).password_digest).cost)
   end
 
+  test "end_other_sessions keeps only the given session" do
+    user = users(:one)
+    kept = user.sessions.create!
+    other = user.sessions.create!
+    someone_else = users(:two).sessions.create!
+
+    user.end_other_sessions(kept)
+
+    assert_equal [ kept ], user.sessions.reload.to_a
+    assert Session.exists?(someone_else.id)
+    assert_not Session.exists?(other.id)
+  end
+
   test "requires a name" do
     user = User.new(name: "", email_address: "new@example.com", password: "password")
     assert_not user.valid?
