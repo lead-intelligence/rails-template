@@ -62,6 +62,16 @@ class JavascriptErrorsControllerTest < ActionDispatch::IntegrationTest
     assert_includes logged, "boom from a visitor"
   end
 
+  test "an anonymous report cannot add lines of its own to the log" do
+    delete session_url
+    logged = capture_log do
+      post javascript_errors_url, params: { message: "boom\nCompleted 200 OK", url: "https://example.com/\r\nStarted GET" }
+    end
+
+    assert_includes logged, "Anonymous browser error: boom Completed 200 OK (https://example.com/ Started GET)"
+    assert_empty logged.lines.grep(/\A(Completed 200 OK|Started GET)/)
+  end
+
   test "rate limits repeated error reports" do
     30.times { post javascript_errors_url, params: { message: "boom" } }
 
