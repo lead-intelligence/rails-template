@@ -248,5 +248,6 @@ class SupportChatsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_no_match "new_message", @response.body
     assert_match I18n.t("messages.composer.exhausted", count: User::DAILY_MESSAGE_LIMIT), @response.body
+    assert_select "a[href=?][data-turbo-frame=_top]", new_feedback_path, text: I18n.t("messages.composer.support_fallback")
   end
 end

@@ -2,6 +2,9 @@
 <div id="composer_<%= chat.id %>" class="flex-1">
   <% if remaining.zero? %>
     <p class="text-sm opacity-70"><%= t(".exhausted", count: User::DAILY_MESSAGE_LIMIT) %></p>
+    <% if chat.support? %>
+      <%= link_to t(".support_fallback"), new_feedback_path, class: "link link-primary text-sm", data: { turbo_frame: "_top" } %>
+    <% end %>
   <% elsif chat.full? %>
     <p class="text-sm opacity-70"><%= t(".full", count: Chat::MAX_MESSAGES) %></p>
   <% elsif chat.support? %>

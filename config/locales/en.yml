@@ -244,6 +244,7 @@ en:
       remaining:
         one: You have %{count} message left today.
         other: You have %{count} messages left today.
+      support_fallback: Write to us through the feedback form
     default_model: 'Default: %{model}'
     error:
       title: Error
