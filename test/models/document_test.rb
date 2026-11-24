@@ -25,6 +25,13 @@ class DocumentTest < ActiveSupport::TestCase
     assert_includes results, cooking
   end
 
+  test "semantic_search fails at once when the provider times out, without retrying" do
+    stub_request(:post, "https://api.openai.com/v1/embeddings").to_timeout
+
+    assert_raises(RubyLLM::ConnectionError) { Document.semantic_search("how to deploy") }
+    assert_requested :post, "https://api.openai.com/v1/embeddings", times: 1
+  end
+
   test "creating a document enqueues an embedding refresh" do
     assert_enqueued_with(job: GenerateDocumentEmbeddingJob) do
       users(:one).documents.create!(title: "New", content: "text")

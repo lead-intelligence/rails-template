@@ -25,6 +25,11 @@ class RubyLlmConfigurationTest < ActiveSupport::TestCase
     assert_equal "text-embedding-3-small", RubyLLM.config.default_embedding_model
   end
 
+  test "gives up on a stalled provider before it holds a job thread for minutes" do
+    assert_equal 60, RubyLLM.config.request_timeout
+    assert_equal 30, RubyLLM.config.stream_idle_timeout
+  end
+
   test "allows only cheap chat models by default" do
     assert_equal %w[gpt-4o-mini gpt-4.1-mini gpt-4.1-nano], Rails.configuration.x.selectable_chat_models
   end

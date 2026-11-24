@@ -3,6 +3,8 @@ RubyLLM.configure do |config|
   config.default_model = ENV.fetch("OPENAI_CHAT_MODEL", "gpt-4o-mini")
   config.default_embedding_model = ENV.fetch("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
   config.openai_protocol = :chat_completions
+  config.request_timeout = 60
+  config.stream_idle_timeout = 30
 end
 
 Rails.application.config.x.selectable_chat_models = %w[gpt-4o-mini gpt-4.1-mini gpt-4.1-nano]
