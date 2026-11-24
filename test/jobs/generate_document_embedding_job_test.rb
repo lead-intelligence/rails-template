@@ -55,4 +55,12 @@ class GenerateDocumentEmbeddingJobTest < ActiveJob::TestCase
 
     assert_enqueued_with job: GenerateDocumentEmbeddingJob, args: [ doc ]
   end
+
+  test "embeds one document at a time" do
+    first, second = documents(:one), documents(:two)
+
+    assert_equal 1, GenerateDocumentEmbeddingJob.concurrency_limit
+    assert_equal GenerateDocumentEmbeddingJob.new(first).concurrency_key, GenerateDocumentEmbeddingJob.new(first).concurrency_key
+    assert_not_equal GenerateDocumentEmbeddingJob.new(first).concurrency_key, GenerateDocumentEmbeddingJob.new(second).concurrency_key
+  end
 end
