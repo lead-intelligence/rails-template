@@ -12,6 +12,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
     get edit_profile_url
     assert_response :success
+    assert_select "input[type=file][name='user[avatar]'][accept=?]", Photo::CONTENT_TYPES.join(",")
   end
 
   test "updates name and avatar" do

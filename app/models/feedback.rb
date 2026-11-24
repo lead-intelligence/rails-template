@@ -11,7 +11,7 @@ class Feedback < ApplicationRecord
   scope :within_the_last_hour, -> { where(created_at: 1.hour.ago..) }
 
   validates :message, presence: true, length: { maximum: MESSAGE_MAX_LENGTH }
-  validates :photos, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }
+  validates :photos, **Photo::VALIDATION
 
   after_create_commit :create_github_issue_later
 

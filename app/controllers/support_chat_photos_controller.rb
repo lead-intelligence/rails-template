@@ -28,7 +28,7 @@ class SupportChatPhotosController < ApplicationController
     if @chat.errors.of_kind?(:pending_photos, :limit_max_exceeded)
       t("support_chat_photos.create.too_many", count: Chat::MAX_PENDING_PHOTOS)
     else
-      t("support_chat_photos.create.upload_error")
+      t("support_chat_photos.create.upload_error", formats: Photo.formats, size: Photo.max_size_in_words)
     end
   end
 
