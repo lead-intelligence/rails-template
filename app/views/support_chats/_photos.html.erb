@@ -4,7 +4,7 @@
       <%= lucide_icon("paperclip", class: "size-4") %>
       <span class="sr-only"><%= t(".attach") %></span>
     <% end %>
-    <%= form.file_field :pending_photos, multiple: true, accept: "image/*",
+    <%= form.file_field :pending_photos, multiple: true, accept: Photo::CONTENT_TYPES.join(","),
         class: "hidden",
         data: { action: "change->support-chat-photos#submit" } %>
   <% end %>

@@ -38,14 +38,16 @@ class DataExportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_url
   end
 
-  test "show redirects to the generated export" do
+  test "show streams the generated export instead of handing out a blob URL" do
     user = users(:one)
     user.data_export.attach(io: StringIO.new("zip"), filename: "data-export.zip", content_type: "application/zip")
     sign_in_as user
 
     get data_export_url
 
-    assert_response :redirect
+    assert_response :success
+    assert_equal "zip", response.body
+    assert_match(/\Aattachment; filename="data-export.zip"/, response.headers["Content-Disposition"])
   end
 
   test "show purges and reports an expired export" do

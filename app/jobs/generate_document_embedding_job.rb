@@ -1,5 +1,5 @@
 class GenerateDocumentEmbeddingJob < ApplicationJob
-  queue_as :default
+  limits_concurrency to: 1, key: ->(document) { document }
   retry_on RubyLLM::RateLimitError, RubyLLM::ServerError, RubyLLM::ServiceUnavailableError, wait: :polynomially_longer, attempts: 5
 
   def perform(document)

@@ -14,6 +14,8 @@ class FeedbacksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "textarea[maxlength=?][aria-describedby=feedback_message_hint]", Feedback::MESSAGE_MAX_LENGTH.to_s
     assert_select "#feedback_message_hint", I18n.t("feedbacks.new.message_hint", count: ActiveSupport::NumberHelper.number_to_delimited(Feedback::MESSAGE_MAX_LENGTH))
+    assert_select "input[type=file][accept=?][aria-describedby=feedback_photos_hint]", Photo::CONTENT_TYPES.join(",")
+    assert_select "#feedback_photos_hint", I18n.t("feedbacks.new.photos_hint", count: Feedback::MAX_PHOTOS)
   end
 
   test "creates feedback scoped to the current user and redirects with a success flash" do

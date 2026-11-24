@@ -46,7 +46,7 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :password_challenge, presence: true, on: :profile, if: :changing_credentials?
   validate :unconfirmed_email_not_taken, on: :profile, if: :unconfirmed_email?
-  validates :avatar, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }
+  validates :avatar, **Photo::VALIDATION
 
   def self.demo_account!(role, name:)
     find_or_create_by!(email_address: "#{role}@#{DEMO_DOMAIN}") do |user|
@@ -83,6 +83,14 @@ class User < ApplicationRecord
     name.to_s.split.first(2).filter_map { |part| part[0] }.join.upcase
   end
 
+  def zone
+    ActiveSupport::TimeZone[time_zone.to_s] || Time.zone_default
+  end
+
+  def remember_time_zone(zone)
+    update_column(:time_zone, zone.tzinfo.name) unless time_zone == zone.tzinfo.name
+  end
+
   def messages_remaining_today
     [ DAILY_MESSAGE_LIMIT - messages_sent_today, 0 ].max
   end
@@ -112,7 +120,12 @@ class User < ApplicationRecord
   end
 
   def self.finish_requested_deletions
-    where(deletion_requested_at: ...DELETION_SWEEP_DELAY.ago).find_each(&:destroy)
+    where(deletion_requested_at: ...DELETION_SWEEP_DELAY.ago).find_each(&:erase!)
+  end
+
+  def erase!
+    chats.find_each(&:destroy!)
+    destroy!
   end
 
   def request_deletion!
@@ -125,6 +138,10 @@ class User < ApplicationRecord
 
   def deletion_requested?
     deletion_requested_at.present?
+  end
+
+  def end_other_sessions(current)
+    sessions.where.not(id: current.id).delete_all
   end
 
   private

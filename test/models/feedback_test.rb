@@ -26,6 +26,16 @@ class FeedbackTest < ActiveSupport::TestCase
     assert feedback.valid?
   end
 
+  test "rejects more photos than the limit" do
+    feedback = users(:one).feedbacks.build(message: "Broken layout")
+    (Feedback::MAX_PHOTOS + 1).times do
+      feedback.photos.attach(io: File.open(file_fixture("avatar.png")), filename: "avatar.png", content_type: "image/png")
+    end
+
+    assert_not feedback.valid?
+    assert feedback.errors.of_kind?(:photos, :limit_max_exceeded)
+  end
+
   test "rejects a text file sent as a png photo" do
     feedback = users(:one).feedbacks.build(message: "Broken layout")
     feedback.photos.attach(io: StringIO.new("plain text"), filename: "avatar.png", content_type: "image/png")

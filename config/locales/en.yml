@@ -215,6 +215,7 @@ en:
       heading: Send feedback
       message_hint: Up to %{count} characters.
       message_label: What's on your mind?
+      photos_hint: Up to %{count} images.
       photos_label: Attach screenshots (optional)
       submit: Send feedback
       title: Feedback
@@ -243,6 +244,7 @@ en:
       remaining:
         one: You have %{count} message left today.
         other: You have %{count} messages left today.
+      support_fallback: Write to us through the feedback form
     default_model: 'Default: %{model}'
     error:
       title: Error
@@ -251,9 +253,6 @@ en:
     form:
       content_label: Message
       content_placeholder: Message...
-      errors:
-        one: "%{count} error prohibited this message from being saved:"
-        other: "%{count} errors prohibited this message from being saved:"
       submit: Send message
     system:
       label: System
@@ -421,8 +420,8 @@ en:
   support_chat_photos:
     create:
       too_many: You can attach up to %{count} photos to a conversation.
-      upload_error: That photo couldn't be attached. Please use a JPG, PNG, or WEBP
-        image under 5MB.
+      upload_error: That photo couldn't be attached. Please use a %{formats} image
+        under %{size}.
   support_chats:
     composer:
       label: Your message

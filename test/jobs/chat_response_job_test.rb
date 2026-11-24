@@ -14,6 +14,21 @@ class ChatResponseJobTest < ActiveJob::TestCase
     end
   end
 
+  test "renders the reply's time in the person's zone, though a job has no request" do
+    users(:one).update!(time_zone: "America/Argentina/Buenos_Aires")
+    stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
+
+    travel_to Time.utc(2026, 11, 24, 1, 30) do
+      chat = users(:one).chats.create!(model: "gpt-4o-mini")
+      chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
+      clear_messages("chat_#{chat.id}")
+
+      ChatResponseJob.perform_now(chat.id)
+
+      assert broadcasts("chat_#{chat.id}").any? { |raw| JSON.parse(raw).include?(">22:30</time>") }
+    end
+  end
+
   test "broadcasts each non-empty chunk that arrives a stream interval after the last one" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
     chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
@@ -86,6 +101,16 @@ class ChatResponseJobTest < ActiveJob::TestCase
 
     assert_no_enqueued_jobs(only: GenerateChatTitleJob) do
       chat.messages.create!(role: :user, content: "The chat page is slow for me")
+      ChatResponseJob.perform_now(chat.id)
+    end
+  end
+
+  test "does not enqueue chat titling for a chat that already has a title" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini", title: "Deploying with Kamal")
+    stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
+
+    assert_no_enqueued_jobs(only: GenerateChatTitleJob) do
+      chat.messages.create!(role: :user, content: "And the database?")
       ChatResponseJob.perform_now(chat.id)
     end
   end

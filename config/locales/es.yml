@@ -219,6 +219,7 @@ es:
       heading: Enviar comentarios
       message_hint: Hasta %{count} caracteres.
       message_label: "¿Qué tienes en mente?"
+      photos_hint: Hasta %{count} imágenes.
       photos_label: Adjuntar capturas de pantalla (opcional)
       submit: Enviar comentarios
       title: Comentarios
@@ -247,6 +248,7 @@ es:
       remaining:
         one: Te queda %{count} mensaje por hoy.
         other: Te quedan %{count} mensajes por hoy.
+      support_fallback: Escríbenos desde el formulario de comentarios
     default_model: 'Por defecto: %{model}'
     error:
       title: Error
@@ -255,9 +257,6 @@ es:
     form:
       content_label: Mensaje
       content_placeholder: Mensaje...
-      errors:
-        one: "%{count} error impidió guardar este mensaje:"
-        other: "%{count} errores impidieron guardar este mensaje:"
       submit: Enviar mensaje
     system:
       label: Sistema
@@ -427,8 +426,8 @@ es:
   support_chat_photos:
     create:
       too_many: Puedes adjuntar hasta %{count} fotos a una conversación.
-      upload_error: No se pudo adjuntar esa foto. Usa una imagen JPG, PNG o WEBP de
-        menos de 5MB.
+      upload_error: No se pudo adjuntar esa foto. Usa una imagen %{formats} de menos
+        de %{size}.
   support_chats:
     composer:
       label: Tu mensaje

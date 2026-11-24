@@ -71,6 +71,23 @@ class CreateSupportTicketToolTest < ActiveSupport::TestCase
     assert_equal "Got it - I've passed this along to the team, including your 1 photo. Thank you!", result
   end
 
+  test "enqueues the GitHub issue only once the photos are attached, so the issue lists them" do
+    chat = users(:one).chats.create!(support: true)
+    chat.pending_photos.attach(io: File.open(file_fixture("avatar.png")), filename: "avatar.png", content_type: "image/png")
+    photos_when_enqueued = nil
+    subscriber = ActiveSupport::Notifications.subscribe("enqueue.active_job") do |*, payload|
+      next unless payload[:job].is_a?(CreateFeedbackIssueJob)
+
+      photos_when_enqueued = ActiveStorage::Attachment.where(record: payload[:job].arguments.first, name: "photos").count
+    end
+
+    CreateSupportTicketTool.new(chat).execute(title: "Broken layout", summary: "Something looks off.")
+
+    assert_equal 1, photos_when_enqueued
+  ensure
+    ActiveSupport::Notifications.unsubscribe(subscriber)
+  end
+
   test "confirms multiple attached photos with correct pluralization" do
     chat = users(:one).chats.create!(support: true)
     chat.pending_photos.attach([

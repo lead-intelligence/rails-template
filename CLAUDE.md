@@ -82,3 +82,4 @@ Reasons and examples: `docs/architecture/conventions.md`.
 - **Templates** — Herb makes malformed HTML a compile-time error; `herb lint` and `format` need Node. → `templates.md`
 - **Pagination** — pagy's own translator ignores `I18n.with_locale`, so it goes through Rails I18n. → `pagination.md`
 - **Money** — money-rails configured, nothing monetized; apps opt in per model. → `money.md`
+- **Time zones** — the browser reports each person's zone in a cookie; a job that renders a time must wrap it in `Time.use_zone(user.zone)`. → `time-zones.md`

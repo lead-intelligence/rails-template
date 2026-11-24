@@ -8,7 +8,7 @@ class ChatResponseJob < ApplicationJob
     support = Chat.where(id: chat_id).pick(:support)
     chat = support ? SupportAgent.find(chat_id) : Chat.find(chat_id)
 
-    begin
+    Time.use_zone(chat.user.zone) do
       chat.complete do |chunk|
         stream(chat.messages.last, chunk.content) unless chunk.content.to_s.empty?
       end
@@ -17,7 +17,7 @@ class ChatResponseJob < ApplicationJob
       raise
     end
 
-    GenerateChatTitleJob.perform_later(chat) unless chat.support?
+    GenerateChatTitleJob.perform_later(chat) unless chat.support? || chat.title.present?
   end
 
   private

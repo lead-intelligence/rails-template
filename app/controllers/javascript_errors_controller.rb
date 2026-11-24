@@ -19,7 +19,7 @@ class JavascriptErrorsController < ApplicationController
     if authenticated?
       Rails.error.report(javascript_error(message), handled: true, source: "javascript", context: error_context)
     else
-      Rails.logger.warn("Anonymous browser error: #{message.truncate(MAX_MESSAGE_LENGTH)} (#{params[:url].to_s.truncate(MAX_MESSAGE_LENGTH)})")
+      Rails.logger.warn("Anonymous browser error: #{message.squish.truncate(MAX_MESSAGE_LENGTH)} (#{params[:url].to_s.squish.truncate(MAX_MESSAGE_LENGTH)})")
     end
     head :no_content
   end

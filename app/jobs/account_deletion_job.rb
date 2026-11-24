@@ -3,6 +3,6 @@ class AccountDeletionJob < ApplicationJob
   discard_on ActiveJob::DeserializationError
 
   def perform(user)
-    user.destroy!
+    user.erase!
   end
 end
