@@ -90,6 +90,16 @@ class ChatResponseJobTest < ActiveJob::TestCase
     end
   end
 
+  test "does not enqueue chat titling for a chat that already has a title" do
+    chat = users(:one).chats.create!(model: "gpt-4o-mini", title: "Deploying with Kamal")
+    stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
+
+    assert_no_enqueued_jobs(only: GenerateChatTitleJob) do
+      chat.messages.create!(role: :user, content: "And the database?")
+      ChatResponseJob.perform_now(chat.id)
+    end
+  end
+
   test "shows a human-friendly failure to the person when the provider fails" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
