@@ -247,6 +247,7 @@ es:
       remaining:
         one: Te queda %{count} mensaje por hoy.
         other: Te quedan %{count} mensajes por hoy.
+      support_fallback: Escríbenos desde el formulario de comentarios
     default_model: 'Por defecto: %{model}'
     error:
       title: Error
