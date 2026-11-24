@@ -23,7 +23,7 @@ jobs:
     # head branch, so a fork's branch named main would otherwise deploy with these secrets.
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
+      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.repository != 'lead-intelligence/rails-template'
     # The production server's own runner, which takes only this workflow from each app's main
