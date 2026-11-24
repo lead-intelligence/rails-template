@@ -257,9 +257,6 @@ es:
     form:
       content_label: Mensaje
       content_placeholder: Mensaje...
-      errors:
-        one: "%{count} error impidió guardar este mensaje:"
-        other: "%{count} errores impidieron guardar este mensaje:"
       submit: Enviar mensaje
     system:
       label: Sistema
