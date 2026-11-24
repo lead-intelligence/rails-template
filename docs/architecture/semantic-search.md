@@ -22,4 +22,6 @@ Each embedding writes one row to RubyLLM's usage ledger, `ruby_llm_usages`, with
 
 `GenerateDocumentEmbeddingJob` retries a rate limit or a provider server error up to five times with a growing wait. Without it a document whose embedding failed once stays out of search until the person edits it again, and nothing tells them. The retry is safe because the job overwrites the embedding.
 
+`GenerateDocumentEmbeddingJob` runs one job per document at a time, through `limits_concurrency` keyed on the document. Two saves close together enqueue two jobs, and in parallel the one that started first, with the older text, can finish last and write the older embedding over the newer one. In a line, the second job waits and then loads the current text.
+
 `Document::EMBEDDING_DIMENSIONS` is tied to the embedding model. Changing `OPENAI_EMBEDDING_MODEL` to one with a different output size means a migration, which is why the variable is documented in `.env.example` and nowhere else.
