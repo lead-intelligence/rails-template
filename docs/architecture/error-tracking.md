@@ -4,7 +4,7 @@ Solid Errors subscribes to `Rails.error` from `config/initializers/solid_errors.
 
 Email notification is the one panel-specific setting: the recipient resolves from `Rails.application.credentials.dig(:solid_errors, :email_to)` and then `SOLID_ERRORS_EMAIL_TO`, and notifications only fire when one of them resolves. Solid Errors mails on every occurrence, not only on a new error.
 
-`SolidErrors.destroy_after` is 30 days. The gem then deletes the occurrences of resolved errors older than that, and the resolved errors left with none, on every hundredth new occurrence. Unresolved errors stay until someone resolves them.
+`SolidErrors.destroy_after` is 30 days. The gem then deletes the occurrences of resolved errors older than that, and the resolved errors left with none, on every hundredth new occurrence. That alone never trims an error nobody resolves, and one that recurs on every page view grows without end, on the volume that also holds the databases. `ErrorHistory.purge_expired` runs every day from `config/recurring.yml` and deletes every occurrence older than `SolidErrors.destroy_after`, resolved or not, in batches. The unresolved error itself stays, with its newer occurrences.
 
 Browser exceptions land in the same dashboard; see browser-errors.md.
 
