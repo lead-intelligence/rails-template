@@ -3,6 +3,7 @@ class Feedback < ApplicationRecord
   belongs_to :chat, optional: true
   MESSAGE_MAX_LENGTH = 10_000
   HOURLY_LIMIT = 5
+  MAX_PHOTOS = Chat::MAX_PENDING_PHOTOS
 
   has_many_attached :photos
 
@@ -11,7 +12,7 @@ class Feedback < ApplicationRecord
   scope :within_the_last_hour, -> { where(created_at: 1.hour.ago..) }
 
   validates :message, presence: true, length: { maximum: MESSAGE_MAX_LENGTH }
-  validates :photos, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }
+  validates :photos, content_type: { in: %w[image/png image/jpeg image/webp], spoofing_protection: true }, size: { less_than: 5.megabytes }, limit: { max: MAX_PHOTOS }
 
   after_create_commit :create_github_issue_later
 

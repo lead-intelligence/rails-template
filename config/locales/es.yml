@@ -219,6 +219,7 @@ es:
       heading: Enviar comentarios
       message_hint: Hasta %{count} caracteres.
       message_label: "¿Qué tienes en mente?"
+      photos_hint: Hasta %{count} imágenes.
       photos_label: Adjuntar capturas de pantalla (opcional)
       submit: Enviar comentarios
       title: Comentarios
