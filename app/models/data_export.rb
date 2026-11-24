@@ -26,6 +26,10 @@ class DataExport
     ActiveStorage::Attachment.where(name: "data_export", created_at: ..RETENTION.ago)
   end
 
+  def self.expired?(attachment)
+    attachment.created_at <= RETENTION.ago
+  end
+
   def self.purge_expired
     expired.find_each(&:purge_later)
   end
