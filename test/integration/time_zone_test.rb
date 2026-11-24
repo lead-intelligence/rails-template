@@ -14,6 +14,11 @@ class TimeZoneTest < ActionDispatch::IntegrationTest
     assert_equal BUENOS_AIRES, users(:one).reload.time_zone
   end
 
+  test "reads zones from the bundled data, which keeps the legacy names browsers still report" do
+    assert_kind_of TZInfo::DataSources::RubyDataSource, TZInfo::DataSource.get
+    assert_equal "America/Buenos_Aires", ActiveSupport::TimeZone["America/Buenos_Aires"].tzinfo.name
+  end
+
   test "ignores a zone that does not exist" do
     sign_in_as users(:one)
     cookies[:time_zone] = "Mars/Olympus_Mons"

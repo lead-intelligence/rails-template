@@ -13,3 +13,5 @@ The `time-zone` Stimulus controller sits on the `body` of the application layout
 The daily message quota follows the person's day. `User#messages_sent_today` compares the stored day with `Date.current`, and the count happens in the request, inside the person's zone, so the quota starts again at local midnight and not at UTC midnight.
 
 The browser may report a legacy alias for a zone, such as `America/Buenos_Aires` for `America/Argentina/Buenos_Aires`. `ActiveSupport::TimeZone` resolves both through TZInfo, so the alias is stored as reported and behaves the same.
+
+Zones come from the `tzinfo-data` gem, bundled on every platform, and never from the operating system. Browsers still report legacy names such as `America/Buenos_Aires`, and Debian, the base of the production and CI images, moved those names to a separate `tzdata-legacy` package. Read from the system files, such a name resolves to no zone, and the person silently stays in the default zone.
