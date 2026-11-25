@@ -63,7 +63,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     fill_in "email_address", with: user.email_address
     fill_in "password", with: "password"
     click_button t("sessions.new.sign_in")
-    assert_current_path root_path
+    assert_current_path chats_path
     assert_turbo_ready
   end
 end

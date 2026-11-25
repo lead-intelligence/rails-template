@@ -25,7 +25,7 @@ class MobileTest < ActionDispatch::IntegrationTest
 
   test "a signed-in page carries the identity, the tab bar and the badge" do
     sign_in_as users(:one)
-    get root_url, headers: NATIVE
+    get edit_profile_url, headers: NATIVE
 
     token = css_select("[data-native-identity]").first["data-native-identity"]
     assert_match(/\A\h{16}\z/, token)
@@ -162,7 +162,7 @@ class MobilePushTest < ActionDispatch::IntegrationTest
 
   test "a signed-in page asks for push permission and the app registers its device" do
     sign_in_as users(:one)
-    get root_url, headers: MobileTest::NATIVE
+    get edit_profile_url, headers: MobileTest::NATIVE
     assert_select "[data-native-push]"
 
     post "/native/push/devices", params: { token: "abc", platform: "apple", name: "iPhone" }, headers: MobileTest::NATIVE

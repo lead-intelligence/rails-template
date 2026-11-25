@@ -101,7 +101,7 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
     3.times { TestNotifier.deliver(users(:one)) }
 
-    assert_queries_match(/noticed_notifications|noticed_events/, count: 3) { get root_url }
+    assert_queries_match(/noticed_notifications|noticed_events/, count: 3) { get edit_profile_url }
   end
 
   test "mark_all_read marks all unread notifications as read and redirects back" do

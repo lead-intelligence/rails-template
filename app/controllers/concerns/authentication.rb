@@ -47,7 +47,15 @@ module Authentication
     end
 
     def after_authentication_url
-      session.delete(:return_to_after_authenticating) || root_url
+      session.delete(:return_to_after_authenticating) || signed_in_home_url
+    end
+
+    def signed_in_home_url
+      chats_url
+    end
+
+    def redirect_to_signed_in_home
+      redirect_to signed_in_home_url if authenticated?
     end
 
     def start_new_session_for(user)
