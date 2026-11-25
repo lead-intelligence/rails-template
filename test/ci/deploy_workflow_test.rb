@@ -41,14 +41,32 @@ class DeployWorkflowTest < ActiveSupport::TestCase
     last = jobs.dig("deploy", "steps").last
 
     assert_equal "always()", last["if"]
-    assert_equal "rm -f config/master.key", last["run"],
+    assert_equal "rm -f config/master.key .kamal/secrets-common", last["run"],
       "the server's runner keeps its workspace after the job, unlike GitHub's"
+  end
+
+  test "each APP_ secret reaches the app's container under its own name" do
+    deploy = jobs.dig("deploy", "steps").find { |step| step["name"] == "Deploy" }
+
+    assert_equal "${{ toJSON(secrets) }}", deploy.dig("env", "SECRETS")
+    assert_includes deploy["run"], 'name.start_with?("APP_")'
+    assert_equal [ "RAILS_MASTER_KEY", "RESEND_API_KEY", "MAIL_FROM" ],
+      kamal_secrets("RESEND_API_KEY MAIL_FROM"), "Kamal hands the container only the names config/deploy.yml lists"
+    assert_equal [ "RAILS_MASTER_KEY" ], kamal_secrets(nil), "a deploy by hand has no ATELIER_ENV"
   end
 
   private
 
   def jobs
     YAML.safe_load(WORKFLOW.read).fetch("jobs")
+  end
+
+  def kamal_secrets(atelier_env)
+    before = ENV["ATELIER_ENV"]
+    ENV["ATELIER_ENV"] = atelier_env
+    YAML.safe_load(ERB.new(Rails.root.join("config/deploy.yml").read).result).dig("env", "secret")
+  ensure
+    ENV["ATELIER_ENV"] = before
   end
 
   def step_index(action)

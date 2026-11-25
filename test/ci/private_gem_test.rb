@@ -21,7 +21,7 @@ class PrivateGemTest < ActiveSupport::TestCase
 
   test "the deploy hands the token to Bundler and to the image build" do
     assert_equal FROM_SECRET, workflow("deploy").dig("jobs", "deploy", "env", CREDENTIAL)
-    assert_includes YAML.safe_load(read("config/deploy.yml")).dig("builder", "secrets"), CREDENTIAL
+    assert_includes YAML.safe_load(ERB.new(read("config/deploy.yml")).result).dig("builder", "secrets"), CREDENTIAL
     assert_includes read(".kamal/secrets"), "#{CREDENTIAL}=$#{CREDENTIAL}"
   end
 
