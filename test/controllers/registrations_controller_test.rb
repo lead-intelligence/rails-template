@@ -8,6 +8,12 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "the sign-up page sends a signed-in user to the signed-in home" do
+    sign_in_as users(:one)
+    get new_registration_url
+    assert_redirected_to chats_url
+  end
+
   test "creates an unconfirmed user, sends a confirmation email, and does not start a session" do
     assert_difference("User.count") do
       assert_enqueued_emails 1 do

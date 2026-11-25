@@ -1,5 +1,6 @@
 class RegistrationsController < ApplicationController
   allow_unauthenticated_access only: %i[ new create ]
+  before_action :redirect_to_signed_in_home, only: :new
   rate_limit to: 10, within: 1.hour, only: :create, with: -> { redirect_to new_registration_path, alert: t("registrations.rate_limit") }
   rate_limit to: 5, within: 5.minutes, only: :destroy, by: -> { Current.user.id }, with: -> { redirect_to edit_profile_path, alert: t("registrations.rate_limit") }
 

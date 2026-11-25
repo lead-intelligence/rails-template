@@ -19,7 +19,7 @@ class AuthenticationTest < ApplicationSystemTestCase
     fill_in "password", with: "password123"
     click_button t("sessions.new.sign_in")
 
-    assert_current_path root_path
+    assert_current_path chats_path
   end
 
   test "signing out from the navbar dropdown" do
@@ -55,7 +55,7 @@ class AuthenticationTest < ApplicationSystemTestCase
     fill_in "password", with: "newpassword123"
     click_button t("sessions.new.sign_in")
 
-    assert_current_path root_path
+    assert_current_path chats_path
   end
 
   private

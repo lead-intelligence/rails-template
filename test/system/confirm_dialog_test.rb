@@ -34,10 +34,10 @@ class ConfirmDialogTest < ApplicationSystemTestCase
   end
 
   test "the confirm dialog stays ready after a Turbo Drive navigation" do
-    visit chats_url
+    visit documents_url
 
     click_link t("app_name")
-    assert_current_path root_path
+    assert_current_path chats_path
     assert_turbo_ready
   end
 

@@ -5,7 +5,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
   test "signs in with valid credentials" do
     sign_in_as users(:one)
-    assert_redirected_to root_url
+    assert_redirected_to chats_url
     assert cookies[:session_id].present?
   end
 
@@ -20,7 +20,13 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_url
 
     sign_in_as users(:one)
-    assert_redirected_to root_url
+    assert_redirected_to chats_url
+  end
+
+  test "the sign-in page sends a signed-in user to the signed-in home" do
+    sign_in_as users(:one)
+    get new_session_url
+    assert_redirected_to chats_url
   end
 
   test "rejects invalid credentials" do
