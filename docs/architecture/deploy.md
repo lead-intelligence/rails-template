@@ -17,3 +17,5 @@ The runtime image installs the `file` command. Every photo upload (avatar, feedb
 The deploy job installs the gems before it loads the server key. Every gem's install code runs during `bundle install`, and with the key loaded it would run with root access to the server every app shares.
 
 Only a push to the repository's own main deploys. The `workflow_run` branches filter matches the head branch of a pull request too, so without the event and head-repository checks a fork's branch named `main` would run its own code with the deploy secrets. The action that loads the server key is pinned to a commit SHA, because a tag can be moved; Dependabot's `github-actions` ecosystem keeps the pin current.
+
+The app's own environment comes from the repository's secrets: the Deploy step hands each secret named `APP_<NAME>` to the container as `<NAME>`, and `config/deploy.yml` lists those names from `ATELIER_ENV`. The pass-through goes by prefix, so a few names are refused and the deploy stops before Kamal runs: `ATELIER_ENTER_KEY`, because it opens the passwordless sign-in link that belongs to staging, and `RAILS_MASTER_KEY` and `ATELIER_ENV`, which the deploy sets itself.

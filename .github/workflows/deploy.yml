@@ -103,7 +103,9 @@ jobs:
       # The app's own environment, which Atelier sets (Peronix's docs/app-env.md): each
       # repository secret APP_NAME reaches the app as NAME. Kamal reads secrets from
       # .kamal/secrets-common, written here with the names only; the values stay in this step's
-      # environment, and config/deploy.yml lists the names it gets in ATELIER_ENV.
+      # environment, and config/deploy.yml lists the names it gets in ATELIER_ENV. A few names are
+      # reserved: the staging sign-in key would open a passwordless door in production, and the
+      # others would override what config/deploy.yml sets.
       - name: Deploy
         env:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -112,6 +114,8 @@ jobs:
           ruby -rjson -e '
             env = JSON.parse(ENV.fetch("SECRETS")).filter_map { |name, value|
               [name.delete_prefix("APP_"), value] if name.start_with?("APP_") }.to_h
+            reserved = env.keys & %w[ATELIER_ENTER_KEY RAILS_MASTER_KEY ATELIER_ENV]
+            abort "#{reserved.map { |name| "APP_#{name}" }.join(", ")}: reserved, never set from Atelier" if reserved.any?
             File.write(".kamal/secrets-common", env.keys.map { |name| "#{name}=$#{name}\n" }.join)
             exec(env.merge("ATELIER_ENV" => env.keys.join(" "), "SECRETS" => nil), "bin/kamal", "deploy")'
 
