@@ -42,6 +42,16 @@ module OpenaiStubs
       )
   end
 
+  def stub_openai_chat_stream_with_endless_tool_calls(tool_name:, arguments:)
+    tool_call_stream = tool_call_stream_event(name: tool_name, arguments: arguments)
+    tool_call_stream << server_sent_event(content: nil, finish_reason: "tool_calls")
+    tool_call_stream << "data: [DONE]\n\n"
+
+    stub_request(:post, "https://api.openai.com/v1/chat/completions")
+      .with(body: /"stream":true/)
+      .to_return(status: 200, headers: { "Content-Type" => "text/event-stream" }, body: tool_call_stream)
+  end
+
   def stub_openai_chat_error(status: 500)
     stub_request(:post, "https://api.openai.com/v1/chat/completions").to_return(
       status: status,
