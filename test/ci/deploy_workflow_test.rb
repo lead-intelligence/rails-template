@@ -57,6 +57,21 @@ class DeployWorkflowTest < ActiveSupport::TestCase
     assert_equal [ "RAILS_MASTER_KEY" ], kamal_secrets(nil), "a deploy by hand has no ATELIER_ENV"
   end
 
+  test "an APP_ secret may not set a name the deploy reserves, and the deploy stops before Kamal runs" do
+    %w[ATELIER_ENTER_KEY RAILS_MASTER_KEY ATELIER_ENV].each do |name|
+      output, status = run_deploy_env({ "APP_#{name}" => "value", "APP_MAIL_FROM" => "hi@example.com" })
+
+      assert_not status.success?, "APP_#{name} would reach production"
+      assert_includes output, "APP_#{name}"
+    end
+  end
+
+  test "an ordinary APP_ secret passes through to Kamal" do
+    output, _status = run_deploy_env({ "APP_MAIL_FROM" => "hi@example.com" })
+
+    assert_includes output, "bin/kamal", "the deploy reached Kamal, which this test leaves out"
+  end
+
   private
 
   def jobs
@@ -69,5 +84,15 @@ class DeployWorkflowTest < ActiveSupport::TestCase
     YAML.safe_load(ERB.new(Rails.root.join("config/deploy.yml").read).result).dig("env", "secret")
   ensure
     ENV["ATELIER_ENV"] = before
+  end
+
+  def run_deploy_env(secrets)
+    deploy = jobs.dig("deploy", "steps").find { |step| step["name"] == "Deploy" }
+    script = deploy["run"][/ruby -rjson -e '(.*)'/m, 1]
+
+    Dir.mktmpdir do |dir|
+      FileUtils.mkdir_p(File.join(dir, ".kamal"))
+      Open3.capture2e({ "SECRETS" => secrets.to_json }, RbConfig.ruby, "-rjson", "-e", script, chdir: dir)
+    end
   end
 end
