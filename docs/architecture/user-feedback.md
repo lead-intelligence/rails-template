@@ -8,7 +8,7 @@ On top of that, each feedback can open a GitHub issue. `after_create_commit` enq
 
 `GITHUB_ISSUES_REPO` must be a private repository. The issue title and body carry the reporter's email address, and the photo links are signed ids that never expire and need no sign-in, so on a public repository both are public.
 
-The person's words go inside a code fence one backtick longer than the longest backtick run in them. Pasted as Markdown they would render, and an `@name` in them would notify that GitHub user; inside a fence they cannot close it early, and neither markup nor mentions take effect.
+The person's words go inside a code fence one backtick longer than the longest backtick run in them. Pasted as Markdown they would render, and an `@name` in them would notify that GitHub user; inside a fence they cannot close it early, and neither markup nor mentions take effect. The captured context gets its own fence the same way: the browser sends the page URL, user agent and viewport, so a person can put a mention or a link there too.
 
 `Feedback::MESSAGE_MAX_LENGTH` (10,000 characters) caps the message, enforced by the model and mirrored by the form's `maxlength` and its `feedbacks.new.message_hint`, which interpolates the constant. GitHub rejects an issue body over 65,536 characters, and with no retry an oversized one would fail forever; the cap leaves the metadata ample room under that ceiling.
 
