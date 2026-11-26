@@ -44,7 +44,7 @@ class SupportChatTest < ApplicationSystemTestCase
   end
 
   test "sending a message from the support widget leaves the chat page's own composer untouched" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     sign_in_via_browser(users(:one))
     stub_openai_chat_stream(chunks: [ "Thanks for reaching out, let's sort this out together." ])
 

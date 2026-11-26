@@ -12,7 +12,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "shows each message's time in the person's locale" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :user, content: "Hola", created_at: Time.zone.parse("2026-11-06 15:05"))
 
     get chat_url(chat)
@@ -23,21 +23,21 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "does not show another user's chat" do
     sign_in_as users(:one)
-    other_chat = users(:two).chats.create!(model: "gpt-4o-mini")
+    other_chat = users(:two).chats.create!(model: "gpt-5.4-nano")
     get chat_url(other_chat)
     assert_response :not_found
   end
 
   test "lists own chats" do
     sign_in_as users(:one)
-    users(:one).chats.create!(model: "gpt-4o-mini")
+    users(:one).chats.create!(model: "gpt-5.4-nano")
     get chats_url
     assert_response :success
   end
 
   test "lists each chat with its message count" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     seed_messages(chat, 3)
 
     get chats_url
@@ -47,17 +47,17 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "the queries to list chats do not grow with the number of chats" do
     sign_in_as users(:one)
-    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), 2)
+    seed_messages(users(:one).chats.create!(model: "gpt-5.4-nano"), 2)
     one_chat = queries_to { get chats_url }
 
-    4.times { seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), 2) }
+    4.times { seed_messages(users(:one).chats.create!(model: "gpt-5.4-nano"), 2) }
 
     assert_equal one_chat, queries_to { get chats_url }
   end
 
   test "lists one page of own chats, newest first, and links to the next" do
     sign_in_as users(:one)
-    chats = Array.new(ChatsController::PER_PAGE + 1) { |index| users(:one).chats.create!(model: "gpt-4o-mini", created_at: index.minutes.ago) }
+    chats = Array.new(ChatsController::PER_PAGE + 1) { |index| users(:one).chats.create!(model: "gpt-5.4-nano", created_at: index.minutes.ago) }
 
     get chats_url
 
@@ -69,7 +69,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "lists the remaining own chats on the second page" do
     sign_in_as users(:one)
-    chats = Array.new(ChatsController::PER_PAGE + 1) { |index| users(:one).chats.create!(model: "gpt-4o-mini", created_at: index.minutes.ago) }
+    chats = Array.new(ChatsController::PER_PAGE + 1) { |index| users(:one).chats.create!(model: "gpt-5.4-nano", created_at: index.minutes.ago) }
 
     get chats_url(page: 2)
 
@@ -79,7 +79,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "sends a page past the last one to the last page" do
     sign_in_as users(:one)
-    Array.new(ChatsController::PER_PAGE + 1) { users(:one).chats.create!(model: "gpt-4o-mini") }
+    Array.new(ChatsController::PER_PAGE + 1) { users(:one).chats.create!(model: "gpt-5.4-nano") }
 
     get chats_url(page: "9" * 25)
 
@@ -88,7 +88,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "the queries to show a chat do not grow with its tool results" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     add_tool_round(chat, 1)
     one_round = queries_to { get chat_url(chat) }
 
@@ -109,20 +109,20 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     get new_chat_url
     assert_response :success
     assert_select "select[name='chat[model]'] option", count: Chat.selectable_models.count + 1
-    assert_select "option[value='gpt-4o-mini']"
+    assert_select "option[value='gpt-5.4-nano']"
     assert_select "option[value='text-embedding-3-small']", count: 0
   end
 
   test "shows an own chat" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     get chat_url(chat)
     assert_response :success
   end
 
   test "shows a chat with multiple messages without an N+1" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
     chat.messages.create!(role: :assistant, content: "Run bin/kamal deploy.")
 
@@ -133,7 +133,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "shows the newest page of messages and links to the older ones" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     messages = Array.new(ChatsController::MESSAGES_PER_PAGE + 1) { |index| chat.messages.create!(role: :user, content: "Message #{index}") }
 
     get chat_url(chat)
@@ -146,7 +146,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "loads the older messages into the frame that asked for them" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     messages = Array.new(ChatsController::MESSAGES_PER_PAGE + 1) { |index| chat.messages.create!(role: :user, content: "Message #{index}") }
     get chat_url(chat)
     frame = css_select("#chat_#{chat.id}_messages turbo-frame").first
@@ -160,7 +160,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "shows no older link when every message fits on one page" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "Only one")
 
     get chat_url(chat)
@@ -170,7 +170,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "a malformed page param shows the newest messages" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :user, content: "Hi")
 
     get chat_url(chat, page: "not-a-cutoff")
@@ -184,7 +184,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     prompt = "How do I deploy with Kamal?"
 
     assert_difference("users(:one).chats.count", 1) do
-      post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: prompt } }
+      post chats_url, params: { chat: { model: "gpt-5.4-nano", prompt: prompt } }
     end
 
     chat = Chat.last
@@ -197,7 +197,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
 
     assert_no_difference("Chat.count") do
-      post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "a" * (Message::CONTENT_MAX_LENGTH + 1) } }
+      post chats_url, params: { chat: { model: "gpt-5.4-nano", prompt: "a" * (Message::CONTENT_MAX_LENGTH + 1) } }
     end
 
     assert_response :unprocessable_entity
@@ -242,10 +242,10 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
   test "rate limits a burst of new chats" do
     sign_in_as users(:one)
 
-    10.times { |i| post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "Prompt #{i}" } } }
+    10.times { |i| post chats_url, params: { chat: { model: "gpt-5.4-nano", prompt: "Prompt #{i}" } } }
 
     assert_no_difference("users(:one).chats.count") do
-      post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "One too many" } }
+      post chats_url, params: { chat: { model: "gpt-5.4-nano", prompt: "One too many" } }
     end
     assert_response :too_many_requests
   end
@@ -262,7 +262,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:one)
     assert_no_difference("users(:one).chats.count") do
       assert_no_enqueued_jobs(only: ChatResponseJob) do
-        post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "" } }
+        post chats_url, params: { chat: { model: "gpt-5.4-nano", prompt: "" } }
       end
     end
     assert_response :no_content
@@ -280,7 +280,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "destroys an own chat" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     assert_difference("users(:one).chats.count", -1) do
       delete chat_url(chat)
     end
@@ -289,8 +289,8 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "hides the composer once the daily quota is exhausted" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
-    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), User::DAILY_MESSAGE_LIMIT)
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
+    seed_messages(users(:one).chats.create!(model: "gpt-5.4-nano"), User::DAILY_MESSAGE_LIMIT)
 
     get chat_url(chat)
 
@@ -301,7 +301,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "shows how many messages are left today on a fresh chat" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     get chat_url(chat)
 
@@ -311,11 +311,11 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "refuses a new chat once the daily quota is exhausted" do
     sign_in_as users(:one)
-    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), User::DAILY_MESSAGE_LIMIT)
+    seed_messages(users(:one).chats.create!(model: "gpt-5.4-nano"), User::DAILY_MESSAGE_LIMIT)
 
     assert_no_difference("users(:one).chats.count") do
       assert_no_enqueued_jobs(only: ChatResponseJob) do
-        post chats_url, params: { chat: { model: "gpt-4o-mini", prompt: "One more" } }
+        post chats_url, params: { chat: { model: "gpt-5.4-nano", prompt: "One more" } }
       end
     end
 
@@ -324,7 +324,7 @@ class ChatsControllerTest < ActionDispatch::IntegrationTest
 
   test "the new chat form gives way to the exhausted notice" do
     sign_in_as users(:one)
-    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), User::DAILY_MESSAGE_LIMIT)
+    seed_messages(users(:one).chats.create!(model: "gpt-5.4-nano"), User::DAILY_MESSAGE_LIMIT)
 
     get new_chat_url
 

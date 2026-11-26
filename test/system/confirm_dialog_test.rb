@@ -7,7 +7,7 @@ class ConfirmDialogTest < ApplicationSystemTestCase
   end
 
   test "cancelling the confirm dialog keeps the chat" do
-    chat = @user.chats.create!(model: "gpt-4o-mini")
+    chat = @user.chats.create!(model: "gpt-5.4-nano")
     visit chats_url
     assert_selector "#chat_#{chat.id}"
 
@@ -21,7 +21,7 @@ class ConfirmDialogTest < ApplicationSystemTestCase
   end
 
   test "confirming the confirm dialog destroys the chat" do
-    chat = @user.chats.create!(model: "gpt-4o-mini")
+    chat = @user.chats.create!(model: "gpt-5.4-nano")
     visit chats_url
     assert_selector "#chat_#{chat.id}"
 

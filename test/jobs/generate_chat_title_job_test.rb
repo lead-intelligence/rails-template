@@ -2,7 +2,7 @@ require "test_helper"
 
 class GenerateChatTitleJobTest < ActiveJob::TestCase
   test "titles the chat from its first user message" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: "user", content: "How do I deploy Rails with Kamal?")
     stub_openai_chat(content: { title: "Deploying Rails with Kamal", tags: [ "rails", "kamal" ] }.to_json)
     GenerateChatTitleJob.perform_now(chat)
@@ -10,19 +10,19 @@ class GenerateChatTitleJobTest < ActiveJob::TestCase
   end
 
   test "keeps an existing title" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini", title: "Kept")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano", title: "Kept")
     GenerateChatTitleJob.perform_now(chat)
     assert_equal "Kept", chat.reload.title
   end
 
   test "does nothing without a user message yet" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     GenerateChatTitleJob.perform_now(chat)
     assert_nil chat.reload.title
   end
 
   test "records the title's usage against the chat's owner" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: "user", content: "How do I deploy Rails with Kamal?")
     stub_openai_chat(content: { title: "Deploying Rails with Kamal", tags: [ "rails" ] }.to_json)
 

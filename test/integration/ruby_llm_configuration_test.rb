@@ -21,7 +21,7 @@ class RubyLlmConfigurationTest < ActiveSupport::TestCase
 
     load Rails.root.join("config/initializers/ruby_llm.rb")
 
-    assert_equal "gpt-4o-mini", RubyLLM.config.default_model
+    assert_equal "gpt-5.4-nano", RubyLLM.config.default_model
     assert_equal "text-embedding-3-small", RubyLLM.config.default_embedding_model
   end
 
@@ -30,7 +30,8 @@ class RubyLlmConfigurationTest < ActiveSupport::TestCase
     assert_equal 30, RubyLLM.config.stream_idle_timeout
   end
 
-  test "allows only cheap chat models by default" do
-    assert_equal %w[gpt-4o-mini gpt-4.1-mini gpt-4.1-nano], Rails.configuration.x.selectable_chat_models
+  test "allows only cheap chat models by default, the default among them" do
+    assert_equal %w[gpt-5.4-nano gpt-5.4-mini gpt-5-mini], Rails.configuration.x.selectable_chat_models
+    assert_includes Rails.configuration.x.selectable_chat_models, RubyLLM.config.default_model
   end
 end
