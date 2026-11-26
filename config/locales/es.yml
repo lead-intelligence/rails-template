@@ -176,6 +176,8 @@ es:
       title: Documentos
     new:
       title: Nuevo documento
+    rate_limit: Hiciste muchas búsquedas o cambios seguidos. Espera un minuto e inténtalo
+      de nuevo.
     show:
       back: Volver a documentos
       delete: Eliminar

@@ -4,7 +4,7 @@ class MessageTest < ActiveSupport::TestCase
   include ActionCable::TestHelper
 
   test "broadcasts itself synchronously when created, before any later chunk appends" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert_broadcasts("chat_#{chat.id}", 1) do
       chat.messages.create!(role: :assistant, content: "Hello")
@@ -12,7 +12,7 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "broadcasts itself synchronously when updated" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :assistant, content: "")
 
     assert_broadcasts("chat_#{chat.id}", 1) do
@@ -21,7 +21,7 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "broadcasts updates as a versioned append into the message list, not a replace" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :assistant, content: "")
 
     clear_messages("chat_#{chat.id}")
@@ -37,7 +37,7 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "broadcast_version increases after an update so a stale broadcast can be detected" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :assistant, content: "")
     original_version = message.broadcast_version
 
@@ -47,7 +47,7 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "broadcasts a remove synchronously when destroyed" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :assistant, content: "Hello")
 
     assert_broadcasts("chat_#{chat.id}", 1) do
@@ -56,7 +56,7 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "destroying the whole chat broadcasts no remove per message" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     3.times { |index| chat.messages.create!(role: :assistant, content: "Hello #{index}") }
 
     assert_no_broadcasts("chat_#{chat.id}") do
@@ -81,7 +81,7 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "renders normally for a system message in a regular chat" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :system, content: "Be concise.")
 
     assert_equal "messages/system", message.to_partial_path
@@ -117,14 +117,14 @@ class MessageTest < ActiveSupport::TestCase
   end
 
   test "a person's message is at most the content limit" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert chat.messages.build(role: :user, content: "a" * Message::CONTENT_MAX_LENGTH).valid?
     assert_not chat.messages.build(role: :user, content: "a" * (Message::CONTENT_MAX_LENGTH + 1)).valid?
   end
 
   test "an assistant reply may exceed the content limit" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert chat.messages.build(role: :assistant, content: "a" * (Message::CONTENT_MAX_LENGTH + 1)).valid?
   end

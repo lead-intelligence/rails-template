@@ -31,7 +31,7 @@ class TimeZoneTest < ActionDispatch::IntegrationTest
   test "shows times in the person's zone" do
     users(:one).update!(time_zone: BUENOS_AIRES)
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "Hi", created_at: Time.utc(2026, 11, 24, 1, 30))
 
     get chat_url(chat)
@@ -51,7 +51,7 @@ class TimeZoneTest < ActionDispatch::IntegrationTest
   test "counts the daily quota on the person's day, not the UTC one" do
     sign_in_as users(:one)
     cookies[:time_zone] = BUENOS_AIRES
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     travel_to Time.utc(2026, 11, 24, 1, 0) do
       post chat_messages_url(chat), params: { message: { content: "Hi" } }

@@ -173,6 +173,8 @@ en:
       title: Documents
     new:
       title: New document
+    rate_limit: You made many searches or changes in a row. Wait a minute and try
+      again.
     show:
       back: Back to documents
       delete: Delete

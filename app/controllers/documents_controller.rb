@@ -1,5 +1,12 @@
 class DocumentsController < ApplicationController
   PER_PAGE = 25
+  SEARCH_LIMIT = 20
+  SAVE_LIMIT = 20
+
+  rate_limit to: SEARCH_LIMIT, within: 1.minute, only: :index, if: -> { params[:q].present? }, by: -> { Current.user.id },
+    name: "search", with: -> { redirect_to documents_path, alert: t("documents.rate_limit") }
+  rate_limit to: SAVE_LIMIT, within: 1.minute, only: %i[ create update ], by: -> { Current.user.id },
+    name: "save", with: -> { redirect_to documents_path, alert: t("documents.rate_limit") }
 
   def index
     query = params.permit(:q, :page)[:q]

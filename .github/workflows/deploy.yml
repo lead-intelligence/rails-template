@@ -59,18 +59,20 @@ jobs:
     # and for the image build (config/deploy.yml).
     env:
       BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
+      BUNDLE_ONLY: deploy
 
     steps:
       # `workflow_run` checks out the default branch's HEAD unless told otherwise, which is not
       # necessarily the commit CI just went green on.
       - name: Checkout the commit the gate passed on
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      # Before the server key: every gem's install code runs here.
+      # Only the deploy group, Kamal and its own gems: every gem's install code runs in this job,
+      # and a process it leaves behind would still be there when the server key is loaded.
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@145243922b4465b78e04dd66294782c7de45901f # v1.345.0
         with:
           bundler-cache: true
 
@@ -103,7 +105,9 @@ jobs:
       # The app's own environment, which Atelier sets (Peronix's docs/app-env.md): each
       # repository secret APP_NAME reaches the app as NAME. Kamal reads secrets from
       # .kamal/secrets-common, written here with the names only; the values stay in this step's
-      # environment, and config/deploy.yml lists the names it gets in ATELIER_ENV.
+      # environment, and config/deploy.yml lists the names it gets in ATELIER_ENV. A few names are
+      # reserved: the staging sign-in key would open a passwordless door in production, and the
+      # others would override what config/deploy.yml sets.
       - name: Deploy
         env:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
@@ -112,6 +116,8 @@ jobs:
           ruby -rjson -e '
             env = JSON.parse(ENV.fetch("SECRETS")).filter_map { |name, value|
               [name.delete_prefix("APP_"), value] if name.start_with?("APP_") }.to_h
+            reserved = env.keys & %w[ATELIER_ENTER_KEY RAILS_MASTER_KEY ATELIER_ENV]
+            abort "#{reserved.map { |name| "APP_#{name}" }.join(", ")}: reserved, never set from Atelier" if reserved.any?
             File.write(".kamal/secrets-common", env.keys.map { |name| "#{name}=$#{name}\n" }.join)
             exec(env.merge("ATELIER_ENV" => env.keys.join(" "), "SECRETS" => nil), "bin/kamal", "deploy")'
 

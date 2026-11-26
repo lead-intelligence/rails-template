@@ -72,7 +72,7 @@ class MadminTest < ActionDispatch::IntegrationTest
   private
 
   def create_owned_rows(user)
-    chat = user.chats.create!(model: "gpt-4o-mini")
+    chat = user.chats.create!(model: "gpt-5.4-nano")
     user.documents.create!(title: "Notes", content: "Notes")
     user.feedbacks.create!(message: "Nice", chat: chat)
     user.sessions.create!(ip_address: "127.0.0.1", user_agent: "Test")

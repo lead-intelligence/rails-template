@@ -12,7 +12,7 @@ class ChatResponseJob < ApplicationJob
       chat.complete do |chunk|
         stream(chat.messages.last, chunk.content) unless chunk.content.to_s.empty?
       end
-    rescue RubyLLM::Error
+    rescue RubyLLM::Error, RubyLLM::ToolRoundLimitError
       broadcast_failure(chat)
       raise
     end

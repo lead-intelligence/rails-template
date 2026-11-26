@@ -4,7 +4,7 @@ module OpenaiStubs
       status: 200,
       headers: { "Content-Type" => "application/json" },
       body: {
-        id: "chatcmpl-test", object: "chat.completion", created: 0, model: "gpt-4o-mini",
+        id: "chatcmpl-test", object: "chat.completion", created: 0, model: "gpt-5.4-nano",
         choices: [ { index: 0, message: { role: "assistant", content: content }, finish_reason: "stop" } ],
         usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
       }.to_json
@@ -42,6 +42,16 @@ module OpenaiStubs
       )
   end
 
+  def stub_openai_chat_stream_with_endless_tool_calls(tool_name:, arguments:)
+    tool_call_stream = tool_call_stream_event(name: tool_name, arguments: arguments)
+    tool_call_stream << server_sent_event(content: nil, finish_reason: "tool_calls")
+    tool_call_stream << "data: [DONE]\n\n"
+
+    stub_request(:post, "https://api.openai.com/v1/chat/completions")
+      .with(body: /"stream":true/)
+      .to_return(status: 200, headers: { "Content-Type" => "text/event-stream" }, body: tool_call_stream)
+  end
+
   def stub_openai_chat_error(status: 500)
     stub_request(:post, "https://api.openai.com/v1/chat/completions").to_return(
       status: status,
@@ -66,7 +76,7 @@ module OpenaiStubs
 
   def tool_call_stream_event(name:, arguments:)
     chunk = {
-      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-4o-mini",
+      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-5.4-nano",
       choices: [ {
         index: 0,
         delta: {
@@ -84,7 +94,7 @@ module OpenaiStubs
   def server_sent_event(content:, finish_reason: nil)
     delta = content.nil? ? {} : { content: content }
     chunk = {
-      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-4o-mini",
+      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-5.4-nano",
       choices: [ { index: 0, delta: delta, finish_reason: finish_reason } ]
     }
     "data: #{chunk.to_json}\n\n"
