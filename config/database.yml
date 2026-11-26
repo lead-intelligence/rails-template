@@ -6,7 +6,9 @@
 #
 default: &default
   adapter: sqlite3
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS", 3).to_i + 4 %>
+  # One process runs Puma's request threads, Action Cable's 4 workers, the 3
+  # job threads and Solid Queue's own 4 (docs/architecture/background-jobs.md).
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS", 3).to_i + 11 %>
   timeout: 5000
 
 development:
