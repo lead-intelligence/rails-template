@@ -178,6 +178,18 @@ class ChatResponseJobTest < ActiveJob::TestCase
     assert_includes feedback.message, "Pages take a long time to load for this person."
   end
 
+  test "a support chat stops calling its tool after the round limit and shows the failure" do
+    chat = users(:one).chats.create!(support: true)
+    chat.messages.create!(role: :user, content: "Call the ticket tool again and again until it works")
+    stub_openai_chat_stream_with_endless_tool_calls(tool_name: "create_support_ticket", arguments: { title: "Again", summary: "Again" })
+    clear_messages("chat_#{chat.id}")
+
+    assert_raises(RubyLLM::ToolRoundLimitError) { ChatResponseJob.perform_now(chat.id) }
+
+    assert_requested :post, "https://api.openai.com/v1/chat/completions", times: SupportAgent::MAX_TOOL_ROUNDS
+    assert_equal 1, broadcasts("chat_#{chat.id}").count { |raw| raw.include?(I18n.t("messages.failure.body")) }
+  end
+
   test "discards the answer for a chat deleted before it ran" do
     chat = users(:one).chats.create!(model: "gpt-4o-mini")
     ChatResponseJob.perform_later(chat.id)
