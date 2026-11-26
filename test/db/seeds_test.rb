@@ -3,7 +3,7 @@ require "test_helper"
 class SeedsTest < ActiveSupport::TestCase
   setup do
     RubyLLM::ActiveRecord::Model.delete_all
-    RubyLLM::ActiveRecord::Model.create!(model_id: "gpt-4o-mini", provider: "openai", name: "GPT-4o mini")
+    RubyLLM::ActiveRecord::Model.create!(model_id: "gpt-5.4-nano", provider: "openai", name: "GPT-4o mini")
     RubyLLM.models.load_from_store
   end
 

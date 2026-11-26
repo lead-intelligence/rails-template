@@ -5,14 +5,14 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
   include MessageQuotaHelper
 
   test "requires authentication" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     post chat_messages_url(chat), params: { message: { content: "Hi" } }
     assert_redirected_to new_session_url
   end
 
   test "enqueues a response and redirects for html requests" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert_enqueued_with(job: ChatResponseJob, args: [ chat.id ]) do
       post chat_messages_url(chat), params: { message: { content: "How do I deploy with Kamal?" } }
@@ -23,7 +23,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "enqueues a response and renders a turbo stream" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert_enqueued_with(job: ChatResponseJob, args: [ chat.id ]) do
       post chat_messages_url(chat), params: { message: { content: "How do I deploy with Kamal?" } }, as: :turbo_stream
@@ -35,7 +35,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "answers 422 when the content is over the limit" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert_no_difference("chat.messages.count") do
       post chat_messages_url(chat), params: { message: { content: "a" * (Message::CONTENT_MAX_LENGTH + 1) } }, as: :turbo_stream
@@ -47,7 +47,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "does nothing when the content is blank" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert_no_enqueued_jobs(only: ChatResponseJob) do
       post chat_messages_url(chat), params: { message: { content: "" } }, as: :turbo_stream
@@ -58,7 +58,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "answers 400 when the content is not text" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     assert_no_enqueued_jobs(only: ChatResponseJob) do
       [ "Hi", { content: [ "Hi" ] }, { content: { text: "Hi" } } ].each do |message|
@@ -70,7 +70,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "does not accept messages for another user's chat" do
     sign_in_as users(:one)
-    other_chat = users(:two).chats.create!(model: "gpt-4o-mini")
+    other_chat = users(:two).chats.create!(model: "gpt-5.4-nano")
     post chat_messages_url(other_chat), params: { message: { content: "Hi" } }
     assert_response :not_found
   end
@@ -88,7 +88,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "a chat at its message limit refuses new messages" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     seed_messages(chat, Chat::MAX_MESSAGES, role: "assistant")
 
     assert_no_enqueued_jobs(only: ChatResponseJob) do
@@ -100,7 +100,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "the message that fills a chat leaves the composer full" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     seed_messages(chat, Chat::MAX_MESSAGES - 1, role: "assistant")
 
     post chat_messages_url(chat), params: { message: { content: "Hola" } }, as: :turbo_stream
@@ -110,7 +110,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "rate limits a burst of messages" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     20.times do |i|
       post chat_messages_url(chat), params: { message: { content: "Message #{i}" } }, as: :turbo_stream
@@ -126,7 +126,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "refuses a message once the daily quota is exhausted" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     seed_messages(chat, User::DAILY_MESSAGE_LIMIT)
 
     assert_no_enqueued_jobs(only: ChatResponseJob) do
@@ -139,8 +139,8 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "the last message within the quota leaves the composer exhausted" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
-    seed_messages(users(:one).chats.create!(model: "gpt-4o-mini"), User::DAILY_MESSAGE_LIMIT - 1)
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
+    seed_messages(users(:one).chats.create!(model: "gpt-5.4-nano"), User::DAILY_MESSAGE_LIMIT - 1)
 
     post chat_messages_url(chat), params: { message: { content: "The last one" } }, as: :turbo_stream
 
@@ -151,7 +151,7 @@ class MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "the turbo stream response targets only this chat's own composer" do
     sign_in_as users(:one)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
 
     post chat_messages_url(chat), params: { message: { content: "Hi" } }, as: :turbo_stream
 

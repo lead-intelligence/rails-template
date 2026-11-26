@@ -4,7 +4,7 @@ module OpenaiStubs
       status: 200,
       headers: { "Content-Type" => "application/json" },
       body: {
-        id: "chatcmpl-test", object: "chat.completion", created: 0, model: "gpt-4o-mini",
+        id: "chatcmpl-test", object: "chat.completion", created: 0, model: "gpt-5.4-nano",
         choices: [ { index: 0, message: { role: "assistant", content: content }, finish_reason: "stop" } ],
         usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
       }.to_json
@@ -66,7 +66,7 @@ module OpenaiStubs
 
   def tool_call_stream_event(name:, arguments:)
     chunk = {
-      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-4o-mini",
+      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-5.4-nano",
       choices: [ {
         index: 0,
         delta: {
@@ -84,7 +84,7 @@ module OpenaiStubs
   def server_sent_event(content:, finish_reason: nil)
     delta = content.nil? ? {} : { content: content }
     chunk = {
-      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-4o-mini",
+      id: "chatcmpl-test", object: "chat.completion.chunk", created: 0, model: "gpt-5.4-nano",
       choices: [ { index: 0, delta: delta, finish_reason: finish_reason } ]
     }
     "data: #{chunk.to_json}\n\n"

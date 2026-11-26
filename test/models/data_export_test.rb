@@ -6,7 +6,7 @@ class DataExportTest < ActiveSupport::TestCase
   test "packages the user's records and files into a zip without sensitive columns" do
     user = users(:one)
     user.avatar.attach(io: File.open(file_fixture("avatar.png")), filename: "avatar.png", content_type: "image/png")
-    chat = user.chats.create!(model: "gpt-4o-mini")
+    chat = user.chats.create!(model: "gpt-5.4-nano")
     document = user.documents.create!(title: "My notes", content: "Confidential <b>rich text</b>")
     user.documents.create!(title: "Second", content: "More notes")
     feedback = user.feedbacks.create!(message: "Nice app")
@@ -28,7 +28,7 @@ class DataExportTest < ActiveSupport::TestCase
   end
 
   test "follows the deletion cascade into nested records and their files" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     message = chat.messages.create!(role: :user, content: "My private question")
     message.attachments.attach(io: File.open(file_fixture("avatar.png")), filename: "photo.png", content_type: "image/png")
     tool_call = chat.messages.create!(role: :assistant, content: "").ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "lookup", arguments: {})
@@ -42,7 +42,7 @@ class DataExportTest < ActiveSupport::TestCase
   end
 
   test "leaves out the opaque provider payloads of messages and tool calls" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :assistant, content: "", raw_content: { "blocks" => [] }, raw_reasoning: { "encrypted" => "x" })
       .ruby_llm_tool_calls.create!(tool_call_id: "call_1", name: "lookup", arguments: {}, thought_signature: "opaque")
 
@@ -168,11 +168,11 @@ class DataExportTest < ActiveSupport::TestCase
     user = users(:one)
     user.documents.create!(title: "First", content: "Notes")
     user.feedbacks.create!(message: "First")
-    user.chats.create!(model: "gpt-4o-mini").messages.create!(role: :user, content: "Hi")
+    user.chats.create!(model: "gpt-5.4-nano").messages.create!(role: :user, content: "Hi")
     baseline = queries_during { export(User.find(user.id)) }
 
     5.times do |index|
-      user.chats.create!(model: "gpt-4o-mini").messages.create!(role: :user, content: "Hi #{index}")
+      user.chats.create!(model: "gpt-5.4-nano").messages.create!(role: :user, content: "Hi #{index}")
       user.documents.create!(title: "Doc #{index}", content: "Notes")
       user.sessions.create!(ip_address: "127.0.0.1", user_agent: "Test")
       user.feedbacks.create!(message: "Feedback #{index}")
@@ -182,7 +182,7 @@ class DataExportTest < ActiveSupport::TestCase
   end
 
   test "holds at most one batch of records in memory at a time" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     now = Time.current
     Message.insert_all(Array.new(DataExport::BATCH_SIZE + 1) do |index|
       { chat_id: chat.id, role: "user", content: "Message #{index}", created_at: now, updated_at: now }
@@ -212,7 +212,7 @@ class DataExportTest < ActiveSupport::TestCase
   private
 
   def record_usage(chat, message)
-    chat.ruby_llm_usages.create!(owner: chat.user, message: message, operation: "chat", provider: "openai", model: "gpt-4o-mini", status: "succeeded")
+    chat.ruby_llm_usages.create!(owner: chat.user, message: message, operation: "chat", provider: "openai", model: "gpt-5.4-nano", status: "succeeded")
   end
 
   def export(user)

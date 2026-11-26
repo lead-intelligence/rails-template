@@ -51,7 +51,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   test "the queued erasure deletes the account and its data" do
     user = users(:one)
-    chat = user.chats.create!(model: "gpt-4o-mini")
+    chat = user.chats.create!(model: "gpt-5.4-nano")
     sign_in_as user
 
     perform_enqueued_jobs(only: AccountDeletionJob) do

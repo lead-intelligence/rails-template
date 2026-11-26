@@ -5,7 +5,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   include QueryCountHelper
 
   test "enqueues chat titling after the response is persisted" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
     assert_enqueued_with(job: GenerateChatTitleJob, args: [ chat ]) do
@@ -19,7 +19,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
     stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
     travel_to Time.utc(2026, 11, 24, 1, 30) do
-      chat = users(:one).chats.create!(model: "gpt-4o-mini")
+      chat = users(:one).chats.create!(model: "gpt-5.4-nano")
       chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
       clear_messages("chat_#{chat.id}")
 
@@ -30,7 +30,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "broadcasts each non-empty chunk that arrives a stream interval after the last one" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "How do I deploy Rails with Kamal?")
     stub_openai_chat_stream(chunks: [ "", "Sure", ", here", " is how." ])
     clear_messages("chat_#{chat.id}")
@@ -42,7 +42,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "coalesces chunks that arrive faster than the stream interval into one broadcast" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "Tell me a story")
     chunks = Array.new(500) { |index| " word#{index}" }
     stub_openai_chat_stream(chunks: chunks)
@@ -58,7 +58,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "a normal chat has no support instructions or tool attached" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
@@ -106,7 +106,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "does not enqueue chat titling for a chat that already has a title" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini", title: "Deploying with Kamal")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano", title: "Deploying with Kamal")
     stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
     assert_no_enqueued_jobs(only: GenerateChatTitleJob) do
@@ -116,7 +116,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "shows a human-friendly failure to the person when the provider fails" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
     stub_openai_chat_error(status: 500)
 
@@ -139,7 +139,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "bills the reply to the chat's user" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
     stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
@@ -149,7 +149,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "shows no failure when the reply succeeds" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     chat.messages.create!(role: :user, content: "How do I deploy with Kamal?")
     stub_openai_chat_stream(chunks: [ "Sure, here is how." ])
 
@@ -179,7 +179,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   test "discards the answer for a chat deleted before it ran" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     ChatResponseJob.perform_later(chat.id)
     chat.destroy!
 
@@ -216,7 +216,7 @@ class ChatResponseJobTest < ActiveJob::TestCase
   end
 
   def queries_to_answer(history:, support: false)
-    chat = users(:one).chats.create!(model: "gpt-4o-mini", support: support)
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano", support: support)
     now = Time.current
     Message.insert_all(Array.new(history) do |index|
       { chat_id: chat.id, role: index.even? ? "user" : "assistant", model_id: index.even? ? nil : chat.model.id,

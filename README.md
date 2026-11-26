@@ -102,7 +102,7 @@ cp .env.example .env
 | Variable | What it does | Without it |
 | --- | --- | --- |
 | `OPENAI_API_KEY` | AI chat, semantic search, support assistant | Those features cannot answer |
-| `OPENAI_CHAT_MODEL`, `OPENAI_EMBEDDING_MODEL` | Override `gpt-4o-mini` / `text-embedding-3-small`. A new embedding model needs a migration | Defaults apply |
+| `OPENAI_CHAT_MODEL`, `OPENAI_EMBEDDING_MODEL` | Override `gpt-5.4-nano` / `text-embedding-3-small`. A new embedding model needs a migration | Defaults apply |
 | `APP_HOST` | Host for mailer and feedback photo links | Links point at `example.com` |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USER_NAME`, `SMTP_PASSWORD` | Production email, any provider (credentials: `smtp/user_name`, `smtp/password`) | No email is sent |
 | `SUPERADMIN_USER`, `SUPERADMIN_PASSWORD` | One login for every developer panel (credentials: `superadmin/username`, `superadmin/password`) | Every panel answers `401` |

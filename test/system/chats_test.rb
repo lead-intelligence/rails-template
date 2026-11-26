@@ -10,7 +10,7 @@ class ChatsTest < ApplicationSystemTestCase
   end
 
   test "sending a message streams the assistant's reply into the chat" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     sign_in_via_browser(users(:one))
     stub_openai_chat(content: { title: "Deploying with Kamal", tags: [ "kamal" ] }.to_json)
     stub_openai_chat_stream(chunks: [ "Sure", ", here", " is how." ])
@@ -24,7 +24,7 @@ class ChatsTest < ApplicationSystemTestCase
   end
 
   test "a long chat loads its older messages on demand" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     oldest = chat.messages.create!(role: :user, content: "The very first question")
     ChatsController::MESSAGES_PER_PAGE.times { |index| chat.messages.create!(role: :assistant, content: "Reply #{index}") }
     sign_in_via_browser(users(:one))
@@ -38,7 +38,7 @@ class ChatsTest < ApplicationSystemTestCase
   end
 
   test "a failed completion shows a human-friendly failure instead of leaking the error" do
-    chat = users(:one).chats.create!(model: "gpt-4o-mini")
+    chat = users(:one).chats.create!(model: "gpt-5.4-nano")
     sign_in_via_browser(users(:one))
     stub_openai_chat_error(status: 500)
 
