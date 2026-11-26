@@ -35,9 +35,11 @@ class CreateFeedbackIssueJobTest < ActiveJob::TestCase
       "From: ada@example.com",
       "App: CharcoTemplate (test)",
       "Context:",
+      "```",
       "Page: https://example.com/chats/1",
       "Browser: TestBrowser/1.0",
       "Viewport: 1512x982",
+      "```",
       "Photos:",
       photo_url,
       "---",
@@ -68,6 +70,21 @@ class CreateFeedbackIssueJobTest < ActiveJob::TestCase
 
     request = stub_request(:post, "https://api.github.com/repos/acme/app/issues")
       .with { |req| JSON.parse(req.body)["body"].end_with?("---\n`````\n#{message}\n`````") }
+      .to_return(status: 201, headers: { "Content-Type" => "application/json" }, body: { number: 1 }.to_json)
+
+    CreateFeedbackIssueJob.perform_now(feedback)
+
+    assert_requested request
+  end
+
+  test "fences the captured context, which the browser sends, so mentions and links in it stay inert" do
+    ENV["GITHUB_ISSUES_TOKEN"] = "fine-grained-token"
+    ENV["GITHUB_ISSUES_REPO"] = "acme/app"
+    page_url = "@acme/maintainers ``` [Sign in again](https://evil.example)"
+    feedback = users(:one).feedbacks.create!(message: "Broken layout", context: { "page_url" => page_url })
+
+    request = stub_request(:post, "https://api.github.com/repos/acme/app/issues")
+      .with { |req| JSON.parse(req.body)["body"].include?("Context:\n````\nPage: #{page_url}\n````\n") }
       .to_return(status: 201, headers: { "Content-Type" => "application/json" }, body: { number: 1 }.to_json)
 
     CreateFeedbackIssueJob.perform_now(feedback)

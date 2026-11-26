@@ -21,7 +21,7 @@ class CreateFeedbackIssueJob < ApplicationJob
 
     if feedback.context.present?
       lines << "Context:"
-      feedback.context.each { |key, value| lines << "#{CONTEXT_LABELS.fetch(key, key)}: #{value.to_s.gsub(/[\r\n]+/, " ")}" }
+      lines.concat(fenced(feedback.context.map { |key, value| "#{CONTEXT_LABELS.fetch(key, key)}: #{value.to_s.gsub(/[\r\n]+/, " ")}" }.join("\n")))
     end
 
     if feedback.photos.attached?
