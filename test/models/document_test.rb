@@ -32,6 +32,16 @@ class DocumentTest < ActiveSupport::TestCase
     assert_requested :post, "https://api.openai.com/v1/embeddings", times: 1
   end
 
+  test "semantic_search embeds at most the query limit" do
+    stub_openai_embedding(vector: Array.new(Document::EMBEDDING_DIMENSIONS, 0.5))
+
+    Document.semantic_search("a" * (Document::QUERY_MAX_LENGTH + 100))
+
+    assert_requested :post, "https://api.openai.com/v1/embeddings" do |request|
+      JSON.parse(request.body)["input"] == "a" * Document::QUERY_MAX_LENGTH
+    end
+  end
+
   test "creating a document enqueues an embedding refresh" do
     assert_enqueued_with(job: GenerateDocumentEmbeddingJob) do
       users(:one).documents.create!(title: "New", content: "text")

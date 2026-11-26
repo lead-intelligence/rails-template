@@ -1,5 +1,6 @@
 class Document < ApplicationRecord
   TITLE_MAX_LENGTH = 200
+  QUERY_MAX_LENGTH = 500
 
   belongs_to :user
   has_rich_text :content
@@ -14,7 +15,7 @@ class Document < ApplicationRecord
   after_save_commit :refresh_embedding_later, if: :embedding_source_changed?
 
   def self.semantic_search(query, limit: 5)
-    query_embedding = search_client.embed(query).vectors
+    query_embedding = search_client.embed(query.first(QUERY_MAX_LENGTH)).vectors
     where.not(embedding: nil).nearest_neighbors(:embedding, query_embedding, distance: "cosine").first(limit)
   end
 

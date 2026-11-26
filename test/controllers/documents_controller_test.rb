@@ -113,6 +113,46 @@ class DocumentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "embedding" ], users(:one).ruby_llm_usages.pluck(:operation)
   end
 
+  test "limits how many searches one person runs per minute" do
+    sign_in_as users(:one)
+    stub_openai_embedding(vector: Array.new(Document::EMBEDDING_DIMENSIONS, 0.5))
+
+    DocumentsController::SEARCH_LIMIT.times { get documents_url, params: { q: "How do I deploy?" } }
+    get documents_url, params: { q: "How do I deploy?" }
+
+    assert_redirected_to documents_url
+    assert_equal I18n.t("documents.rate_limit"), flash[:alert]
+    assert_requested :post, "https://api.openai.com/v1/embeddings", times: DocumentsController::SEARCH_LIMIT
+  end
+
+  test "the plain list is not limited, only the search" do
+    sign_in_as users(:one)
+
+    (DocumentsController::SEARCH_LIMIT + 1).times { get documents_url }
+
+    assert_response :success
+  end
+
+  test "limits how many times one person saves documents per minute" do
+    sign_in_as users(:one)
+    DocumentsController::SAVE_LIMIT.times { |index| post documents_url, params: { document: { title: "Note #{index}", content: "Text" } } }
+
+    assert_no_difference("Document.count") do
+      post documents_url, params: { document: { title: "One too many", content: "Text" } }
+    end
+
+    assert_redirected_to documents_url
+    assert_equal I18n.t("documents.rate_limit"), flash[:alert]
+  end
+
+  test "caps the search field at the query limit" do
+    sign_in_as users(:one)
+
+    get documents_url
+
+    assert_select "input[name=q][maxlength=?]", Document::QUERY_MAX_LENGTH.to_s
+  end
+
   test "falls back to the plain list when the search provider fails" do
     sign_in_as users(:one)
     users(:one).documents.create!(title: "Kamal notes", content: "Deploy with Kamal")
