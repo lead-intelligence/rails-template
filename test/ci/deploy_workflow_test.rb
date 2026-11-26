@@ -16,9 +16,10 @@ class DeployWorkflowTest < ActiveSupport::TestCase
       "CI runs finish out of order, so an older commit could deploy after a newer one and roll production back"
   end
 
-  test "Bundler installs the gems before the server key is loaded" do
-    assert_operator step_index("ruby/setup-ruby"), :<, step_index("webfactory/ssh-agent"),
-      "every gem's install code would otherwise run with root access to the server"
+  test "the deploy installs only the gems Kamal needs" do
+    assert_equal "deploy", jobs.dig("deploy", "env", "BUNDLE_ONLY"),
+      "every gem's install code runs in the job that later holds the server key, and a process it leaves behind outlives the step"
+    assert_equal [ "kamal" ], Bundler.definition.dependencies.select { |dependency| dependency.groups == [ :deploy ] }.map(&:name)
   end
 
   test "only a push to this repository's main deploys" do
@@ -27,9 +28,10 @@ class DeployWorkflowTest < ActiveSupport::TestCase
     assert_includes jobs.dig("latest", "if"), "github.event.workflow_run.head_repository.full_name == github.repository"
   end
 
-  test "the action that receives the server key is pinned to a commit" do
-    assert_match(/\Awebfactory\/ssh-agent@\h{40}\z/, jobs.dig("deploy", "steps").find { |step| step["uses"].to_s.start_with?("webfactory/ssh-agent") }["uses"],
-      "a tag can be moved to other code, and this action holds root access to the server")
+  test "every action the deploy runs is pinned to a commit" do
+    jobs.dig("deploy", "steps").filter_map { |step| step["uses"] }.each do |action|
+      assert_match(/@\h{40}\z/, action, "a tag can be moved to other code, and this job runs on the production server")
+    end
   end
 
   test "every job runs on the production server's runner" do
@@ -67,9 +69,5 @@ class DeployWorkflowTest < ActiveSupport::TestCase
     YAML.safe_load(ERB.new(Rails.root.join("config/deploy.yml").read).result).dig("env", "secret")
   ensure
     ENV["ATELIER_ENV"] = before
-  end
-
-  def step_index(action)
-    jobs.dig("deploy", "steps").index { |step| step["uses"].to_s.start_with?(action) }
   end
 end

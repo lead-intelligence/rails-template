@@ -59,18 +59,20 @@ jobs:
     # and for the image build (config/deploy.yml).
     env:
       BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
+      BUNDLE_ONLY: deploy
 
     steps:
       # `workflow_run` checks out the default branch's HEAD unless told otherwise, which is not
       # necessarily the commit CI just went green on.
       - name: Checkout the commit the gate passed on
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      # Before the server key: every gem's install code runs here.
+      # Only the deploy group, Kamal and its own gems: every gem's install code runs in this job,
+      # and a process it leaves behind would still be there when the server key is loaded.
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@145243922b4465b78e04dd66294782c7de45901f # v1.345.0
         with:
           bundler-cache: true
 
