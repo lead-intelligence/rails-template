@@ -8,7 +8,7 @@
 
   <%= native_search_tag target: "#q", placeholder: t(".search_placeholder") %>
   <%= form_with url: documents_path, method: :get, class: "join w-full mb-6 native-hidden" do |form| %>
-    <%= form.text_field :q, value: params[:q], placeholder: t(".search_placeholder"), class: "input input-bordered join-item w-full" %>
+    <%= form.text_field :q, value: params[:q], maxlength: Document::QUERY_MAX_LENGTH, placeholder: t(".search_placeholder"), class: "input input-bordered join-item w-full" %>
     <%= form.submit t(".search"), class: "btn btn-primary join-item" %>
   <% end %>
   <%= native_scan_button_tag t(".scan"), target: "#q", submit: true, id: "scan", class: "btn btn-block mb-6 native-only" %>
