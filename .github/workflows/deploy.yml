@@ -76,11 +76,15 @@ jobs:
         with:
           bundler-cache: true
 
-      # One key reaches the server for every app.
+      # One key reaches the server for every app. It lives on this runner, never in a GitHub
+      # secret: a branch's workflows run on its pull request with every secret the repository
+      # can read, and agents write the branches. Only this workflow from main reaches this runner.
       - name: Load the server key
-        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.PERONIX_DEPLOY_KEY }}
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/peronix_deploy
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
 
       # The server's own host keys, written down rather than scanned on every run: scanning
       # trusts whatever answers first. Check them against `ssh-keyscan 2.28.229.5 | ssh-keygen -lf -`
@@ -120,6 +124,11 @@ jobs:
             abort "#{reserved.map { |name| "APP_#{name}" }.join(", ")}: reserved, never set from Atelier" if reserved.any?
             File.write(".kamal/secrets-common", env.keys.map { |name| "#{name}=$#{name}\n" }.join)
             exec(env.merge("ATELIER_ENV" => env.keys.join(" "), "SECRETS" => nil), "bin/kamal", "deploy")'
+
+      # The server's runner outlives the job, unlike GitHub's: its agent would stay.
+      - name: Stop the server key's agent
+        if: always()
+        run: ssh-agent -k || true
 
       # The server's runner keeps its workspace after the job, unlike GitHub's.
       - name: Forget the credentials key

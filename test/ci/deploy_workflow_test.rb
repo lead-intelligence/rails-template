@@ -34,6 +34,19 @@ class DeployWorkflowTest < ActiveSupport::TestCase
     end
   end
 
+  test "the server key comes from the runner, never from a GitHub secret" do
+    assert_includes jobs.dig("deploy", "steps")[key_step_index]["run"], "ssh-add ~/.ssh/peronix_deploy"
+    assert_no_match(/PERONIX_DEPLOY_KEY/, WORKFLOW.read,
+      "a branch's workflows run on its pull request with every secret, and agents write branches")
+  end
+
+  test "the server key's agent stops after every deploy, failed or not" do
+    stop = jobs.dig("deploy", "steps").find { |step| step["name"] == "Stop the server key's agent" }
+
+    assert_equal "always()", stop["if"]
+    assert_equal "ssh-agent -k || true", stop["run"]
+  end
+
   test "every job runs on the production server's runner" do
     assert_equal({ "latest" => "deploy", "deploy" => "deploy" }, jobs.transform_values { |job| job["runs-on"] },
       "GitHub's runners spend the organization's minutes; the deploy runner group takes only this workflow from main")
@@ -94,5 +107,9 @@ class DeployWorkflowTest < ActiveSupport::TestCase
       FileUtils.mkdir_p(File.join(dir, ".kamal"))
       Open3.capture2e({ "SECRETS" => secrets.to_json }, RbConfig.ruby, "-rjson", "-e", script, chdir: dir)
     end
+  end
+
+  def key_step_index
+    jobs.dig("deploy", "steps").index { |step| step["name"] == "Load the server key" }
   end
 end
