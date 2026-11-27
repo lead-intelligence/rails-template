@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/lead-intelligence/charco_mobile.git
-  revision: 6c83fec5a2eb63c4a1b68319201cddf3553e85d2
+  revision: d244f6caafd6b26c1b58c527254f4ebd1bad2c43
   branch: main
   glob: gem/*.gemspec
   specs:
@@ -597,10 +597,10 @@ GEM
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
     websocket (1.2.11)
-    websocket-driver (0.9.0)
+    websocket-driver (0.9.1)
       base64
       websocket-extensions (>= 0.2.0)
-    websocket-extensions (0.2.0)
+    websocket-extensions (0.3.0)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     yaml (0.4.0)
@@ -888,8 +888,8 @@ CHECKSUMS
   web-console (4.3.0) sha256=e13b71301cdfc2093f155b5aa3a622db80b4672d1f2f713119cc7ec7ac6a6da4
   webmock (3.40.0) sha256=6d88e99c220e911dc4451f1a3e7077c40c205df3583e162a10d5f1f29f5a9790
   websocket (1.2.11) sha256=b7e7a74e2410b5e85c25858b26b3322f29161e300935f70a0e0d3c35e0462737
-  websocket-driver (0.9.0) sha256=4dfcc6ac0ea1b6771daf5fb54cbbca131e4d5922ea0a65ba2da980370dadbe9f
-  websocket-extensions (0.2.0) sha256=6fb0d0f687aa8adc8eafa5ce68db36dfd6a8ebf232515040ce27c33c1291e589
+  websocket-driver (0.9.1) sha256=8b6c5c0834f77f53b86d486cc761c99d60df807a8264267ea52fca0da660bb1e
+  websocket-extensions (0.3.0) sha256=1492aabd79218294b564e67e9ee6a90abdac1a2981d35a49848bbc39754f0752
   xpath (3.2.0) sha256=6dfda79d91bb3b949b947ecc5919f042ef2f399b904013eb3ef6d20dd3a4082e
   yaml (0.4.0) sha256=240e69d1e6ce3584d6085978719a0faa6218ae426e034d8f9b02fb54d3471942
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
