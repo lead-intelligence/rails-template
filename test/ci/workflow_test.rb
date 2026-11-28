@@ -9,7 +9,7 @@ class CiWorkflowTest < ActiveSupport::TestCase
   end
 
   test "the workflow token can only read the repository" do
-    assert_equal({ "contents" => "read", "packages" => "read" }, workflow["permissions"],
+    assert_equal({ "contents" => "read", "packages" => "read", "checks" => "read" }, workflow["permissions"],
       "the job runs pull request code; a changed organization default would hand it a write token")
   end
 
@@ -25,6 +25,29 @@ class CiWorkflowTest < ActiveSupport::TestCase
       "GitHub's runners spend a private repository's minutes; ours would run a stranger's pull request to a public one"
     assert_equal %w[ci-linux ubuntu-latest], triggers.dig("workflow_dispatch", "inputs", "runner", "options"),
       "with no ci-linux runner up, a run started by hand on GitHub's runners is the fallback"
+  end
+
+  test "only a pull request into main runs CI: an epic's stories go into its branch, and nothing waits for them" do
+    assert_equal({ "branches" => %w[main] }, triggers["pull_request"],
+      "a story's pull request ran the whole CI next to its epic's, for nothing, and held a runner")
+  end
+
+  test "a merge whose code its pull request already tested ends green with no second run" do
+    skip_step = steps.find { |step| step["id"] == "tested" }
+
+    assert skip_step, "the merge into main ran bin/ci again on the code its pull request had passed"
+    assert_equal "github.event_name == 'push'", skip_step["if"]
+    assert_equal 2, steps.first.dig("with", "fetch-depth"), "the merge's second parent is its pull request's head"
+    gated = steps.select { |step| step["name"].in?([ "Install gems", "Run quality gate" ]) }
+    assert_equal [ "steps.tested.outputs.done != 'true'" ] * 2, gated.map { |step| step["if"] }
+  end
+
+  test "the quality gate runs the tests that failed once more, alone, before it fails" do
+    gate = steps.find { |step| step["name"] == "Run quality gate" }
+
+    assert_includes gate["run"], "bin/rerun-failed-tests tmp/ci.log",
+      "a flaky system test made GitHub run the whole CI again, then cost a build"
+    assert_equal "bash", gate["shell"]
   end
 
   private

@@ -1,7 +1,10 @@
 name: CI
 
 on:
+  # A pull request into main only: an epic's stories go into its branch, and
+  # nothing waits for their CI.
   pull_request:
+    branches: [ main ]
   push:
     branches: [ main ]
   # The fallback when no ci-linux runner is up: run it by hand on GitHub's
@@ -18,6 +21,8 @@ permissions:
   contents: read
   # Pulls the CI image while its package is private.
   packages: read
+  # Reads whether a merge's pull request passed CI.
+  checks: read
 
 jobs:
   ci:
@@ -49,14 +54,44 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          # A merge's second parent is its pull request's head.
+          fetch-depth: 2
+
+      # A merge into main whose code is its pull request's head, which passed
+      # CI, needs no second run: the code is the same, and Deploy waits for
+      # this run. A merge whose code differs runs everything.
+      - name: Skip a merge its pull request already tested
+        id: tested
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          head="$(git rev-parse -q --verify 'HEAD^2' || true)"
+          [ -n "$head" ] && [ "$(git rev-parse 'HEAD^{tree}')" = "$(git rev-parse 'HEAD^2^{tree}')" ] || exit 0
+          passed="$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$head/check-runs?check_name=ci" |
+            ruby -rjson -e 'puts JSON.parse($stdin.read)["check_runs"].any? { |run| run["conclusion"] == "success" }')"
+          if [ "$passed" = true ]; then
+            echo "The pull request's head $head passed CI on this same code."
+            echo "done=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Install gems
+        if: steps.tested.outputs.done != 'true'
         run: bundle install --jobs 4
 
+      # A failed bin/ci whose failures are only tests runs them again alone,
+      # in seconds (bin/rerun-failed-tests).
       - name: Run quality gate
+        if: steps.tested.outputs.done != 'true'
+        shell: bash
         env:
           RAILS_ENV: test
-        run: bin/ci
+        run: |
+          mkdir -p tmp
+          bin/ci 2>&1 | tee tmp/ci.log
+          [ "${PIPESTATUS[0]}" = 0 ] || bin/rerun-failed-tests tmp/ci.log
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v7
