@@ -58,12 +58,16 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     find("label", text: t("shared.theme_switcher.#{theme}")).click
   end
 
+  # Signs the user in as the app does, with a session and its signed cookie,
+  # and opens the signed-in home. The login form has its own tests
+  # (authentication_test.rb): going through it in every test took a quarter
+  # of the system tests' time (measured on lacaniosa, 2026-11-28).
   def sign_in_via_browser(user)
-    page.visit new_session_url
-    fill_in "email_address", with: user.email_address
-    fill_in "password", with: "password"
-    click_button t("sessions.new.sign_in")
+    session = user.sessions.create!(user_agent: "system test", ip_address: "127.0.0.1")
+    jar = ActionDispatch::TestRequest.create.cookie_jar
+    jar.signed[:session_id] = session.id
+    page.driver.browser.cookies.set(name: "session_id", value: jar[:session_id], domain: Capybara.current_session.server.host)
+    visit chats_path
     assert_current_path chats_path
-    assert_turbo_ready
   end
 end
