@@ -21,10 +21,10 @@ class CiWorkflowTest < ActiveSupport::TestCase
   end
 
   test "a private app runs on our own runners, a public repository and a run by hand on GitHub's" do
-    assert_equal "${{ inputs.runner || (github.event.repository.private && 'ci-amd64' || 'ubuntu-latest') }}", job["runs-on"],
+    assert_equal "${{ inputs.runner || (github.event.repository.private && 'ci-linux' || 'ubuntu-latest') }}", job["runs-on"],
       "GitHub's runners spend a private repository's minutes; ours would run a stranger's pull request to a public one"
-    assert_equal %w[ci-amd64 ubuntu-latest], triggers.dig("workflow_dispatch", "inputs", "runner", "options"),
-      "with no ci-amd64 runner up, a run started by hand on GitHub's runners is the fallback"
+    assert_equal %w[ci-linux ubuntu-latest], triggers.dig("workflow_dispatch", "inputs", "runner", "options"),
+      "with no ci-linux runner up, a run started by hand on GitHub's runners is the fallback"
   end
 
   private

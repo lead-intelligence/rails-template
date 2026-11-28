@@ -17,8 +17,17 @@ permissions:
   packages: write
 
 jobs:
+  # One image per architecture, each built on a runner of its own, so no
+  # step runs emulated: CI runs natively on ARM runners as on x86 ones.
   image:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     env:
       BUNDLE_GITHUB__COM: x-access-token:${{ secrets.CHARCO_MOBILE_TOKEN }}
     steps:
@@ -30,7 +39,7 @@ jobs:
           ruby="$(sed 's/^ruby-//' .ruby-version)"
           echo "IMAGE=ghcr.io/lead-intelligence/rails-ci:$ruby" >>"$GITHUB_ENV"
           docker build --pull --build-arg RUBY_VERSION="$ruby" --secret id=BUNDLE_GITHUB__COM,env=BUNDLE_GITHUB__COM \
-            -f .github/ci/Dockerfile -t "ghcr.io/lead-intelligence/rails-ci:$ruby" .
+            -f .github/ci/Dockerfile -t "ghcr.io/lead-intelligence/rails-ci:$ruby-${{ matrix.arch }}" .
 
       # Main replaces the image every app runs on. A branch only publishes a
       # tag that does not exist yet, as a new Ruby's, so its CI can run.
@@ -40,5 +49,23 @@ jobs:
         run: |
           echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           if [ "$GITHUB_REF" = refs/heads/main ] || ! docker manifest inspect "$IMAGE" >/dev/null 2>&1; then
-            docker push "$IMAGE"
+            docker push "$IMAGE-${{ matrix.arch }}"
+          fi
+
+  # The tag every app names holds both: each runner pulls its own.
+  manifest:
+    needs: image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Join the architectures under one tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          image="ghcr.io/lead-intelligence/rails-ci:$(sed 's/^ruby-//' .ruby-version)"
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          if [ "$GITHUB_REF" = refs/heads/main ] || ! docker manifest inspect "$image" >/dev/null 2>&1; then
+            docker buildx imagetools create -t "$image" "$image-amd64" "$image-arm64"
           fi
