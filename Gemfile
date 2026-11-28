@@ -94,7 +94,10 @@ gem "lexxy", "~> 1.0.3"
 
 gem "neighbor", "~> 1.2"
 
-gem "sqlite-vec", "~> 0.1.9"
+# Built from source at install: the published gem's Linux ARM binary is
+# tagged arm64-linux, which Bundler never picks on aarch64-linux, so CI could
+# not run natively on ARM (asg017/sqlite-dist#20).
+gem "sqlite-vec", git: "https://github.com/lead-intelligence/sqlite-vec-ruby"
 
 gem "console1984", "~> 0.2.5"
 
